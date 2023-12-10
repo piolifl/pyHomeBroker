@@ -12,7 +12,7 @@ environ.Env.read_env()
 
 print(time.strftime("%H:%M:%S"),'Abriendo el archvo de Excel ...')
 
-wb = xw.Book('../epgb_pyHB.xlsx')
+wb = xw.Book('.D:\pyHomeBroker\epgb_pyHB.xlsx')
 shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
 
