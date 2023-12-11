@@ -9,13 +9,11 @@ import environ
 env = environ.Env()
 environ.Env.read_env()
 
-
 print(time.strftime("%H:%M:%S"),'Abriendo el archvo de Excel ...')
 
-wb = xw.Book('.D:\pyHomeBroker\epgb_pyHB.xlsx')
+wb = xw.Book('D:\pyHomeBroker\epgb_pyHB.xlsx')
 shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
-
 shtTest.range('U1:V1').value  = 0
 shtTest.range('W1').value  = 100
 shtTest.range('Q2:X25').value  = 0
@@ -73,7 +71,6 @@ def on_options(online, quotes):
     options.update(thisData)
 def on_securities(online, quotes):
     global ACC
-    #print(quotes)
     thisData = quotes
     thisData = thisData.reset_index()
     thisData['symbol'] = thisData['symbol'] + ' - ' +  thisData['settlement']
@@ -120,11 +117,12 @@ def getGrupos():
     # hb.online.subscribe_securities('corporate_bonds', '24hs')  # Obligaciones Negociables - 24hs
     hb.online.subscribe_securities('corporate_bonds', 'SPOT')  # Obligaciones Negociables - spot
     hb.online.subscribe_repos()
+
 hb = HomeBroker(int(os.environ.get('broker')),
                 #on_options=on_options,
                 on_securities=on_securities,
                 on_repos=on_repos)
-#'os.environ.get('SECRET_KEY')'
+
 hb.auth.login(dni=str(os.environ.get('dni')),
               user=str(os.environ.get('user')),
               password=str(os.environ.get('password')),
@@ -181,7 +179,9 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
         shtTest.range('X'+str(int(celda+1))).value = shtTest.range('W'+str(int(celda+1))).value / shtTest.range('V'+str(int(celda+1))).value
 
 print(time.strftime("%H:%M:%S"),"Cargando los precios en la planilla")
+
 while True:
+    
     try:
        #shtTest.range('A26').options(index=True, header=False).value = everything
        #shtTest.range('A' + str(listLength)).options(index=True, header=False).value = options
@@ -189,7 +189,7 @@ while True:
        shtTest.range('A' + str(listLength)).options(index=True, header=False).value = everything
        shtTest.range('AE2').options(index=True, header=False).value = cauciones
        if time.strftime("%H:%M:%S") <= '10:45:00': continue
-       if time.strftime("%H:%M:%S") > '17:02:00': salida() 
+       if time.strftime("%H:%M:%S") > '17:05:00': salida() 
     except: print("Error al escribir datos, reconectando Excel ... ",time.strftime("%H:%M:%S"))
 
     for valor in shtTest.range('P2:U25').value:
@@ -223,22 +223,40 @@ while True:
                 print("Error no fue posible cancelar todas las ordenes activas...")
         
         # mundo RULOS en automaticoPuntass _______________________________________________________________
-        elif valor[5] == '+': # and valor[0]+1 > 9:
+        elif valor[5] == 4:
             try:
                 shtTest.range('W1').value  = 1
                 cantidad= int(shtTest.range('Y'+str(int(valor[0]+1))).value)
-                enviarOrden('buy','A'+str((int(valor[0])+1)),'F'+str((int(valor[0])+1)),cantidad,valor[0])
+                enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
                 shtTest.range('U'+str(int(valor[0]+1))).value = 0
                 break
             except: shtTest.range('U'+str(int(valor[0]+1))).value = 0
-        elif valor[5] == '-': # and valor[0]+1 > 9:
+        
+        elif valor[5] == 3:
             try:
                 shtTest.range('W1').value  = 1
                 cantidad= int(shtTest.range('Y'+str(int(valor[0]+1))).value)
-                enviarOrden('sell','A'+str((int(valor[0])+1)),'F'+str((int(valor[0])+1)),cantidad,valor[0])
+                enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
                 shtTest.range('U'+str(int(valor[0]+1))).value = 0
                 break
             except: shtTest.range('U'+str(int(valor[0]+1))).value = 0
+
+        elif valor[5] == 2:
+            try:
+                shtTest.range('W1').value  = 1
+                enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
+                shtTest.range('U'+str(int(valor[0]+1))).value = 0
+                break
+            except: shtTest.range('U'+str(int(valor[0]+1))).value = 0
+        
+        elif valor[5] == 1:
+            try:
+                shtTest.range('W1').value  = 1
+                enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
+                shtTest.range('U'+str(int(valor[0]+1))).value = 0
+                break
+            except: shtTest.range('U'+str(int(valor[0]+1))).value = 0
+        
 
 
 # r2zGLem7KtxtE4b // git
