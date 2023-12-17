@@ -15,7 +15,7 @@ wb = xw.Book('D:\pyHomeBroker\epgb_pyHB.xlsx')
 shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
 shtTest.range('U1:V1').value  = 0
-shtTest.range('W1').value  = 100
+shtTest.range('W1').value  = 10
 shtTest.range('Q2:X25').value  = 0
 
 def getOptionsList():
