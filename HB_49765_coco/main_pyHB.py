@@ -80,7 +80,7 @@ def on_securities(online, quotes):
     thisData['datetime'] = pd.to_datetime(thisData['datetime'])
     everything.update(thisData)
 def on_repos(online, quotes):
-    global cauciones, caucionesD
+    global cauciones
     thisData = quotes
     thisData = thisData.reset_index()
     thisData = thisData.set_index("symbol")
@@ -97,10 +97,10 @@ def on_repos(online, quotes):
 #-------------------------------------------------------------------------------------------------------
 def getGrupos():
     hb.online.connect()
-    #hb.online.subscribe_options()
-    #hb.online.subscribe_securities('bluechips', '48hs')    # Acciones del Panel lider - 48hs
+    # hb.online.subscribe_options()
+    # hb.online.subscribe_securities('bluechips', '48hs')    # Acciones del Panel lider - 48hs
     # hb.online.subscribe_securities('bluechips', '24hs')   # Acciones del Panel lider - 24hs
-    #hb.online.subscribe_securities('bluechips', 'SPOT')    # Acciones del Panel lider - spot
+    # hb.online.subscribe_securities('bluechips', 'SPOT')    # Acciones del Panel lider - spot
     hb.online.subscribe_securities('government_bonds', '48hs')  # Bonos - 48hs
     # hb.online.subscribe_securities('government_bonds', '24hs') # Bonos - 24hs
     hb.online.subscribe_securities('government_bonds', 'SPOT')  # Bonos - spot
@@ -221,41 +221,7 @@ while True:
                 break
             except:
                 print("Error no fue posible cancelar todas las ordenes activas...")
-        
-        # mundo RULOS en automaticoPuntass _______________________________________________________________
-        elif valor[5] == 4:
-            try:
-                shtTest.range('W1').value  = 1
-                cantidad= int(shtTest.range('Y'+str(int(valor[0]+1))).value)
-                enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
-                shtTest.range('U'+str(int(valor[0]+1))).value = 0
-                break
-            except: shtTest.range('U'+str(int(valor[0]+1))).value = 0
-        
-        elif valor[5] == 3:
-            try:
-                shtTest.range('W1').value  = 1
-                cantidad= int(shtTest.range('Y'+str(int(valor[0]+1))).value)
-                enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
-                shtTest.range('U'+str(int(valor[0]+1))).value = 0
-                break
-            except: shtTest.range('U'+str(int(valor[0]+1))).value = 0
 
-        elif valor[5] == 2:
-            try:
-                shtTest.range('W1').value  = 1
-                enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
-                shtTest.range('U'+str(int(valor[0]+1))).value = 0
-                break
-            except: shtTest.range('U'+str(int(valor[0]+1))).value = 0
-        
-        elif valor[5] == 1:
-            try:
-                shtTest.range('W1').value  = 1
-                enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
-                shtTest.range('U'+str(int(valor[0]+1))).value = 0
-                break
-            except: shtTest.range('U'+str(int(valor[0]+1))).value = 0
         
 
 
