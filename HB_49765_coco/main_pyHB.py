@@ -196,34 +196,45 @@ while True:
         if valor[1] != 0: # COMPRAR precio BID ___________________________________________________________
             try: 
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0])
-                break
             except: shtTest.range('Q'+str(int(valor[0]+1))+':'+'T'+str(int(valor[0]+1))).value = 0
         elif valor[2] != 0: # COMPRAR precio ASK _________________________________________________________
             try: 
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[2],valor[0])
-                break
             except: shtTest.range('Q'+str(int(valor[0]+1))+':'+'T'+str(int(valor[0]+1))).value = 0
         elif valor[3] != 0: # VENDER precio BID __________________________________________________________
             try:
                 enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[3],valor[0])
-                break
             except: shtTest.range('Q'+str(int(valor[0]+1))+':'+'T'+str(int(valor[0]+1))).value = 0
         elif valor[4] != 0: # VENDER precio ASK __________________________________________________________
             try:
                 enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[4],valor[0])
-                break
             except: shtTest.range('Q'+str(int(valor[0]+1))+':'+'T'+str(int(valor[0]+1))).value = 0
-        elif valor[5] == 'c' or valor[5] == 'C': # CANCELAR todas las ordenes ____________________________
+
+        # CANCELAR todas las ordenes _____________________________________________________________________
+        elif valor[5] == 'c' or valor[5] == 'C': 
             try:
                 hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
                 shtTest.range('Q'+str(int(valor[0]+1))+':'+'X'+str(int(valor[0]+1))).value = 0
                 print("Todas las ordenes activas canceladas, verificar multiplo favor")
-                break
             except:
                 print("Error no fue posible cancelar todas las ordenes activas...")
 
+        # mundo RULOS en automaticoPuntass _______________________________________________________________
+        elif valor[5] == '-':
+            try:
+                shtTest.range('W1').value  = 1
+                cantidad= int(shtTest.range('Y'+str(int(valor[0]+1))).value)
+                enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
+                shtTest.range('U'+str(int(valor[0]+1))).value = 0
+                break
+            except: shtTest.range('U'+str(int(valor[0]+1))).value = 0
         
-
-
-# r2zGLem7KtxtE4b // git
+        elif valor[5] == '+':
+            try:
+                shtTest.range('W1').value  = 1
+                enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
+                shtTest.range('U'+str(int(valor[0]+1))).value = 0
+                break
+            except: shtTest.range('U'+str(int(valor[0]+1))).value = 0
+        
 #[ ]><   \n
