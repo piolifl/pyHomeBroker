@@ -9,7 +9,7 @@ import environ
 env = environ.Env()
 environ.Env.read_env()
 
-print(time.strftime("%H:%M:%S"),'Abriendo el archvo de Excel ...')
+print(time.strftime("%H:%M:%S"),'Abriendo hoja de Excel ...')
 
 wb = xw.Book('D:\pyHomeBroker\epgb_pyHB.xlsx')
 shtTest = wb.sheets('HomeBroker')
@@ -59,7 +59,7 @@ options = options.rename(columns={"bid_size": "bidsize", "ask_size": "asksize"})
 everything = bonos
 listLength = len(options) +26
 
-print(time.strftime("%H:%M:%S"),'Se preparan tickers para solicitar precios ...')
+print(time.strftime("%H:%M:%S"),'Se leen tickers para solicitar precios ...')
 
 def on_options(online, quotes):
     global options
@@ -137,7 +137,7 @@ def salida():
     hb.online.disconnect()
     exit()
 #-------------------------------------------------------------------------------------------------------
-print(time.strftime("%H:%M:%S"),f"Logueo correcto COCOS.CAPITAL nro cuenta: {int(os.environ.get('account_id'))}")
+print(time.strftime("%H:%M:%S"),f"Logueo en COCOS.CAPITAL nro cuenta: {int(os.environ.get('account_id'))}")
 
 def nameArs(name):
     if name == 'SE4D': name = 'S18E4'
@@ -295,10 +295,9 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     else: 
         shtTest.range('X'+str(int(celda+1))).value = shtTest.range('W'+str(int(celda+1))).value / shtTest.range('V'+str(int(celda+1))).value
 
-print(time.strftime("%H:%M:%S"),"Cargando los precios en la planilla")
+print(time.strftime("%H:%M:%S"),"Done ...")
 
 while True:
-    
     try:
        #shtTest.range('A26').options(index=True, header=False).value = everything
        #shtTest.range('A' + str(listLength)).options(index=True, header=False).value = options
@@ -347,7 +346,6 @@ while True:
                 cantidad= int(shtTest.range('Y'+str(int(valor[0]+1))).value)
                 enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
                 shtTest.range('U'+str(int(valor[0]+1))).value = 0
-                break
             except: shtTest.range('U'+str(int(valor[0]+1))).value = 0
         
         elif valor[5] == '+':
@@ -355,7 +353,6 @@ while True:
                 shtTest.range('W1').value  = 1
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
                 shtTest.range('U'+str(int(valor[0]+1))).value = 0
-                break
             except: shtTest.range('U'+str(int(valor[0]+1))).value = 0
 
         
