@@ -57,7 +57,7 @@ bonos = getBonosList()
 options = getOptionsList()
 options = options.rename(columns={"bid_size": "bidsize", "ask_size": "asksize"})
 everything = bonos
-listLength = len(options) +26
+listLength = len(options) +30
 
 print(time.strftime("%H:%M:%S"),'Se leen tickers para solicitar precios ...')
 
@@ -137,63 +137,58 @@ def salida():
     hb.online.disconnect()
     exit()
 #-------------------------------------------------------------------------------------------------------
-print(time.strftime("%H:%M:%S"),f"Logueo en COCOS.CAPITAL nro cuenta: {int(os.environ.get('account_id'))}")
+print(time.strftime("%H:%M:%S"),f"Logueo en COCOS.CAPITAL nro cuenta: {int(os.environ.get('account_id'))}",end=" // ")
 
-def nameArs(name):
-    if name == 'SE4D': name = 'S18E4'
+def nameARS(name):
+    if  name  == 'XE4D' : name = 'X18E4'
+    elif name == 'XE4C' : name = 'X18E4'
+    elif name == 'SE4D': name = 'S18E4'
     elif name == 'SE4C': name = 'S18E4'
     elif name == 'MRCA': name = 'MRCAO'
+    elif name == 'MRCAD': name = 'MRCAO'
+    elif name == 'MRCAC': name = 'MRCAO'
     elif name == 'CLSI': name = 'CLSIO'
+    elif name == 'CLSID': name = 'CLSIO'
+    elif name == 'CLSIC': name = 'CLSIO'
     elif name == 'BA7D': name = 'BA37D'
-    elif name == 'AL30C': name = 'AL30'
-    elif name == 'AL30D': name = 'AL30'
-    elif name == 'AE38C': name = 'AE38'
-    elif name == 'AE38D': name = 'AE38'
-    elif name == 'AL29C': name = 'AL29'
+    elif name == 'BA7DD': name = 'BA37D'
+    elif name == 'BA7DC': name = 'BA37D'
     elif name == 'AL29D': name = 'AL29'
-    elif name == 'AL35C': name = 'AL35'
+    elif name == 'AL29C': name = 'AL29'
+    elif name == 'AL30D': name = 'AL30'
+    elif name == 'AL30C': name = 'AL30'
+    elif name == 'AE38D': name = 'AE38'
+    elif name == 'AE38C': name = 'AE38'
     elif name == 'AL35D': name = 'AL35'
-    elif name == 'AL41C': name = 'AL41'
+    elif name == 'AL35C': name = 'AL35'
     elif name == 'AL41D': name = 'AL41'
-    elif name == 'GD29C': name = 'GD29'
+    elif name == 'AL41C': name = 'AL41'
     elif name == 'GD29D': name = 'GD29'
-    elif name == 'GD35C': name = 'GD35'
+    elif name == 'GD29C': name = 'GD29'
     elif name == 'GD35D': name = 'GD35'
-    elif name == 'GD38C': name = 'GD38'
+    elif name == 'GD35C': name = 'GD35'
     elif name == 'GD38D': name = 'GD38'
-    elif name == 'GD41C': name = 'GD41'
+    elif name == 'GD38C': name = 'GD38'
     elif name == 'GD41D': name = 'GD41'
-    elif name == 'GD46C': name = 'GD46'
+    elif name == 'GD41C': name = 'GD41'
     elif name == 'GD46D': name = 'GD46'
+    elif name == 'GD46C': name = 'GD46'
     return name
-def nameCcl(name):
-    if name == 'S18E4': name = 'SE4C'
-    elif name == 'S18E4': name = 'SE4C'
-    elif name == 'MRCAO': name = 'MRCAC'
-    elif name == 'CLSIO': name = 'CLSIC'
-    elif name == 'BA37D': name = 'BA7DC'
-    elif name == 'AL30': name = 'AL30C'
-    elif name == 'GD30': name = 'GD30C'
-    elif name == 'AE38': name = 'AE38C'
-    elif name == 'AL29': name = 'AL29C'
-    elif name == 'AL35': name = 'AL35C'
-    elif name == 'AL41': name = 'AL41C'
-    elif name == 'GD29': name = 'GD29C'
-    elif name == 'GD35': name = 'GD35C'
-    elif name == 'GD38': name = 'GD38C'
-    elif name == 'GD41': name = 'GD41C'
-    elif name == 'GD46': name = 'GD46C'
-    return name
-def nameMep(name):
-    if name == 'S18E4': name = 'SE4D'
-    elif name == 'S18E4': name = 'SE4D'
+
+def nameMEP(name):
+    if  name  == 'X18E4':name = 'XE4D'
+    elif name  == 'XE4C':name = 'XE4D'
+    elif name == 'S18E4': name= 'SE4D'
+    elif name == 'SE4D': name= 'SE4C'
+    elif name == 'MRCA': name = 'MRCAD'
     elif name == 'MRCAO': name = 'MRCAD'
-    elif name == 'CLSIO': name = 'CLSID'
-    elif name == 'BA37D': name = 'BA7DD'
-    elif name == 'AL30': name = 'AL30D'
-    elif name == 'GD30': name = 'GD30D'
-    elif name == 'AE38': name = 'AE38D'
+    elif name == 'CLSI': name= 'CLSID'
+    elif name == 'CLSIO': name= 'CLSID'
+    elif name == 'BA37': name= 'BA7DD'
+    elif name == 'BA37D': name= 'BA7DD'
     elif name == 'AL29': name = 'AL29D'
+    elif name == 'AL30': name = 'AL30D'
+    elif name == 'AE38': name = 'AE38D'
     elif name == 'AL35': name = 'AL35D'
     elif name == 'AL41': name = 'AL41D'
     elif name == 'GD29': name = 'GD29D'
@@ -202,59 +197,97 @@ def nameMep(name):
     elif name == 'GD41': name = 'GD41D'
     elif name == 'GD46': name = 'GD46D'
     return name
-   
+
+def nameCCL(name):
+    if  name  == 'X18E4':name = 'XE4C'
+    elif name  == 'XE4D':name = 'XE4C'
+    elif name == 'S18E4': name= 'SE4C'
+    elif name == 'SE4D': name= 'SE4C'
+    elif name == 'MRCA': name = 'MRCAC'
+    elif name == 'MRCAO': name = 'MRCAC'
+    elif name == 'CLSI': name= 'CLSIC'
+    elif name == 'CLSIO': name= 'CLSIC'
+    elif name == 'BA37': name= 'BA7DC'
+    elif name == 'BA37D': name= 'BA7DC'
+    elif name == 'AL29': name = 'AL29C'
+    elif name == 'AL30': name = 'AL30C'
+    elif name == 'AE38': name = 'AE38C'
+    elif name == 'AL35': name = 'AL35C'
+    elif name == 'AL41': name = 'AL41C'
+    elif name == 'GD29': name = 'GD29C'
+    elif name == 'GD35': name = 'GD35C'
+    elif name == 'GD38': name = 'GD38C'
+    elif name == 'GD41': name = 'GD41C'
+    elif name == 'GD46': name = 'GD46C'
+    return name
+
 def ilRulo():
+    print(time.strftime("%H:%M:%S"),"Buscando mejores precios ...",end=" // ")
     celda,pesos,dolar = 46,100,10000
     tikers = {
         'cclCI':['tiker',dolar],'ccl48':['tiker',dolar],
         'mepCI':['tiker',dolar],'mep48':['tiker',dolar],
-        'arsCI':['tiker',pesos],'ars48':['tiker',pesos]
+        'arsCImep':['tiker',pesos],'ars48mep':['tiker',pesos],
+        'arsCIccl':['tiker',pesos],'ars48ccl':['tiker',pesos]
         }
     for valor in shtTest.range('A46:A141').value:
-        ars = shtTest.range('AA'+str(celda)).value
+        arsM = shtTest.range('AA'+str(celda)).value
+        arsC = shtTest.range('AA'+str(celda)).value
         ccl = shtTest.range('Z'+str(celda)).value
         mep = shtTest.range('Z'+str(celda)).value
-        if ars != None and ccl != None and mep != None:
+        if arsM != None and arsC != None and ccl != None and mep != None:
             if (valor[7:8] == 's' or valor[8:9] == 's'):
-                if ars > tikers['arsCI'][1]: tikers['arsCI'] = [nameArs(valor[:4])+' - spot',int(ars)]
                 if valor[3:4] == 'C' or valor[4:5] == 'C': 
-                    if ccl < tikers['cclCI'][1]: tikers['cclCI'] = [nameCcl(valor[:4])+' - spot',int(ccl)]
+                    if arsC > tikers['arsCIccl'][1]: tikers['arsCIccl'] = [nameARS(valor[:4]),arsC]
+                    if ccl < tikers['cclCI'][1]: tikers['cclCI'] = [valor,ccl]
                 if valor[3:4] == 'D' or valor[4:5] == 'D':
-                    if mep < tikers['mepCI'][1]: tikers['mepCI'] = [nameMep(valor[:4])+' - spot',int(mep)]
+                    if arsM > tikers['arsCImep'][1]: tikers['arsCImep'] = [nameARS(valor[:4]),arsM]
+                    if mep < tikers['mepCI'][1]: tikers['mepCI'] = [valor,mep]
             if (valor[7:9]=='48' or valor[8:10]=='48'):
-                if ars > tikers['ars48'][1]: tikers['ars48'] = [nameArs(valor[:4])+' - 48hs',int(ars)]
                 if valor[3:4] == 'C' or valor[4:5] == 'C': 
-                    if ccl < tikers['ccl48'][1]: tikers['ccl48'] = [nameCcl(valor[:4])+' - 48hs',int(ccl)]
+                    if arsC > tikers['ars48ccl'][1]: tikers['ars48ccl'] = [nameARS(valor[:4]),arsC]
+                    if ccl < tikers['ccl48'][1]: tikers['ccl48'] = [valor,ccl]
                 if valor[3:4] == 'D' or valor[4:5] == 'D': 
-                    if mep < tikers['mep48'][1]: tikers['mep48'] = [nameMep(valor[:4])+' - 48hs',int(mep)]
+                    if arsM > tikers['ars48mep'][1]: tikers['ars48mep'] = [nameARS(valor[:4]),arsM]
+                    if mep < tikers['mep48'][1]: tikers['mep48'] = [valor,mep]
         celda +=1
-    print(time.strftime("%H:%M:%S"),tikers)
+    
     # Carga de tikers en planilla excel
-    shtTest.range('A2').value = tikers['mepCI'][0]                  
-    shtTest.range('A3').value = tikers['cclCI'][0][:4]+'D - spot'   
-    shtTest.range('A4').value = tikers['cclCI'][0]                   
-    shtTest.range('A5').value = tikers['mepCI'][0][:4]+'C - spot'
-    shtTest.range('A6').value = tikers['mepCI'][0]                  
-    shtTest.range('A7').value = tikers['arsCI'][0][:4]+'D - spot'   
-    shtTest.range('A8').value = tikers['arsCI'][0]                   
-    shtTest.range('A9').value = tikers['mepCI'][0][:4]+' - spot'
-    shtTest.range('A10').value = tikers['cclCI'][0]                  
-    shtTest.range('A11').value = tikers['arsCI'][0][:4]+'C - spot'   
-    shtTest.range('A12').value = tikers['arsCI'][0]                   
-    shtTest.range('A13').value = tikers['cclCI'][0][:4]+' - spot'
+    shtTest.range('A22').value = tikers['mepCI'][0]     
+    shtTest.range('Y22').value = tikers['mepCI'][1]
+    shtTest.range('Z22').value = nameARS(tikers['mepCI'][0][:4])+' - spot'
+    shtTest.range('AA22').value = nameCCL(tikers['mepCI'][0][:4])+' - spot'
+    shtTest.range('A23').value = tikers['mep48'][0]
+    shtTest.range('Y23').value = tikers['mep48'][1]
+    shtTest.range('Z23').value = nameARS(tikers['mep48'][0][:4])+' - 48hs'
+    shtTest.range('AA23').value = nameCCL(tikers['mep48'][0][:4])+' - 48hs'
+    shtTest.range('A24').value = tikers['cclCI'][0]
+    shtTest.range('Y24').value = tikers['cclCI'][1]
+    shtTest.range('Z24').value = nameARS(tikers['cclCI'][0][:4])+' - spot'
+    shtTest.range('AA24').value = nameMEP(tikers['cclCI'][0][:4])+' - spot'
+    shtTest.range('A25').value = tikers['ccl48'][0]
+    shtTest.range('Y25').value = tikers['ccl48'][1]
+    shtTest.range('Z25').value = nameARS(tikers['ccl48'][0][:4])+' - 48hs'
+    shtTest.range('AA25').value = nameMEP(tikers['ccl48'][0][:4])+' - 48hs'
 
-    shtTest.range('A14').value = tikers['mep48'][0]                  
-    shtTest.range('A15').value = tikers['ccl48'][0][:4]+'D - 48hs'   
-    shtTest.range('A16').value = tikers['ccl48'][0]                   
-    shtTest.range('A17').value = tikers['mep48'][0][:4]+'C - 48hs'
-    shtTest.range('A18').value = tikers['mep48'][0]                  
-    shtTest.range('A19').value = tikers['ars48'][0][:4]+'D - 48hs'   
-    shtTest.range('A20').value = tikers['ars48'][0]                   
-    shtTest.range('A21').value = tikers['mep48'][0][:4]+' - 48hs'
-    shtTest.range('A22').value = tikers['ccl48'][0]                  
-    shtTest.range('A23').value = tikers['ars48'][0][:4]+'C - 48hs'   
-    shtTest.range('A24').value = tikers['ars48'][0]                   
-    shtTest.range('A25').value = tikers['ccl48'][0][:4]+' - 48hs'
+    shtTest.range('A26').value = tikers['arsCImep'][0]+' - spot'
+    shtTest.range('Y26').value = tikers['arsCImep'][1]
+    shtTest.range('Z26').value = nameMEP(tikers['arsCImep'][0])+' - spot'
+    shtTest.range('AA26').value = nameCCL(tikers['arsCImep'][0])+' - spot'
+    shtTest.range('A27').value = tikers['ars48mep'][0]+' - 48hs'
+    shtTest.range('Y27').value = tikers['ars48mep'][1]
+    shtTest.range('Z27').value = nameMEP(tikers['ars48mep'][0])+' - 48hs'
+    shtTest.range('AA27').value = nameCCL(tikers['ars48mep'][0])+' - 48hs'
+    shtTest.range('A28').value = tikers['arsCIccl'][0]+' - spot'
+    shtTest.range('Y28').value = tikers['arsCIccl'][1]
+    shtTest.range('Z28').value = nameCCL(tikers['arsCIccl'][0])+' - spot'
+    shtTest.range('AA28').value = nameMEP(tikers['arsCIccl'][0])+' - spot'
+    shtTest.range('A29').value = tikers['ars48ccl'][0]+' - 48hs'
+    shtTest.range('Y29').value = tikers['ars48ccl'][1]
+    shtTest.range('Z29').value = nameCCL(tikers['ars48ccl'][0])+' - 48hs'
+    shtTest.range('AA29').value = nameMEP(tikers['ars48ccl'][0])+' - 48hs'
+
+    print(time.strftime("%H:%M:%S"),'Done!')
 
 def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     symbol = shtTest.range(str(symbol)).value.split()
@@ -301,7 +334,7 @@ while True:
     try:
        #shtTest.range('A26').options(index=True, header=False).value = everything
        #shtTest.range('A' + str(listLength)).options(index=True, header=False).value = options
-       shtTest.range('A26').options(index=True, header=False).value = options
+       shtTest.range('A30').options(index=True, header=False).value = options
        shtTest.range('A' + str(listLength)).options(index=True, header=False).value = everything
        shtTest.range('AE2').options(index=True, header=False).value = cauciones
        if time.strftime("%H:%M:%S") <= '10:45:00': continue
@@ -311,8 +344,9 @@ while True:
     if shtTest.range('Q1').value != 1:
         ilRulo()
         shtTest.range('Q1').value = 1
+        
 
-    for valor in shtTest.range('P2:U29').value:
+    for valor in shtTest.range('P2:U21').value:
         if valor[1] != 0: # COMPRAR precio BID ___________________________________________________________
             try: 
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0])

@@ -13,10 +13,13 @@ def nameARS(name):
     elif name == 'XE4C' : name = 'X18E4'
     elif name == 'SE4D': name = 'S18E4'
     elif name == 'SE4C': name = 'S18E4'
+    elif name == 'MRCA': name = 'MRCAO'
     elif name == 'MRCAD': name = 'MRCAO'
     elif name == 'MRCAC': name = 'MRCAO'
+    elif name == 'CLSI': name = 'CLSIO'
     elif name == 'CLSID': name = 'CLSIO'
     elif name == 'CLSIC': name = 'CLSIO'
+    elif name == 'BA7D': name = 'BA37D'
     elif name == 'BA7DD': name = 'BA37D'
     elif name == 'BA7DC': name = 'BA37D'
     elif name == 'AL29D': name = 'AL29'
@@ -46,7 +49,9 @@ def nameMEP(name):
     elif name  == 'XE4C':name = 'XE4D'
     elif name == 'S18E4': name= 'SE4D'
     elif name == 'SE4D': name= 'SE4C'
+    elif name == 'MRCAO': name = 'MRCAD'
     elif name == 'MRCA': name = 'MRCAD'
+    elif name == 'CLSI': name= 'CLSID'
     elif name == 'CLSIO': name= 'CLSID'
     elif name == 'BA37D': name= 'BA7DD'
     elif name == 'BA7D': name= 'BA7DD'
@@ -67,7 +72,9 @@ def nameCCL(name):
     elif name  == 'XE4D':name = 'XE4C'
     elif name == 'S18E4': name= 'SE4C'
     elif name == 'SE4D': name= 'SE4C'
+    elif name == 'MRCAO': name = 'MRCAC'
     elif name == 'MRCA': name = 'MRCAC'
+    elif name == 'CLSI': name= 'CLSIC'
     elif name == 'CLSIO': name= 'CLSIC'
     elif name == 'BA37D': name= 'BA7DC'
     elif name == 'AL29': name = 'AL29C'
@@ -84,6 +91,7 @@ def nameCCL(name):
 
 
 def rulo():
+    print(time.strftime("%H:%M:%S"),"Buscando mejores precios ...",end=" // ")
     celda,pesos,dolar = 46,100,10000
     tikers = {
         'cclCI':['tiker',dolar],'ccl48':['tiker',dolar],
@@ -100,55 +108,56 @@ def rulo():
         if arsM != None and arsC != None and ccl != None and mep != None:
             if (valor[7:8] == 's' or valor[8:9] == 's'):
                 if valor[3:4] == 'C' or valor[4:5] == 'C': 
-                    if arsC > tikers['arsCIccl'][1]: tikers['arsCIccl'] = [nameARS(valor[:4]),arsC]
+                    if arsC > tikers['arsCIccl'][1]: tikers['arsCIccl'] = [valor[:4],arsC]
                     if ccl < tikers['cclCI'][1]: tikers['cclCI'] = [valor,ccl]
                 if valor[3:4] == 'D' or valor[4:5] == 'D':
-                    if arsM > tikers['arsCImep'][1]: tikers['arsCImep'] = [nameARS(valor[:4]),arsM]
+                    if arsM > tikers['arsCImep'][1]: tikers['arsCImep'] = [valor[:4],arsM]
                     if mep < tikers['mepCI'][1]: tikers['mepCI'] = [valor,mep]
             if (valor[7:9]=='48' or valor[8:10]=='48'):
                 if valor[3:4] == 'C' or valor[4:5] == 'C': 
-                    if arsC > tikers['ars48ccl'][1]: tikers['ars48ccl'] = [nameARS(valor[:4]),arsC]
+                    if arsC > tikers['ars48ccl'][1]: tikers['ars48ccl'] = [valor[:4],arsC]
                     if ccl < tikers['ccl48'][1]: tikers['ccl48'] = [valor,ccl]
                 if valor[3:4] == 'D' or valor[4:5] == 'D': 
-                    if arsM > tikers['ars48mep'][1]: tikers['ars48mep'] = [nameARS(valor[:4]),arsM]
+                    if arsM > tikers['ars48mep'][1]: tikers['ars48mep'] = [valor[:4],arsM]
                     if mep < tikers['mep48'][1]: tikers['mep48'] = [valor,mep]
         celda +=1
-    print(tikers)
-    # Carga de tikers en planilla excel
-    shtTest.range('A2').value = tikers['mepCI'][0]     
-    shtTest.range('Y2').value = tikers['mepCI'][1]
-    shtTest.range('Z2').value = nameARS(tikers['mepCI'][0][:4])+' - spot'
-    shtTest.range('AA2').value = nameCCL(tikers['mepCI'][0][:4])+' - spot'
-    shtTest.range('A3').value = tikers['mep48'][0]
-    shtTest.range('Y3').value = tikers['mep48'][1]
-    shtTest.range('Z3').value = nameARS(tikers['mep48'][0][:4])+' - 48hs'
-    shtTest.range('AA3').value = nameCCL(tikers['mep48'][0][:4])+' - 48hs'
-    shtTest.range('A4').value = tikers['cclCI'][0]
-    shtTest.range('Y4').value = tikers['cclCI'][1]
-    shtTest.range('Z4').value = nameARS(tikers['cclCI'][0][:4])+' - spot'
-    shtTest.range('AA4').value = nameMEP(tikers['cclCI'][0][:4])+' - spot'
-    shtTest.range('A5').value = tikers['ccl48'][0]
-    shtTest.range('Y5').value = tikers['ccl48'][1]
-    shtTest.range('Z5').value = nameARS(tikers['ccl48'][0][:4])+' - 48hs'
-    shtTest.range('AA5').value = nameMEP(tikers['ccl48'][0][:4])+' - 48hs'
-
-    shtTest.range('A6').value = tikers['arsCImep'][0]+' - spot'
-    shtTest.range('Y6').value = tikers['arsCImep'][1]
-    shtTest.range('Z6').value = nameMEP(tikers['arsCImep'][0])+' - spot'
-    shtTest.range('AA6').value = nameCCL(tikers['arsCImep'][0])+' - spot'
-    shtTest.range('A7').value = tikers['ars48mep'][0]+' - 48hs'
-    shtTest.range('Y7').value = tikers['ars48mep'][1]
-    shtTest.range('Z7').value = nameMEP(tikers['ars48mep'][0])+' - 48hs'
-    shtTest.range('AA7').value = nameCCL(tikers['ars48mep'][0])+' - 48hs'
-    shtTest.range('A8').value = tikers['arsCIccl'][0]+' - spot'
-    shtTest.range('Y8').value = tikers['arsCIccl'][1]
-    shtTest.range('Z8').value = nameCCL(tikers['arsCIccl'][0])+' - spot'
-    shtTest.range('AA8').value = nameMEP(tikers['arsCIccl'][0])+' - spot'
-    shtTest.range('A9').value = tikers['ars48ccl'][0]+' - 48hs'
-    shtTest.range('Y9').value = tikers['ars48ccl'][1]
-    shtTest.range('Z9').value = nameCCL(tikers['ars48ccl'][0])+' - 48hs'
-    shtTest.range('AA9').value = nameMEP(tikers['ars48ccl'][0])+' - 48hs'
     
+    # Carga de tikers en planilla excel
+    shtTest.range('A22').value = tikers['mepCI'][0]     
+    shtTest.range('Y22').value = tikers['mepCI'][1]
+    shtTest.range('Z22').value = nameARS(tikers['mepCI'][0][:4])+' - spot'
+    shtTest.range('AA22').value = nameCCL(tikers['mepCI'][0][:4])+' - spot'
+    shtTest.range('A23').value = tikers['mep48'][0]
+    shtTest.range('Y23').value = tikers['mep48'][1]
+    shtTest.range('Z23').value = nameARS(tikers['mep48'][0][:4])+' - 48hs'
+    shtTest.range('AA23').value = nameCCL(tikers['mep48'][0][:4])+' - 48hs'
+    shtTest.range('A24').value = tikers['cclCI'][0]
+    shtTest.range('Y24').value = tikers['cclCI'][1]
+    shtTest.range('Z24').value = nameARS(tikers['cclCI'][0][:4])+' - spot'
+    shtTest.range('AA24').value = nameMEP(tikers['cclCI'][0][:4])+' - spot'
+    shtTest.range('A25').value = tikers['ccl48'][0]
+    shtTest.range('Y25').value = tikers['ccl48'][1]
+    shtTest.range('Z25').value = nameARS(tikers['ccl48'][0][:4])+' - 48hs'
+    shtTest.range('AA25').value = nameMEP(tikers['ccl48'][0][:4])+' - 48hs'
+
+    shtTest.range('A26').value = tikers['arsCImep'][0]+' - spot'
+    shtTest.range('Y26').value = tikers['arsCImep'][1]
+    shtTest.range('Z26').value = nameMEP(tikers['arsCImep'][0])+' - spot'
+    shtTest.range('AA26').value = nameCCL(tikers['arsCImep'][0])+' - spot'
+    shtTest.range('A27').value = tikers['ars48mep'][0]+' - 48hs'
+    shtTest.range('Y27').value = tikers['ars48mep'][1]
+    shtTest.range('Z27').value = nameMEP(tikers['ars48mep'][0])+' - 48hs'
+    shtTest.range('AA27').value = nameCCL(tikers['ars48mep'][0])+' - 48hs'
+    shtTest.range('A28').value = tikers['arsCIccl'][0]+' - spot'
+    shtTest.range('Y28').value = tikers['arsCIccl'][1]
+    shtTest.range('Z28').value = nameCCL(tikers['arsCIccl'][0])+' - spot'
+    shtTest.range('AA28').value = nameMEP(tikers['arsCIccl'][0])+' - spot'
+    shtTest.range('A29').value = tikers['ars48ccl'][0]+' - 48hs'
+    shtTest.range('Y29').value = tikers['ars48ccl'][1]
+    shtTest.range('Z29').value = nameCCL(tikers['ars48ccl'][0])+' - 48hs'
+    shtTest.range('AA29').value = nameMEP(tikers['ars48ccl'][0])+' - 48hs'
+    print(time.strftime("%H:%M:%S"),'Done!')
+    print(tikers)
 rulo()
 
 
