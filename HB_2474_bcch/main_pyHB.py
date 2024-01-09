@@ -97,10 +97,10 @@ def on_repos(online, quotes):
 #-------------------------------------------------------------------------------------------------------
 def getGrupos():
     hb.online.connect()
-    # hb.online.subscribe_options()
-    # hb.online.subscribe_securities('bluechips', '48hs')    # Acciones del Panel lider - 48hs
+    #hb.online.subscribe_options()
+    #hb.online.subscribe_securities('bluechips', '48hs')    # Acciones del Panel lider - 48hs
     # hb.online.subscribe_securities('bluechips', '24hs')   # Acciones del Panel lider - 24hs
-    # hb.online.subscribe_securities('bluechips', 'SPOT')    # Acciones del Panel lider - spot
+    #hb.online.subscribe_securities('bluechips', 'SPOT')    # Acciones del Panel lider - spot
     hb.online.subscribe_securities('government_bonds', '48hs')  # Bonos - 48hs
     # hb.online.subscribe_securities('government_bonds', '24hs') # Bonos - 24hs
     hb.online.subscribe_securities('government_bonds', 'SPOT')  # Bonos - spot
@@ -345,7 +345,6 @@ while True:
         ilRulo()
         shtTest.range('Q1').value = 1
         
-
     for valor in shtTest.range('P2:U21').value:
         if valor[1] != 0: # COMPRAR precio BID ___________________________________________________________
             try: 
