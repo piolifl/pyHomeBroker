@@ -100,7 +100,7 @@ def rulo():
         'arsCIccl':['tiker',pesos],'ars48ccl':['tiker',pesos]
         }
 
-    for valor in shtTest.range('A46:A141').value:
+    for valor in shtTest.range('A46:A147').value:
         arsM = shtTest.range('AA'+str(celda)).value
         arsC = shtTest.range('AA'+str(celda)).value
         ccl = shtTest.range('Z'+str(celda)).value
