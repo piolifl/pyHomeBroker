@@ -137,7 +137,7 @@ def salida():
     hb.online.disconnect()
     exit()
 #-------------------------------------------------------------------------------------------------------
-print(time.strftime("%H:%M:%S"),f"Logueo en COCOS.CAPITAL nro cuenta: {int(os.environ.get('account_id'))}",end=" // ")
+print(time.strftime("%H:%M:%S"),f"Logueo en BCCH nro cuenta: {int(os.environ.get('account_id'))}",end=" // ")
 
 def nameARS(name):
     if  name  == 'XE4D' : name = 'X18E4'
@@ -153,6 +153,7 @@ def nameARS(name):
     elif name == 'BA7D': name = 'BA37D'
     elif name == 'BA7DD': name = 'BA37D'
     elif name == 'BA7DC': name = 'BA37D'
+    elif name == 'BP27': name = 'BPO27'
     elif name == 'AL29D': name = 'AL29'
     elif name == 'AL29C': name = 'AL29'
     elif name == 'AL30D': name = 'AL30'
@@ -165,7 +166,9 @@ def nameARS(name):
     elif name == 'AL41C': name = 'AL41'
     elif name == 'GD29D': name = 'GD29'
     elif name == 'GD29C': name = 'GD29'
-    elif name == 'GD35D': name = 'GD35'
+    elif name == 'GD30D': name = 'GD29'
+    elif name == 'GD30C': name = 'GD30'
+    elif name == 'GD35D': name = 'GD30'
     elif name == 'GD35C': name = 'GD35'
     elif name == 'GD38D': name = 'GD38'
     elif name == 'GD38C': name = 'GD38'
@@ -186,12 +189,14 @@ def nameMEP(name):
     elif name == 'CLSIO': name= 'CLSID'
     elif name == 'BA37': name= 'BA7DD'
     elif name == 'BA37D': name= 'BA7DD'
+    elif name == 'BP27': name= 'BP27D'
     elif name == 'AL29': name = 'AL29D'
     elif name == 'AL30': name = 'AL30D'
     elif name == 'AE38': name = 'AE38D'
     elif name == 'AL35': name = 'AL35D'
     elif name == 'AL41': name = 'AL41D'
     elif name == 'GD29': name = 'GD29D'
+    elif name == 'GD30': name = 'GD30D'
     elif name == 'GD35': name = 'GD35D'
     elif name == 'GD38': name = 'GD38D'
     elif name == 'GD41': name = 'GD41D'
@@ -209,17 +214,20 @@ def nameCCL(name):
     elif name == 'CLSIO': name= 'CLSIC'
     elif name == 'BA37': name= 'BA7DC'
     elif name == 'BA37D': name= 'BA7DC'
+    elif name == 'BP27': name= 'BP27C'
     elif name == 'AL29': name = 'AL29C'
     elif name == 'AL30': name = 'AL30C'
     elif name == 'AE38': name = 'AE38C'
     elif name == 'AL35': name = 'AL35C'
     elif name == 'AL41': name = 'AL41C'
     elif name == 'GD29': name = 'GD29C'
+    elif name == 'GD30': name = 'GD30C'
     elif name == 'GD35': name = 'GD35C'
     elif name == 'GD38': name = 'GD38C'
     elif name == 'GD41': name = 'GD41C'
     elif name == 'GD46': name = 'GD46C'
     return name
+
 
 def ilRulo():
     print(time.strftime("%H:%M:%S"),"Buscando mejores precios ...",end=" // ")
@@ -257,14 +265,17 @@ def ilRulo():
     shtTest.range('Y22').value = tikers['mepCI'][1]
     shtTest.range('Z22').value = nameARS(tikers['mepCI'][0][:4])+' - spot'
     shtTest.range('AA22').value = nameCCL(tikers['mepCI'][0][:4])+' - spot'
+
     shtTest.range('A23').value = tikers['mep48'][0]
     shtTest.range('Y23').value = tikers['mep48'][1]
     shtTest.range('Z23').value = nameARS(tikers['mep48'][0][:4])+' - 48hs'
     shtTest.range('AA23').value = nameCCL(tikers['mep48'][0][:4])+' - 48hs'
+
     shtTest.range('A24').value = tikers['cclCI'][0]
     shtTest.range('Y24').value = tikers['cclCI'][1]
     shtTest.range('Z24').value = nameARS(tikers['cclCI'][0][:4])+' - spot'
     shtTest.range('AA24').value = nameMEP(tikers['cclCI'][0][:4])+' - spot'
+
     shtTest.range('A25').value = tikers['ccl48'][0]
     shtTest.range('Y25').value = tikers['ccl48'][1]
     shtTest.range('Z25').value = nameARS(tikers['ccl48'][0][:4])+' - 48hs'

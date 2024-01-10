@@ -22,6 +22,7 @@ def nameARS(name):
     elif name == 'BA7D': name = 'BA37D'
     elif name == 'BA7DD': name = 'BA37D'
     elif name == 'BA7DC': name = 'BA37D'
+    elif name == 'BP27': name = 'BPO27'
     elif name == 'AL29D': name = 'AL29'
     elif name == 'AL29C': name = 'AL29'
     elif name == 'AL30D': name = 'AL30'
@@ -34,7 +35,9 @@ def nameARS(name):
     elif name == 'AL41C': name = 'AL41'
     elif name == 'GD29D': name = 'GD29'
     elif name == 'GD29C': name = 'GD29'
-    elif name == 'GD35D': name = 'GD35'
+    elif name == 'GD30D': name = 'GD29'
+    elif name == 'GD30C': name = 'GD30'
+    elif name == 'GD35D': name = 'GD30'
     elif name == 'GD35C': name = 'GD35'
     elif name == 'GD38D': name = 'GD38'
     elif name == 'GD38C': name = 'GD38'
@@ -49,18 +52,20 @@ def nameMEP(name):
     elif name  == 'XE4C':name = 'XE4D'
     elif name == 'S18E4': name= 'SE4D'
     elif name == 'SE4D': name= 'SE4C'
-    elif name == 'MRCAO': name = 'MRCAD'
     elif name == 'MRCA': name = 'MRCAD'
+    elif name == 'MRCAO': name = 'MRCAD'
     elif name == 'CLSI': name= 'CLSID'
     elif name == 'CLSIO': name= 'CLSID'
+    elif name == 'BA37': name= 'BA7DD'
     elif name == 'BA37D': name= 'BA7DD'
-    elif name == 'BA7D': name= 'BA7DD'
+    elif name == 'BP27': name= 'BP27D'
     elif name == 'AL29': name = 'AL29D'
     elif name == 'AL30': name = 'AL30D'
     elif name == 'AE38': name = 'AE38D'
     elif name == 'AL35': name = 'AL35D'
     elif name == 'AL41': name = 'AL41D'
     elif name == 'GD29': name = 'GD29D'
+    elif name == 'GD30': name = 'GD30D'
     elif name == 'GD35': name = 'GD35D'
     elif name == 'GD38': name = 'GD38D'
     elif name == 'GD41': name = 'GD41D'
@@ -72,17 +77,20 @@ def nameCCL(name):
     elif name  == 'XE4D':name = 'XE4C'
     elif name == 'S18E4': name= 'SE4C'
     elif name == 'SE4D': name= 'SE4C'
-    elif name == 'MRCAO': name = 'MRCAC'
     elif name == 'MRCA': name = 'MRCAC'
+    elif name == 'MRCAO': name = 'MRCAC'
     elif name == 'CLSI': name= 'CLSIC'
     elif name == 'CLSIO': name= 'CLSIC'
+    elif name == 'BA37': name= 'BA7DC'
     elif name == 'BA37D': name= 'BA7DC'
+    elif name == 'BP27': name= 'BP27C'
     elif name == 'AL29': name = 'AL29C'
     elif name == 'AL30': name = 'AL30C'
     elif name == 'AE38': name = 'AE38C'
     elif name == 'AL35': name = 'AL35C'
     elif name == 'AL41': name = 'AL41C'
     elif name == 'GD29': name = 'GD29C'
+    elif name == 'GD30': name = 'GD30C'
     elif name == 'GD35': name = 'GD35C'
     elif name == 'GD38': name = 'GD38C'
     elif name == 'GD41': name = 'GD41C'
@@ -127,35 +135,44 @@ def rulo():
     shtTest.range('Y22').value = tikers['mepCI'][1]
     shtTest.range('Z22').value = nameARS(tikers['mepCI'][0][:4])+' - spot'
     shtTest.range('AA22').value = nameCCL(tikers['mepCI'][0][:4])+' - spot'
+
     shtTest.range('A23').value = tikers['mep48'][0]
     shtTest.range('Y23').value = tikers['mep48'][1]
     shtTest.range('Z23').value = nameARS(tikers['mep48'][0][:4])+' - 48hs'
     shtTest.range('AA23').value = nameCCL(tikers['mep48'][0][:4])+' - 48hs'
+
     shtTest.range('A24').value = tikers['cclCI'][0]
     shtTest.range('Y24').value = tikers['cclCI'][1]
     shtTest.range('Z24').value = nameARS(tikers['cclCI'][0][:4])+' - spot'
     shtTest.range('AA24').value = nameMEP(tikers['cclCI'][0][:4])+' - spot'
+    
     shtTest.range('A25').value = tikers['ccl48'][0]
     shtTest.range('Y25').value = tikers['ccl48'][1]
     shtTest.range('Z25').value = nameARS(tikers['ccl48'][0][:4])+' - 48hs'
     shtTest.range('AA25').value = nameMEP(tikers['ccl48'][0][:4])+' - 48hs'
 
+
     shtTest.range('A26').value = tikers['arsCImep'][0]+' - spot'
     shtTest.range('Y26').value = tikers['arsCImep'][1]
     shtTest.range('Z26').value = nameMEP(tikers['arsCImep'][0])+' - spot'
     shtTest.range('AA26').value = nameCCL(tikers['arsCImep'][0])+' - spot'
+
     shtTest.range('A27').value = tikers['ars48mep'][0]+' - 48hs'
     shtTest.range('Y27').value = tikers['ars48mep'][1]
     shtTest.range('Z27').value = nameMEP(tikers['ars48mep'][0])+' - 48hs'
     shtTest.range('AA27').value = nameCCL(tikers['ars48mep'][0])+' - 48hs'
+
     shtTest.range('A28').value = tikers['arsCIccl'][0]+' - spot'
     shtTest.range('Y28').value = tikers['arsCIccl'][1]
     shtTest.range('Z28').value = nameCCL(tikers['arsCIccl'][0])+' - spot'
     shtTest.range('AA28').value = nameMEP(tikers['arsCIccl'][0])+' - spot'
+
     shtTest.range('A29').value = tikers['ars48ccl'][0]+' - 48hs'
     shtTest.range('Y29').value = tikers['ars48ccl'][1]
     shtTest.range('Z29').value = nameCCL(tikers['ars48ccl'][0])+' - 48hs'
     shtTest.range('AA29').value = nameMEP(tikers['ars48ccl'][0])+' - 48hs'
+
+
     print(time.strftime("%H:%M:%S"),'Done!')
     print(tikers)
 rulo()
