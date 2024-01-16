@@ -10,7 +10,7 @@ shtTickers = wb.sheets('Tickers')
 shtTest.range('Q2:X147').value  = 0
 
 
-celda,pesos,dolar = 46,100,10000
+celda,pesos,dolar = 46,100,2000
 tikers = {
         'cclCI':['',dolar],'ccl48':['',dolar],
         'mepCI':['',dolar],'mep48':['',dolar],
@@ -80,6 +80,10 @@ def cargoPlanilla(dicc):
     shtTest.range('Z29').value = namesCcl(dicc['ars48ccl'][0],' - 48hs')
     shtTest.range('AA29').value =namesMep(dicc['ars48ccl'][0],' - 48hs')  
 
+
+shtTest.range('A22:A29').value = ''
+shtTest.range('Y22:AA29').value = ''
+
 for valor in shtTest.range('A46:A146').value:
         arsM = shtTest.range('AA'+str(celda)).value
         if arsM == None: arsM = 100
@@ -87,10 +91,11 @@ for valor in shtTest.range('A46:A146').value:
         ccl = shtTest.range('Z'+str(celda)).value
         if ccl == None: ccl = 10000
         mep = ccl
-        if (valor[7:8] == 's' or valor[8:9] == 's'): 
+        if (valor[7:8] == 's' or valor[8:9] == 's'):
             if valor[3:4] == 'C' or valor[4:5] == 'C': 
-                if arsC > tikers['arsCIccl'][1]: tikers['arsCIccl'] = [namesArs(valor[:5],' - spot'),arsC]
+                if 1000 < arsC > tikers['arsCIccl'][1]: tikers['arsCIccl'] = [namesArs(valor[:5],' - spot'),arsC]
                 if 1000 < ccl < tikers['cclCI'][1]: tikers['cclCI'] = [valor,ccl]
+
             if valor[3:4] == 'D' or valor[4:5] == 'D':
                 if arsM > tikers['arsCImep'][1]: tikers['arsCImep'] = [namesArs(valor[:5],' - spot'),arsM]
                 if 1000 < mep < tikers['mepCI'][1]: tikers['mepCI'] = [valor,mep]

@@ -205,9 +205,7 @@ def cargoPlanilla(dicc):
     shtTest.range('Z29').value = namesCcl(dicc['ars48ccl'][0],' - 48hs')
     shtTest.range('AA29').value =namesMep(dicc['ars48ccl'][0],' - 48hs')   
 
-
 def ilRulo():
-    print(time.strftime("%H:%M:%S"),"Buscando mejores precios ...",end=" // ")
     celda,pesos,dolar = 46,100,10000
     tikers = {'cclCI':['',dolar],'ccl48':['',dolar],'mepCI':['',dolar],'mep48':['',dolar],'arsCIccl':['',pesos],'ars48ccl':['',pesos],'arsCImep':['',pesos],'ars48mep':['',pesos]}
     
@@ -233,11 +231,8 @@ def ilRulo():
                 if arsM > tikers['ars48mep'][1]: tikers['ars48mep'] = [namesArs(valor[:5],' - 48hs'),arsM]
                 if 1000 < mep < tikers['mep48'][1]: tikers['mep48'] = [valor,mep]
         celda +=1
-
     cargoPlanilla(tikers)
     
-    print(time.strftime("%H:%M:%S"),'Done!')
-
 def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     symbol = shtTest.range(str(symbol)).value.split()
     mas = shtTest.range('U1').value
@@ -246,7 +241,6 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     precioV = (precio - (mas * 2))
     size *= multiplo
     order = 0
-    
     if shtTest.range('V'+str(int(celda+1))).value == 0: 
         shtTest.range('W'+str(int(celda+1))+':'+'X'+str(int(celda+1))).value = 0
     if tipo.lower() == 'buy': 
