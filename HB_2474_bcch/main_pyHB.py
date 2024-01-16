@@ -145,7 +145,7 @@ def limpio():
 
 def namesArs(nombre,plazo): 
     if nombre[:2] == 'BA' and (nombre[4:5] == 'D' or nombre[4:5] == 'C'):
-        return 'BA7DD'+plazo
+        return 'BA37D'+plazo
     elif (nombre[:1] == 'X' or nombre[:1] == 'S') and (nombre[3:4] == 'D' or nombre[3:4] == 'C'):
         if (nombre[1:2] == 'F' or nombre[1:2] == 'Y'): return nombre[:1]+'18'+nombre[1:3]+plazo
         else: return nombre[:1]+'18'+nombre[1:3]+plazo
