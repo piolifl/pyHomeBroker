@@ -144,9 +144,11 @@ def limpio():
     shtTest.range('A22:A29').value = ''
     shtTest.range('Y22:AA29').value = ''
 
-def namesArs(nombre,plazo): 
-    if nombre[:2] == 'BA' :
+def namesArs(nombre,plazo):
+    if nombre[:2] == 'BA':
         return 'BA37D'+plazo
+    elif nombre[:2] == 'BP':
+        return 'BPO27'+plazo
     elif (nombre[:1] == 'X' or nombre[:1] == 'S') and (nombre[3:4] == 'D' or nombre[3:4] == 'C'):
         if (nombre[1:2] == 'F' or nombre[1:2] == 'Y'): return nombre[:1]+'20'+nombre[1:3]+plazo
         else: return nombre[:1]+'18'+nombre[1:3]+plazo
