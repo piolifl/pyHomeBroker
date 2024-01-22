@@ -144,11 +144,9 @@ def limpio():
     shtTest.range('A22:A29').value = ''
     shtTest.range('Y22:AA29').value = ''
 
-def namesArs(nombre,plazo):
-    if nombre[:2] == 'BA':
-        return 'BA37D'+plazo
-    elif nombre[:2] == 'BP':
-        return 'BPO27'+plazo
+def namesArs(nombre,plazo): 
+    if nombre[:2] == 'BA': return 'BA37D'+plazo
+    elif nombre[:2] == 'BP': return 'BPO27'+plazo
     elif (nombre[:1] == 'X' or nombre[:1] == 'S') and (nombre[3:4] == 'D' or nombre[3:4] == 'C'):
         if (nombre[1:2] == 'F' or nombre[1:2] == 'Y'): return nombre[:1]+'20'+nombre[1:3]+plazo
         else: return nombre[:1]+'18'+nombre[1:3]+plazo
@@ -157,8 +155,8 @@ def namesArs(nombre,plazo):
     else: return nombre[:4]+'O'+plazo
 
 def namesCcl(nombre,plazo): 
-    if nombre[:2] == 'BA' and (nombre[4:5] == 'D' or nombre[4:5] == ' '):
-        return 'BA7DC'+plazo
+    if nombre[:2] == 'BA': return 'BA7DC'+plazo
+    elif nombre[:2] == 'BP': return 'BP27C'+plazo
     elif (nombre[:1] == 'X' or nombre[:1] == 'S') :
         if nombre[3:4] == 'D': return nombre[:3]+'C'+plazo
         else: return nombre[:1]+nombre[3:5]+'C'+plazo
@@ -167,8 +165,8 @@ def namesCcl(nombre,plazo):
     else: return nombre[:4]+'C'+plazo
 
 def namesMep(nombre,plazo): 
-    if nombre[:2] == 'BA' and (nombre[4:5] == 'C' or nombre[4:5] == ' '):
-        return 'BA7DD'+plazo
+    if nombre[:2] == 'BA': return 'BA7DD'+plazo
+    elif nombre[:2] == 'BP': return 'BP27D'+plazo
     elif (nombre[:1] == 'X' or nombre[:1] == 'S') :
         if nombre[3:4] == 'C': return nombre[:3]+'D'+plazo
         else: return nombre[:1]+nombre[3:5]+'D'+plazo
