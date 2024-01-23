@@ -9,11 +9,10 @@ import environ
 env = environ.Env()
 environ.Env.read_env()
 
-print(time.strftime("%H:%M:%S"),'Abriendo hoja de Excel ...')
-
 wb = xw.Book('D:\pyHomeBroker\epgb_pyHB.xlsx')
 shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
+shtTest.range('Q1').value  = os.environ.get('name')
 shtTest.range('T1').value  = 'NO'
 shtTest.range('U1:V1').value  = 0
 shtTest.range('W1').value  = 10
@@ -59,8 +58,6 @@ options = getOptionsList()
 options = options.rename(columns={"bid_size": "bidsize", "ask_size": "asksize"})
 everything = bonos
 listLength = len(options) +30
-
-print(time.strftime("%H:%M:%S"),'Se leen tickers para solicitar precios ...')
 
 def on_options(online, quotes):
     global options
@@ -138,7 +135,7 @@ def salida():
     hb.online.disconnect()
     exit()
 #-------------------------------------------------------------------------------------------------------
-print(time.strftime("%H:%M:%S"),f"Logueo en cuenta: {int(os.environ.get('account_id'))}",end=" // ")
+print(time.strftime("%H:%M:%S"),f"Logueo en cuenta: {int(os.environ.get('account_id'))} en: {os.environ.get('name')}")
 
 def limpio():
     shtTest.range('A22:A29').value = ''
@@ -215,7 +212,18 @@ def cargoPlanilla(dicc):
         shtTest.range('A29').value = dicc['ars48ccl'][0]
         shtTest.range('Y29').value = dicc['ars48ccl'][1]
         shtTest.range('Z29').value = namesCcl(dicc['ars48ccl'][0],' - 48hs')
-        shtTest.range('AA29').value =namesMep(dicc['ars48ccl'][0],' - 48hs')   
+        shtTest.range('AA29').value =namesMep(dicc['ars48ccl'][0],' - 48hs')
+        
+    if time.strftime("%H:%M:%S") > '16:26:00':
+        shtTest.range('A10').value = dicc['mep48'][0]
+        shtTest.range('A11').value = namesMep(dicc['ars48mep'][0],' - 48hs')
+        shtTest.range('A12').value = dicc['ars48mep'][0]
+        shtTest.range('A13').value = namesArs(dicc['mep48'][0],' - 48hs')
+    else:
+        shtTest.range('A10').value = dicc['mepCI'][0]
+        shtTest.range('A11').value = namesMep(dicc['arsCImep'][0],' - spot')
+        shtTest.range('A12').value = dicc['arsCImep'][0]
+        shtTest.range('A13').value = namesArs(dicc['mepCI'][0],' - spot')
 
 def ilRulo():
     celda,pesos,dolar = 46,1000,0
@@ -283,8 +291,6 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     else: 
         shtTest.range('X'+str(int(celda+1))).value = shtTest.range('W'+str(int(celda+1))).value / shtTest.range('V'+str(int(celda+1))).value
 
-print(time.strftime("%H:%M:%S"),"Done ...")
-
 while True:
     try:
        #shtTest.range('A26').options(index=True, header=False).value = everything
@@ -301,9 +307,7 @@ while True:
         ilRulo()
         shtTest.range('A1').value = 'symbol'
     
-    if shtTest.range('T1').value == 'NO': 
-        time.sleep(0.3)
-        continue
+    if shtTest.range('T1').value == 'NO': continue
 
     for valor in shtTest.range('P46:U153').value:
         if valor[1] != 0: # COMPRAR precio BID ___________________________________________________________

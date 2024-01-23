@@ -9,6 +9,7 @@ shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
 shtTest.range('Q2:X29').value  = 0
 
+
 celda,pesos,dolar = 46,1000,0
 tikers = {
         'cclCI':['',dolar],'ccl48':['',dolar],
@@ -88,7 +89,18 @@ def cargoPlanilla(dicc):
         shtTest.range('A29').value = dicc['ars48ccl'][0]
         shtTest.range('Y29').value = dicc['ars48ccl'][1]
         shtTest.range('Z29').value = namesCcl(dicc['ars48ccl'][0],' - 48hs')
-        shtTest.range('AA29').value =namesMep(dicc['ars48ccl'][0],' - 48hs')  
+        shtTest.range('AA29').value =namesMep(dicc['ars48ccl'][0],' - 48hs') 
+         
+    if time.strftime("%H:%M:%S") > '16:26:00':
+        shtTest.range('A10').value = dicc['mep48'][0]
+        shtTest.range('A11').value = namesMep(dicc['ars48mep'][0],' - 48hs')
+        shtTest.range('A12').value = dicc['ars48mep'][0]
+        shtTest.range('A13').value = namesArs(dicc['mep48'][0],' - 48hs')
+    else:
+        shtTest.range('A10').value = dicc['mepCI'][0]
+        shtTest.range('A11').value = namesMep(dicc['arsCImep'][0],' - spot')
+        shtTest.range('A12').value = dicc['arsCImep'][0]
+        shtTest.range('A13').value = namesArs(dicc['mepCI'][0],' - spot')
 
 shtTest.range('A22:A29').value = ''
 shtTest.range('Y22:AA29').value = ''
