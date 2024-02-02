@@ -214,6 +214,7 @@ def limpio():
     shtTest.range('A10:A17').value = ''
     shtTest.range('A22:A29').value = ''
     shtTest.range('Y22:AA29').value = ''
+
 def cargoXplazo(dicc):
     if time.strftime("%H:%M:%S") > '16:26:00':
         shtTest.range('A10').value = dicc['mep48'][0] # mep
@@ -221,7 +222,7 @@ def cargoXplazo(dicc):
         shtTest.range('A12').value = dicc['ars48mep'][0] #  ars
         shtTest.range('A13').value = namesArs(dicc['mep48'][0],' - 48hs') # ars
         shtTest.range('A14').value = dicc['mep48'][0] # mep
-        shtTest.range('A15').value = namesMep(dicc['ars48mep'][0],' - 48hs')
+        shtTest.range('A15').value = namesMep(dicc['ccl48'][0],' - 48hs')
         shtTest.range('A16').value = dicc['ccl48'][0] # ccl
         shtTest.range('A17').value = namesCcl(dicc['mep48'][0],' - 48hs')
     else:
@@ -230,7 +231,7 @@ def cargoXplazo(dicc):
         shtTest.range('A12').value = dicc['arsCImep'][0]
         shtTest.range('A13').value = namesArs(dicc['mepCI'][0],' - spot') 
         shtTest.range('A14').value = dicc['mepCI'][0] # mep
-        shtTest.range('A15').value = namesMep(dicc['arsCImep'][0],' - spot')
+        shtTest.range('A15').value = namesMep(dicc['cclCI'][0],' - spot')
         shtTest.range('A16').value = dicc['cclCI'][0] # ccl
         shtTest.range('A17').value = namesCcl(dicc['mepCI'][0],' - spot')
 
