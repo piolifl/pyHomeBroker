@@ -90,18 +90,28 @@ def cargoPlanilla(dicc):
         shtTest.range('Y29').value = dicc['ars48ccl'][1]
         shtTest.range('Z29').value = namesCcl(dicc['ars48ccl'][0],' - 48hs')
         shtTest.range('AA29').value =namesMep(dicc['ars48ccl'][0],' - 48hs') 
-         
+
+def cargoXplazo(dicc):
     if time.strftime("%H:%M:%S") > '16:26:00':
-        shtTest.range('A10').value = dicc['mep48'][0]
-        shtTest.range('A11').value = namesMep(dicc['ars48mep'][0],' - 48hs')
-        shtTest.range('A12').value = dicc['ars48mep'][0]
-        shtTest.range('A13').value = namesArs(dicc['mep48'][0],' - 48hs')
+        shtTest.range('A10').value = dicc['mep48'][0] # mep
+        shtTest.range('A11').value = namesMep(dicc['ars48mep'][0],' - 48hs') #  mep
+        shtTest.range('A12').value = dicc['ars48mep'][0] #  ars
+        shtTest.range('A13').value = namesArs(dicc['mep48'][0],' - 48hs') # ars
+        shtTest.range('A14').value = dicc['mep48'][0] # mep
+        shtTest.range('A15').value = namesMep(dicc['ars48mep'][0],' - 48hs')
+        shtTest.range('A16').value = dicc['ccl48'][0] # ccl
+        shtTest.range('A17').value = namesCcl(dicc['mep48'][0],' - 48hs')
     else:
         shtTest.range('A10').value = dicc['mepCI'][0]
         shtTest.range('A11').value = namesMep(dicc['arsCImep'][0],' - spot')
         shtTest.range('A12').value = dicc['arsCImep'][0]
-        shtTest.range('A13').value = namesArs(dicc['mepCI'][0],' - spot')
+        shtTest.range('A13').value = namesArs(dicc['mepCI'][0],' - spot') 
+        shtTest.range('A14').value = dicc['mepCI'][0] # mep
+        shtTest.range('A15').value = namesMep(dicc['arsCImep'][0],' - spot')
+        shtTest.range('A16').value = dicc['cclCI'][0] # ccl
+        shtTest.range('A17').value = namesCcl(dicc['mepCI'][0],' - spot')
 
+shtTest.range('A10:A17').value = ''
 shtTest.range('A22:A29').value = ''
 shtTest.range('Y22:AA29').value = ''
 
@@ -132,6 +142,7 @@ for valor in shtTest.range('A46:A146').value:
 
 print(tikers)
 
+cargoXplazo(tikers)
 cargoPlanilla(tikers)
 
 
