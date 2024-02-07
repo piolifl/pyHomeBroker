@@ -16,11 +16,11 @@ shtTest.range('Q1').value  = os.environ.get('name')
 shtTest.range('T1').value = 'NO'
 shtTest.range('U1:V1').value  = 0
 shtTest.range('W1').value  = 10
-shtTest.range('Q2:X29').value  = 0
+
 
 def getOptionsList():
     global allOptions
-    rng = shtTickers.range('A2:A25').expand()
+    rng = shtTickers.range('A2:A50').expand()
     oOpciones = rng.value
     allOptions = pd.DataFrame({'symbol': oOpciones},columns=["symbol", "bid_size", "bid", "ask", "ask_size", "last","change", "open", "high", "low", "previous_close", "turnover", "volume",'operations', 'datetime'])
     allOptions = allOptions.set_index('symbol')
@@ -95,10 +95,10 @@ def on_repos(online, quotes):
 #-------------------------------------------------------------------------------------------------------
 def getGrupos():
     hb.online.connect()
-    #hb.online.subscribe_options()
-    #hb.online.subscribe_securities('bluechips', '48hs')    # Acciones del Panel lider - 48hs
+    hb.online.subscribe_options()
+    hb.online.subscribe_securities('bluechips', '48hs')    # Acciones del Panel lider - 48hs
     # hb.online.subscribe_securities('bluechips', '24hs')   # Acciones del Panel lider - 24hs
-    #hb.online.subscribe_securities('bluechips', 'SPOT')    # Acciones del Panel lider - spot
+    hb.online.subscribe_securities('bluechips', 'SPOT')    # Acciones del Panel lider - spot
     hb.online.subscribe_securities('government_bonds', '48hs')  # Bonos - 48hs
     # hb.online.subscribe_securities('government_bonds', '24hs') # Bonos - 24hs
     hb.online.subscribe_securities('government_bonds', 'SPOT')  # Bonos - spot
@@ -117,7 +117,7 @@ def getGrupos():
     hb.online.subscribe_repos()
 
 hb = HomeBroker(int(os.environ.get('broker')),
-                #on_options=on_options,
+                on_options=on_options,
                 on_securities=on_securities,
                 on_repos=on_repos)
 
@@ -319,8 +319,9 @@ while True:
         shtTest.range('A1').value = 'symbol'
 
     if shtTest.range('T1').value == 'NO': continue
+    else: shtTest.range('Q2:X77').value  = 0
 
-    for valor in shtTest.range('P46:U153').value:
+    for valor in shtTest.range('P30:U77').value:
         if valor[1] != 0: # COMPRAR precio BID ___________________________________________________________
             try: 
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0])
