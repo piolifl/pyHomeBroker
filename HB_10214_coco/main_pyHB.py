@@ -20,7 +20,7 @@ shtTest.range('W1').value  = 1
 
 def getOptionsList():
     global allOptions
-    rng = shtTickers.range('A2:A50').expand()
+    rng = shtTickers.range('A2:A25').expand()
     oOpciones = rng.value
     allOptions = pd.DataFrame({'symbol': oOpciones},columns=["symbol", "bid_size", "bid", "ask", "ask_size", "last","change", "open", "high", "low", "previous_close", "turnover", "volume",'operations', 'datetime'])
     allOptions = allOptions.set_index('symbol')
@@ -319,9 +319,9 @@ while True:
         shtTest.range('A1').value = 'symbol'
 
     if shtTest.range('T1').value == 'NO': continue
-    else: shtTest.range('Q2:X77').value  = 0
+    else: shtTest.range('Q2:X53').value  = 0
 
-    for valor in shtTest.range('P30:U77').value:
+    for valor in shtTest.range('P30:U53').value:
         if valor[1] != 0: # COMPRAR precio BID ___________________________________________________________
             try: 
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0])

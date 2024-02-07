@@ -13,13 +13,13 @@ wb = xw.Book('D:\pyHomeBroker\epgb_pyHB.xlsx')
 shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
 shtTest.range('Q1').value  = os.environ.get('name')
-shtTest.range('T1').value  = 'NO'
+#shtTest.range('T1').value  = 'NO'
 shtTest.range('U1:V1').value  = 0
 shtTest.range('W1').value  = 1
 '''
 def getOptionsList():
     global allOptions
-    rng = shtTickers.range('A2:A50').expand()
+    rng = shtTickers.range('A2:A25').expand()
     oOpciones = rng.value
     allOptions = pd.DataFrame({'symbol': oOpciones},columns=["symbol", "bid_size", "bid", "ask", "ask_size", "last","change", "open", "high", "low", "previous_close", "turnover", "volume",'operations', 'datetime'])
     allOptions = allOptions.set_index('symbol')
@@ -278,30 +278,31 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
         if len(symbol) < 2:
             #order = hb.orders.send_buy_order(symbol[0],'24hs', float(precio),int(size))
             print(f'Buy  {symbol[0]} 24hs // +{int(size)} // {precio} // ${int(precio*100*size)} // order {order}')
-            shtTest.range('V'+str(int(celda+1))).value += int(size)
-            shtTest.range('W'+str(int(celda+1))).value += int(size) * float(precio)*100
+            print(symbol[0],'24hs', float(precio),int(size))
+            #shtTest.range('V'+str(int(celda+1))).value += int(size)
+            #shtTest.range('W'+str(int(celda+1))).value += int(size) * float(precio)*100
         else:
             #order = hb.orders.send_buy_order(symbol[0],symbol[2],float(precio),int(size))
             print(f'Buy  {symbol[0]} {symbol[2]} // +{int(size)} // {precio} // ${int(precio/100*size)} // order {order}')
-            shtTest.range('V'+str(int(celda+1))).value += int(size)
-            shtTest.range('W'+str(int(celda+1))).value += int(size) * float(precio)/100
+            #shtTest.range('V'+str(int(celda+1))).value += int(size)
+            #shtTest.range('W'+str(int(celda+1))).value += int(size) * float(precio)/100
     else: 
         if len(symbol) < 2:
             #order = hb.orders.send_sell_order(symbol[0],'24hs', float(precioV),int(size))
             print(f'Sell {symbol[0]} 24hs // -{int(size)} // {precioV} // ${int(precioV*100*size)} // order {order}')
-            shtTest.range('V'+str(int(celda+1))).value -= int(size)
-            shtTest.range('W'+str(int(celda+1))).value -= int(size) * float(precioV)*100
+            #shtTest.range('V'+str(int(celda+1))).value -= int(size)
+            #shtTest.range('W'+str(int(celda+1))).value -= int(size) * float(precioV)*100
         else:
             #order = hb.orders.send_sell_order(symbol[0],symbol[2],float(precioV),int(size))
             print(f'Sell {symbol[0]} {symbol[2]} // -{int(size)} // {precioV} // ${int(precioV/100*size)} // order {order}')
-            shtTest.range('V'+str(int(celda+1))).value -= int(size)
-            shtTest.range('W'+str(int(celda+1))).value -= int(size) * float(precioV)/100
-    shtTest.range('Q'+str(int(valor[0]+1))+':'+'U'+str(int(valor[0]+1))).value = 0
-    if shtTest.range('V'+str(int(celda+1))).value == 0:
+            #shtTest.range('V'+str(int(celda+1))).value -= int(size)
+            #shtTest.range('W'+str(int(celda+1))).value -= int(size) * float(precioV)/100
+    #shtTest.range('Q'+str(int(valor[0]+1))+':'+'U'+str(int(valor[0]+1))).value = 0
+    '''if shtTest.range('V'+str(int(celda+1))).value == 0:
         shtTest.range('X'+str(int(celda+1))).value = shtTest.range('W'+str(int(celda+1))).value / 1
     else: 
         shtTest.range('X'+str(int(celda+1))).value = shtTest.range('W'+str(int(celda+1))).value / shtTest.range('V'+str(int(celda+1))).value
-
+'''
 while True:
     '''try:
        #shtTest.range('A26').options(index=True, header=False).value = everything
@@ -319,13 +320,14 @@ while True:
         shtTest.range('A1').value = 'symbol'
     
     '''if shtTest.range('T1').value == 'NO': continue
-    else: shtTest.range('Q2:X77').value  = 0'''
+    else: shtTest.range('Q2:X53').value  = 0'''
 
-    for valor in shtTest.range('P30:U77').value:
+    for valor in shtTest.range('P30:U53').value:
         if valor[1] != 0: # COMPRAR precio BID ___________________________________________________________
             try: 
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0])
             except: shtTest.range('Q'+str(int(valor[0]+1))+':'+'T'+str(int(valor[0]+1))).value = 0
+            time.sleep(30)
         elif valor[2] != 0: # COMPRAR precio ASK _________________________________________________________
             try: 
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[2],valor[0])
