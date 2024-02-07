@@ -15,7 +15,7 @@ shtTickers = wb.sheets('Tickers')
 shtTest.range('Q1').value  = os.environ.get('name')
 shtTest.range('T1').value = 'NO'
 shtTest.range('U1:V1').value  = 0
-shtTest.range('W1').value  = 10
+shtTest.range('W1').value  = 1
 
 def getOptionsList():
     global allOptions

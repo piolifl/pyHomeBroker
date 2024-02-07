@@ -15,8 +15,8 @@ shtTickers = wb.sheets('Tickers')
 shtTest.range('Q1').value  = os.environ.get('name')
 shtTest.range('T1').value  = 'NO'
 shtTest.range('U1:V1').value  = 0
-shtTest.range('W1').value  = 10
-
+shtTest.range('W1').value  = 1
+'''
 def getOptionsList():
     global allOptions
     rng = shtTickers.range('A2:A50').expand()
@@ -133,6 +133,7 @@ def salida():
     exc.quit()
     hb.online.disconnect()
     exit()
+'''
 #-------------------------------------------------------------------------------------------------------
 print(time.strftime("%H:%M:%S"),f"Logueo en cuenta: {int(os.environ.get('account_id'))} en: {os.environ.get('name')}")
 
@@ -275,23 +276,23 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
         shtTest.range('W'+str(int(celda+1))+':'+'X'+str(int(celda+1))).value = 0
     if tipo.lower() == 'buy': 
         if len(symbol) < 2:
-            order = hb.orders.send_buy_order(symbol[0],'24hs', float(precio),int(size))
+            #order = hb.orders.send_buy_order(symbol[0],'24hs', float(precio),int(size))
             print(f'Buy  {symbol[0]} 24hs // +{int(size)} // {precio} // ${int(precio*100*size)} // order {order}')
             shtTest.range('V'+str(int(celda+1))).value += int(size)
             shtTest.range('W'+str(int(celda+1))).value += int(size) * float(precio)*100
         else:
-            order = hb.orders.send_buy_order(symbol[0],symbol[2],float(precio),int(size))
+            #order = hb.orders.send_buy_order(symbol[0],symbol[2],float(precio),int(size))
             print(f'Buy  {symbol[0]} {symbol[2]} // +{int(size)} // {precio} // ${int(precio/100*size)} // order {order}')
             shtTest.range('V'+str(int(celda+1))).value += int(size)
             shtTest.range('W'+str(int(celda+1))).value += int(size) * float(precio)/100
     else: 
         if len(symbol) < 2:
-            order = hb.orders.send_sell_order(symbol[0],'24hs', float(precioV),int(size))
+            #order = hb.orders.send_sell_order(symbol[0],'24hs', float(precioV),int(size))
             print(f'Sell {symbol[0]} 24hs // -{int(size)} // {precioV} // ${int(precioV*100*size)} // order {order}')
             shtTest.range('V'+str(int(celda+1))).value -= int(size)
             shtTest.range('W'+str(int(celda+1))).value -= int(size) * float(precioV)*100
         else:
-            order = hb.orders.send_sell_order(symbol[0],symbol[2],float(precioV),int(size))
+            #order = hb.orders.send_sell_order(symbol[0],symbol[2],float(precioV),int(size))
             print(f'Sell {symbol[0]} {symbol[2]} // -{int(size)} // {precioV} // ${int(precioV/100*size)} // order {order}')
             shtTest.range('V'+str(int(celda+1))).value -= int(size)
             shtTest.range('W'+str(int(celda+1))).value -= int(size) * float(precioV)/100
@@ -302,7 +303,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
         shtTest.range('X'+str(int(celda+1))).value = shtTest.range('W'+str(int(celda+1))).value / shtTest.range('V'+str(int(celda+1))).value
 
 while True:
-    try:
+    '''try:
        #shtTest.range('A26').options(index=True, header=False).value = everything
        #shtTest.range('A' + str(listLength)).options(index=True, header=False).value = options
        shtTest.range('A30').options(index=True, header=False).value = options
@@ -310,15 +311,15 @@ while True:
        shtTest.range('AE2').options(index=True, header=False).value = cauciones
        if time.strftime("%H:%M:%S") <= '10:45:00': continue
        if time.strftime("%H:%M:%S") > '17:05:00': salida() 
-    except: print("Error al escribir datos, reconectando Excel ... ",time.strftime("%H:%M:%S"))
+    except: print("Error al escribir datos, reconectando Excel ... ",time.strftime("%H:%M:%S"))'''
 
     if shtTest.range('A1').value != 'symbol':
         limpio()
         ilRulo()
         shtTest.range('A1').value = 'symbol'
     
-    if shtTest.range('T1').value == 'NO': continue
-    else: shtTest.range('Q2:X77').value  = 0
+    '''if shtTest.range('T1').value == 'NO': continue
+    else: shtTest.range('Q2:X77').value  = 0'''
 
     for valor in shtTest.range('P30:U77').value:
         if valor[1] != 0: # COMPRAR precio BID ___________________________________________________________
@@ -341,7 +342,7 @@ while True:
         # CANCELAR todas las ordenes _____________________________________________________________________
         elif valor[5] == 'c' or valor[5] == 'C': 
             try:
-                hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
+                #hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
                 shtTest.range('Q'+str(int(valor[0]+1))+':'+'X'+str(int(valor[0]+1))).value = 0
                 print("Todas las ordenes activas canceladas, verificar multiplo favor")
             except:
