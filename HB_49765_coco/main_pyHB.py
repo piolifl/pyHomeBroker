@@ -127,12 +127,10 @@ hb.auth.login(dni=str(os.environ.get('dni')),
 
 getGrupos()
 
-def salida():
+'''def salida():
     hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
-    exc = xw.apps.active
-    exc.quit()
     hb.online.disconnect()
-    exit()
+    exit()'''
 #-------------------------------------------------------------------------------------------------------
 print(time.strftime("%H:%M:%S"),f"Logueo en cuenta: {int(os.environ.get('account_id'))} en: {os.environ.get('name')}")
 
@@ -302,6 +300,9 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
         shtTest.range('X'+str(int(celda+1))).value = shtTest.range('W'+str(int(celda+1))).value / shtTest.range('V'+str(int(celda+1))).value
 
 while True:
+    if time.strftime("%H:%M:%S") > '17:05:00': 
+        print(time.strftime("%H:%M:%S"), 'Mercado cerrado.')
+        break 
     try:
        #shtTest.range('A26').options(index=True, header=False).value = everything
        #shtTest.range('A' + str(listLength)).options(index=True, header=False).value = options
@@ -309,7 +310,6 @@ while True:
        shtTest.range('A' + str(listLength)).options(index=True, header=False).value = everything
        shtTest.range('AE2').options(index=True, header=False).value = cauciones
        if time.strftime("%H:%M:%S") <= '10:45:00': continue
-       if time.strftime("%H:%M:%S") > '17:05:00': salida() 
     except: print("Error al escribir datos, reconectando Excel ... ",time.strftime("%H:%M:%S"))
 
     if shtTest.range('A1').value != 'symbol':
@@ -319,7 +319,6 @@ while True:
     
     if shtTest.range('T1').value == 'NO': continue
 
-        
     for valor in shtTest.range('P30:U53').value:
         if valor[1] != 0: # COMPRAR precio BID ___________________________________________________________
             try: 
@@ -362,6 +361,5 @@ while True:
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
                 shtTest.range('U'+str(int(valor[0]+1))).value = 0
             except: shtTest.range('U'+str(int(valor[0]+1))).value = 0
-
         
 #[ ]><   \n
