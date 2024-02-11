@@ -15,7 +15,6 @@ shtTickers = wb.sheets('Tickers')
 shtTest.range('Q1').value = 'N'
 shtTest.range('R1').value = 0.05
 shtTest.range('U1:V1').value  = 0
-shtTest.range('Y30:Z53').value  = 0
 shtTest.range('S1').value ='N'
 shtTest.range('T1').value ='N'
 shtTest.range('W1').value  = 1
@@ -333,8 +332,24 @@ while True:
     if shtTest.range('A1').value != 'symbol': ilRulo()
     time.sleep(10)
     for valor in shtTest.range('P30:V53').value:
-        if shtTest.range('Q1').value!='N' and valor[6]!=0:
+        if shtTest.range('Q1').value!='N' and valor[6]!=0: # Activa TRAILING STOP _________________________
             trailingStop('A'+str((int(valor[0])+1)),valor[6],valor[0])
+        try: # CANCELAR todas las ordenes _________________________________________________________________
+            if valor[5] == 'c' or valor[5] == 'C': 
+                hb.orders.cancel_order(int(os.environ.get('account_id')),orderC)
+                shtTest.range('Q'+str(int(valor[0]+1))+':'+'X'+str(int(valor[0]+1))).value = 0
+                print(f"Orden compra {orderC} fue cancelada")
+            elif valor[5] == 'v' or valor[5] == 'V': 
+                hb.orders.cancel_order(int(os.environ.get('account_id')),orderV)
+                shtTest.range('Q'+str(int(valor[0]+1))+':'+'X'+str(int(valor[0]+1))).value = 0
+                print(f"Orden venta {orderV} fue cancelada")
+            elif valor[5] == 'x' or valor[5] == 'X': 
+                hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
+                shtTest.range('Q'+str(int(valor[0]+1))+':'+'X'+str(int(valor[0]+1))).value = 0
+                print("Todas las ordenes activas canceladas")
+        except: 
+            shtTest.range('U'+str(int(valor[0]+1))).value = 0
+            print('Error, al cancelar orden.')
         if valor[1] != 0: # COMPRAR precio BID ___________________________________________________________
             try: enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0])
             except: shtTest.range('Q'+str(int(valor[0]+1))+':'+'T'+str(int(valor[0]+1))).value = 0
@@ -347,40 +362,20 @@ while True:
         elif valor[4] != 0: # VENDER precio ASK __________________________________________________________
             try: enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[4],valor[0])
             except: shtTest.range('Q'+str(int(valor[0]+1))+':'+'T'+str(int(valor[0]+1))).value = 0
-        # CANCELAR todas las ordenes _____________________________________________________________________
-        try: 
-            if valor[5] == 'c' or valor[5] == 'C': 
-                #hb.orders.cancel_order(int(os.environ.get('account_id')),orderC)
-                shtTest.range('Q'+str(int(valor[0]+1))+':'+'X'+str(int(valor[0]+1))).value = 0
-                print(f"Orden compra {orderC} fue cancelada")
-            elif valor[5] == 'v' or valor[5] == 'V': 
-                #hb.orders.cancel_order(int(os.environ.get('account_id')),orderV)
-                shtTest.range('Q'+str(int(valor[0]+1))+':'+'X'+str(int(valor[0]+1))).value = 0
-                print(f"Orden venta {orderV} fue cancelada")
-            elif valor[5] == 'x' or valor[5] == 'X': 
-                #hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
-                shtTest.range('Q'+str(int(valor[0]+1))+':'+'X'+str(int(valor[0]+1))).value = 0
-                print("Todas las ordenes activas canceladas")
-        except: 
-            shtTest.range('U'+str(int(valor[0]+1))).value = 0
-            print('Error, al cancelar orden.')
-
-        # mundo RULOS en automaticoPuntass _______________________________________________________________
-        '''elif valor[5] == '-':
+        elif valor[5] == '-': # sell usando puntas _______________________________________________________
             try:
                 shtTest.range('W1').value  = 1
                 cantidad= int(shtTest.range('Y'+str(int(valor[0]+1))).value)
                 enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
                 shtTest.range('U'+str(int(valor[0]+1))).value = 0
             except: shtTest.range('U'+str(int(valor[0]+1))).value = 0
-        
-        elif valor[5] == '+':
+        elif valor[5] == '+': # buy usando puntas _______________________________________________________
             try:
                 shtTest.range('W1').value  = 1
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
                 shtTest.range('U'+str(int(valor[0]+1))).value = 0
             except: shtTest.range('U'+str(int(valor[0]+1))).value = 0
-            '''
-# print(time.strftime("%H:%M:%S"), 'Mercado cerrado.')
+
+print(time.strftime("%H:%M:%S"), 'Mercado cerrado.')
   
 #[ ]><   \n
