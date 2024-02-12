@@ -8,16 +8,15 @@ import environ
 
 env = environ.Env()
 environ.Env.read_env()
-
 wb = xw.Book('D:\pyHomeBroker\epgb_pyHB.xlsx')
 shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
-shtTest.range('Q1').value = 'N'
-shtTest.range('R1').value = 0.05
-shtTest.range('U1:V1').value  = 0
-shtTest.range('S1').value ='N'
-shtTest.range('T1').value ='N'
-shtTest.range('W1').value  = 1
+shtTest.range('Q1').value = 'OPC'
+shtTest.range('R1').value = 'BON'
+shtTest.range('T1').value = 0.025
+shtTest.range('U1:V1').value = 0
+shtTest.range('S1').value ='NO'
+shtTest.range('W1').value = 1
 
 def getOptionsList():
     global allOptions
@@ -130,7 +129,6 @@ hb.auth.login(dni=str(os.environ.get('dni')),
 getGrupos()
 
 #-------------------------------------------------------------------------------------------------------
-
 print(time.strftime("%H:%M:%S"),f"Logueo en cuenta: {int(os.environ.get('account_id'))} en: {os.environ.get('name')}")
 
 def namesArs(nombre,plazo): 
@@ -302,19 +300,28 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
 
 ####################################### TRAILINGStop STOP ################################################
 def trailingStop(nombre=str,cantidad=int,nroCelda=int):
+    global orderV
     try:
         nombre = shtTest.range(str(nombre)).value.split()
         if len(nombre) < 2:
             bid = shtTest.range('C'+str(int(nroCelda+1))).value
+            bid_size = shtTest.range('B'+str(int(nroCelda+1))).value
+            last = shtTest.range('F'+str(int(nroCelda+1))).value
             costo = shtTest.range('X'+str(int(nroCelda+1))).value 
-            ganancia = shtTest.range('R1').value
-            if bid * 100 > costo * (1 + ganancia):
-                if shtTest.range('Q1').value == 'T':
-                    #orderV = hb.orders.send_sell_order(nombre[0],'24hs', float(bid),int(cantidad))
-                    print('vendo x trailingStop', nombre[0],'24hs', float(bid),int(cantidad))
-                    shtTest.range('V'+str(int(nroCelda+1))).value = 0
-                shtTest.range('Q1').value = 'T'
-                shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100     
+            ganancia = shtTest.range('T1').value
+            if cantidad > bid_size : cantidad = bid_size
+            if bid * 100 > costo * (1 + ganancia): # Precio sube activo trailing y sube % ganancia               
+                if shtTest.range('S1').value == 'TSTOP': shtTest.range('T1').value *= 1 + 0.25
+                else: shtTest.range('S1').value = 'TSTOP'
+                shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
+            if last * 100 < costo * (1 - ganancia): # Precio baja activo stop y envia orden venta
+                if shtTest.range('S1').value == 'STOP' and bid > last * (1 - ganancia):
+                    orderV = hb.orders.send_sell_order(nombre[0],'24hs', float(bid),int(cantidad))
+                    print(time.strftime("%H:%M:%S"),'trailingSTOP', nombre[0], float(bid),int(cantidad))
+                    shtTest.range('V'+str(int(nroCelda+1))).value -= cantidad
+                    shtTest.range('S1').value = ' '
+                    shtTest.range('T1').value = 0.25
+                else: shtTest.range('S1').value = 'STOP'   
     except: pass
 #########################################################################################################
 
@@ -323,8 +330,8 @@ while True:
     try:
        #shtTest.range('A26').options(index=True, header=False).value = everything
        #shtTest.range('A' + str(listLength)).options(index=True, header=False).value = options
-       if shtTest.range('T1').value!='N':shtTest.range('A30').options(index=True,header=False).value=options
-       if shtTest.range('S1').value!='N':shtTest.range('A'+str(listLength)).options(index=True,header=False).value = everything
+       if shtTest.range('Q1').value!='OPC':shtTest.range('A30').options(index=True,header=False).value=options
+       if shtTest.range('R1').value!='BON':shtTest.range('A'+str(listLength)).options(index=True,header=False).value = everything
        shtTest.range('AE2').options(index=True, header=False).value = cauciones
        if time.strftime("%H:%M:%S") <= '10:45:00': continue
     except: print("_____ error al cargar datos en Excel !!! ",time.strftime("%H:%M:%S"))
@@ -332,7 +339,7 @@ while True:
     if shtTest.range('A1').value != 'symbol': ilRulo()
     time.sleep(10)
     for valor in shtTest.range('P30:V53').value:
-        if shtTest.range('Q1').value!='N' and valor[6]!=0: # Activa TRAILING STOP _________________________
+        if shtTest.range('S1').value!='NO' and valor[6]>0: # Activa TRAILING STOP _________________________
             trailingStop('A'+str((int(valor[0])+1)),valor[6],valor[0])
         try: # CANCELAR todas las ordenes _________________________________________________________________
             if valor[5] == 'c' or valor[5] == 'C': 
