@@ -11,11 +11,11 @@ environ.Env.read_env()
 wb = xw.Book('D:\pyHomeBroker\epgb_pyHB.xlsx')
 shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
-shtTest.range('Q1').value = 'OPC'
-shtTest.range('R1').value = 'BON'
+shtTest.range('Q1').value = 'O'
+shtTest.range('R1').value = 'B'
 shtTest.range('T1').value = 0.025
 shtTest.range('U1:V1').value = 0
-shtTest.range('S1').value ='NO'
+shtTest.range('S1').value ='N'
 shtTest.range('W1').value = 1
 
 
@@ -164,51 +164,50 @@ def namesMep(nombre,plazo):
 
 def cargoPlanilla(dicc):
     if dicc['mepCI'][1] != 10000:
-        shtTest.range('A22').value = dicc['mepCI'][0]    
-        shtTest.range('Y22').value = dicc['mepCI'][1]
-        shtTest.range('Z22').value = namesArs(dicc['mepCI'][0],' - spot')
-        shtTest.range('AA22').value =namesCcl(dicc['mepCI'][0],' - spot')
+        shtTest.range('A18').value = dicc['mepCI'][0]    
+        shtTest.range('Y18').value = dicc['mepCI'][1]
+        shtTest.range('Z18').value = namesArs(dicc['mepCI'][0],' - spot')
+        shtTest.range('AA18').value =namesCcl(dicc['mepCI'][0],' - spot')
     if dicc['mep48'][1] != 10000:    
-        shtTest.range('A23').value = dicc['mep48'][0]
-        shtTest.range('Y23').value = dicc['mep48'][1]
-        shtTest.range('Z23').value = namesArs(dicc['mep48'][0],' - 48hs')
-        shtTest.range('AA23').value =namesCcl(dicc['mep48'][0],' - 48hs')
+        shtTest.range('A19').value = dicc['mep48'][0]
+        shtTest.range('Y19').value = dicc['mep48'][1]
+        shtTest.range('Z19').value = namesArs(dicc['mep48'][0],' - 48hs')
+        shtTest.range('AA19').value =namesCcl(dicc['mep48'][0],' - 48hs')
     if dicc['cclCI'][1] != 10000:
-        shtTest.range('A24').value = dicc['cclCI'][0]
-        shtTest.range('Y24').value = dicc['cclCI'][1]
-        shtTest.range('Z24').value = namesArs(dicc['cclCI'][0],' - spot')
-        shtTest.range('AA24').value =namesMep(dicc['cclCI'][0],' - spot')
+        shtTest.range('A20').value = dicc['cclCI'][0]
+        shtTest.range('Y20').value = dicc['cclCI'][1]
+        shtTest.range('Z20').value = namesArs(dicc['cclCI'][0],' - spot')
+        shtTest.range('AA20').value =namesMep(dicc['cclCI'][0],' - spot')
     if dicc['ccl48'][1] != 10000:
-        shtTest.range('A25').value = dicc['ccl48'][0]
-        shtTest.range('Y25').value = dicc['ccl48'][1]
-        shtTest.range('Z25').value = namesArs(dicc['ccl48'][0],' - 48hs')
-        shtTest.range('AA25').value =namesMep(dicc['ccl48'][0],' - 48hs')
+        shtTest.range('A21').value = dicc['ccl48'][0]
+        shtTest.range('Y21').value = dicc['ccl48'][1]
+        shtTest.range('Z21').value = namesArs(dicc['ccl48'][0],' - 48hs')
+        shtTest.range('AA21').value =namesMep(dicc['ccl48'][0],' - 48hs')
 
     if dicc['arsCImep'][1] != 100:
-        shtTest.range('A26').value = dicc['arsCImep'][0]
-        shtTest.range('Y26').value = dicc['arsCImep'][1]
-        shtTest.range('Z26').value = namesMep(dicc['arsCImep'][0],' - spot')
-        shtTest.range('AA26').value =namesCcl(dicc['arsCImep'][0],' - spot')
+        shtTest.range('A22').value = dicc['arsCImep'][0]
+        shtTest.range('Y22').value = dicc['arsCImep'][1]
+        shtTest.range('Z22').value = namesMep(dicc['arsCImep'][0],' - spot')
+        shtTest.range('AA22').value =namesCcl(dicc['arsCImep'][0],' - spot')
     if dicc['ars48mep'][1] != 100:
-        shtTest.range('A27').value = dicc['ars48mep'][0]
-        shtTest.range('Y27').value = dicc['ars48mep'][1]
-        shtTest.range('Z27').value = namesMep(dicc['ars48mep'][0],' - 48hs')
-        shtTest.range('AA27').value =namesCcl(dicc['ars48mep'][0],' - 48hs')
+        shtTest.range('A23').value = dicc['ars48mep'][0]
+        shtTest.range('Y23').value = dicc['ars48mep'][1]
+        shtTest.range('Z23').value = namesMep(dicc['ars48mep'][0],' - 48hs')
+        shtTest.range('AA23').value =namesCcl(dicc['ars48mep'][0],' - 48hs')
     if dicc['arsCIccl'][1] != 100:
-        shtTest.range('A28').value = dicc['arsCIccl'][0]
-        shtTest.range('Y28').value = dicc['arsCIccl'][1]
-        shtTest.range('Z28').value = namesCcl(dicc['arsCIccl'][0],' - spot')
-        shtTest.range('AA28').value =namesMep(dicc['arsCIccl'][0],' - spot')
+        shtTest.range('A24').value = dicc['arsCIccl'][0]
+        shtTest.range('Y24').value = dicc['arsCIccl'][1]
+        shtTest.range('Z24').value = namesCcl(dicc['arsCIccl'][0],' - spot')
+        shtTest.range('AA24').value =namesMep(dicc['arsCIccl'][0],' - spot')
     if dicc['ars48ccl'][1] != 100:
-        shtTest.range('A29').value = dicc['ars48ccl'][0]
-        shtTest.range('Y29').value = dicc['ars48ccl'][1]
-        shtTest.range('Z29').value = namesCcl(dicc['ars48ccl'][0],' - 48hs')
-        shtTest.range('AA29').value =namesMep(dicc['ars48ccl'][0],' - 48hs') 
+        shtTest.range('A25').value = dicc['ars48ccl'][0]
+        shtTest.range('Y25').value = dicc['ars48ccl'][1]
+        shtTest.range('Z25').value = namesCcl(dicc['ars48ccl'][0],' - 48hs')
+        shtTest.range('AA25').value =namesMep(dicc['ars48ccl'][0],' - 48hs') 
 
 def limpio():
-    shtTest.range('A10:A17').value = ''
-    shtTest.range('A22:A29').value = ''
-    shtTest.range('Y22:AA29').value = ''
+    shtTest.range('A10:A25').value = ''
+    shtTest.range('Y18:AA25').value = ''
 
 def cargoXplazo(dicc):
     if time.strftime("%H:%M:%S") > '16:26:00':
@@ -337,18 +336,18 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
 while True:
     if time.strftime("%H:%M:%S") > '17:06:00': break 
     try:
+       shtTest.range('AE2').options(index=True, header=False).value = cauciones
        #shtTest.range('A26').options(index=True, header=False).value = everything
        #shtTest.range('A' + str(listLength)).options(index=True, header=False).value = options
-       if shtTest.range('Q1').value!='OPC':shtTest.range('A30').options(index=True,header=False).value=options
-       if shtTest.range('R1').value!='BON':shtTest.range('A'+str(listLength)).options(index=True,header=False).value = everything
-       shtTest.range('AE2').options(index=True, header=False).value = cauciones
-       if time.strftime("%H:%M:%S") <= '10:45:00': continue
+       if shtTest.range('Q1').value!='O':shtTest.range('A30').options(index=True,header=False).value=options
+       if shtTest.range('R1').value!='B':shtTest.range('A'+str(listLength)).options(index=True,header=False).value = everything
     except: print("_____ error al cargar datos en Excel !!! ",time.strftime("%H:%M:%S"))
 
     if shtTest.range('A1').value != 'symbol': ilRulo()
-    ##time.sleep(10)
+    if shtTest.range('R1').value =='B': time.sleep(5)
+    else: time.sleep(10)
     for valor in shtTest.range('P26:V53').value:
-        if shtTest.range('S1').value!='NO' and valor[6]>0: # Activa TRAILING STOP _________________________
+        if shtTest.range('S1').value!='N' and valor[6]>0: # Activa TRAILING STOP _________________________
             trailingStop('A'+str((int(valor[0])+1)),valor[6],valor[0])
         try: # CANCELAR todas las ordenes _________________________________________________________________
             if valor[5] == 'c' or valor[5] == 'C': 
