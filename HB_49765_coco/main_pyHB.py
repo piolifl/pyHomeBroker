@@ -21,7 +21,7 @@ shtTest.range('W1').value = 1
 
 def getOptionsList():
     global allOptions
-    rng = shtTickers.range('A2:A25').expand()
+    rng = shtTickers.range('A2:A35').expand()
     oOpciones = rng.value
     allOptions = pd.DataFrame({'symbol': oOpciones},columns=["symbol", "bid_size", "bid", "ask", "ask_size", "last","change", "open", "high", "low", "previous_close", "turnover", "volume",'operations', 'datetime'])
     allOptions = allOptions.set_index('symbol')
@@ -344,9 +344,9 @@ while True:
     except: print("_____ error al cargar datos en Excel !!! ",time.strftime("%H:%M:%S"))
 
     if shtTest.range('A1').value != 'symbol': ilRulo()
-    if shtTest.range('R1').value =='B': time.sleep(5)
+    if shtTest.range('R1').value =='B': time.sleep(1)
     else: time.sleep(10)
-    for valor in shtTest.range('P26:V53').value:
+    for valor in shtTest.range('P26:V59').value:
         if shtTest.range('S1').value!='N' and valor[6]>0: # Activa TRAILING STOP _________________________
             trailingStop('A'+str((int(valor[0])+1)),valor[6],valor[0])
         try: # CANCELAR todas las ordenes _________________________________________________________________
@@ -387,6 +387,7 @@ while True:
         elif valor[5] == '+': # buy usando puntas _______________________________________________________
             try:
                 shtTest.range('W1').value  = 1
+                cantidad= int(shtTest.range('Y'+str(int(valor[0]+1))).value)
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
                 shtTest.range('U'+str(int(valor[0]+1))).value = 0
             except: shtTest.range('U'+str(int(valor[0]+1))).value = 0
