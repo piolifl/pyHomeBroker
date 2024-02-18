@@ -157,23 +157,23 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     if tipo.lower() == 'buy': 
         if len(symbol) < 2:
             ##orderC = hb.orders.send_buy_order(symbol[0],'24hs', float(precio),int(size))
-            print(f'Buy  {symbol[0]} 24hs // +{int(size)} // {precio} // order {orderC}')
+            print(f'Buy  {symbol[0]} // + {int(size)} // a {precio}')
             shtTest.range('V'+str(int(celda+1))).value += int(size)
             shtTest.range('W'+str(int(celda+1))).value += int(size) * float(precio)*100
         else:
             ##orderC = hb.orders.send_buy_order(symbol[0],symbol[2],float(precio),int(size*por))
-            print(f'Buy  {symbol[0]} {symbol[2]} // +{int(size*por)} // {precio/100} // order {orderC}')
+            print(f'Buy  {symbol[0]} {symbol[2]} // + {int(size*por)} // a {precio/100}')
             shtTest.range('V'+str(int(celda+1))).value += int(size*por)
             shtTest.range('W'+str(int(celda+1))).value += int(size*por) * float(precio)/100
     else: 
         if len(symbol) < 2:
             ##orderV = hb.orders.send_sell_order(symbol[0],'24hs', float(precioV),int(size))
-            print(f'Sell {symbol[0]} 24hs // -{int(size)} // {precioV} // order {orderV}')
+            print(f'Sell {symbol[0]} // - {int(size)} // a {precioV}')
             shtTest.range('V'+str(int(celda+1))).value -= int(size)
             shtTest.range('W'+str(int(celda+1))).value -= int(size) * float(precioV)*100
         else:
             ##orderV = hb.orders.send_sell_order(symbol[0],symbol[2],float(precioV),int(size*por))
-            print(f'Sell {symbol[0]} {symbol[2]} // -{int(size*por)} // {precioV/100} // order {orderV}')
+            print(f'Sell {symbol[0]} {symbol[2]} // - {int(size*por)} // a {precioV/100}')
             shtTest.range('V'+str(int(celda+1))).value -= int(size*por)
             shtTest.range('W'+str(int(celda+1))).value -= int(size*por) * float(precioV)/100
     shtTest.range('Q'+str(int(valor[0]+1))+':'+'U'+str(int(valor[0]+1))).value = 0
