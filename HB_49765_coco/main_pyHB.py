@@ -381,10 +381,8 @@ while True:
             except: shtTest.range('Q'+str(int(valor[0]+1))+':'+'T'+str(int(valor[0]+1))).value = 0
         
         elif valor[5] == '-' or valor[5] == '+': # buy//sell usando puntas ________________________________
-            try: 
-                cantidad = int(shtTest.range('Y'+str(int(valor[0]+1))).value)
-                if cantidad < 0: cantidad = shtTest.range('W1').value
-            except: cantidad = 1
+            try: cantidad = int(shtTest.range('Y'+str(int(valor[0]+1))).value)
+            except: cantidad = shtTest.range('W1').value
             if valor[5] == '-':
                 enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
             else: enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
