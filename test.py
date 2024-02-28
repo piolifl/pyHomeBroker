@@ -4,7 +4,7 @@ import pandas as pd
 from datetime import date, timedelta
 import time
 
-wb = xw.Book('.\epgb_pyHB.xlsx')
+wb = xw.Book('..\epgb_pyHB.xlsx')
 shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
 shtTest.range('Q1').value = 'O'
@@ -221,7 +221,7 @@ while True:
     else: time.sleep(3)
 
     for valor in shtTest.range('P26:V59').value:
-        if str(shtTest.range('S1').value).lower()!='n' and valor[6]>0: # Activa TRAILING STOP _________________________
+        if str(shtTest.range('S1').value).lower()!='n' and int(valor[6])>0: # Activa TRAILING STOP ________
             trailingStop('A'+str((int(valor[0])+1)),valor[6],valor[0])
         try: # CANCELAR todas las ordenes _________________________________________________________________
             if str(valor[5]).lower() == 'c': 
