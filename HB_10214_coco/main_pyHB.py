@@ -307,26 +307,32 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
 
         if len(nombre) < 2: #TRAILING sobre opciones financieras
             if bid * 100 > costo * (1 + ganancia): # Precio sube activo trailing y sube % ganancia               
-                if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='TRAILING': shtTest.range('T1').value*=1+0.25
+                if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='TRAILING': shtTest.range('T1').value*=1+0.125
                 else: shtTest.range('W'+str(int(nroCelda+1))).value = 'TRAILING'
                 shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
             if last * 100 < costo * (1 - ganancia): # Precio baja activo stop y envia orden venta
+                shtTest.range('T1').value = 0.0125
                 if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP' and bid > last * (1 - ganancia):
-                    print(time.strftime("%H:%M:%S"),'trailingSTOP',end=' ')
+                    print(time.strftime("%H:%M:%S"),'trailingSTOP',end=' || ')
+                    shtTest.range('T1').value = 0.025
+                    shtTest.range('W'+str(int(nroCelda+1))).value = ''
+                    shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
                     enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),cantidad,nroCelda)
-                    shtTest.range('W'+str(int(nroCelda+1))+':'+'X'+str(int(nroCelda+1))).value = 0
                 else: shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'  
 
         else: #TRAILING sobre bonos / letras / ons
             if bid / 100 > costo * (1 + (ganancia/25)): # Precio sube activo trailing y sube % ganancia               
-                if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='TRAILING': shtTest.range('T1').value*= 1+0.25
+                if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='TRAILING': shtTest.range('T1').value*= 1+0.125
                 else: shtTest.range('W'+str(int(nroCelda+1))).value = 'TRAILING'
                 shtTest.range('X'+str(int(nroCelda+1))).value = bid / 100
             if last / 100 < costo * (1 - ganancia/25): # Precio baja activo stop y envia orden venta
+                shtTest.range('T1').value = 0.0125
                 if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='STOP' and (bid/100)>(last/100)*(1-(ganancia/25)):
-                    print(time.strftime("%H:%M:%S"),'trailingSTOP',end=' ')
+                    print(time.strftime("%H:%M:%S"),'trailingSTOP',end=' || ')
+                    shtTest.range('T1').value = 0.025
+                    shtTest.range('W'+str(int(nroCelda+1))).value = ''
+                    shtTest.range('X'+str(int(nroCelda+1))).value = bid / 100
                     enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),cantidad,nroCelda)
-                    shtTest.range('W'+str(int(nroCelda+1))+':'+'X'+str(int(nroCelda+1))).value = 0
                 else: shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP' 
     except: pass
 #########################################################################################################
@@ -347,11 +353,14 @@ while True:
     if str(shtTest.range('R1').value).lower() =='b': time.sleep(1)
     else: time.sleep(3)
 
+    if str(shtTest.range('S1').value).lower() != 'n': # Activa TRAILING STOP _________________________
+        for valor in shtTest.range('P26:V27').value:
+            if int(valor[6])>0:
+                try: cantidad = shtTest.range('Y'+str(int(valor[0]+1))).value
+                except: cantidad = 1
+                trailingStop('A'+str((int(valor[0])+1)),cantidad,valor[0])
+
     for valor in shtTest.range('P26:V59').value:
-        if str(shtTest.range('S1').value).lower()!='n' and valor[6]>0: # Activa TRAILING STOP _________________________
-            try: cantidad = int(shtTest.range('W1').value)
-            except: cantidad = 1
-            trailingStop('A'+str((int(valor[0])+1)),cantidad,valor[0])
         try: # CANCELAR todas las ordenes _________________________________________________________________
             if str(valor[5]).lower() == 'c': 
                 hb.orders.cancel_order(int(os.environ.get('account_id')),orderC)
