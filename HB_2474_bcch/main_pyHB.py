@@ -330,13 +330,13 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
             if bid / 100 > costo * (1 + (ganancia/25)): # Precio sube activo trailing y sube % ganancia               
                 if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='TRAILING': shtTest.range('T1').value*= 1+0.0625
                 else: shtTest.range('W'+str(int(nroCelda+1))).value = 'TRAILING'
-                shtTest.range('X'+str(int(nroCelda+1))).value = bid / 100
+                shtTest.range('X'+str(int(nroCelda+1))).value = round(bid / 100,5)
             if last / 100 < costo * (1 - 0.0015): # Precio baja activo stop y envia orden venta
                 if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='STOP' and (bid/100)>(last/100)*(1-0.0015):
                     print(time.strftime("%H:%M:%S"),'trailingSTOP',end=' || ')
                     shtTest.range('T1').value = 0.025
                     shtTest.range('W'+str(int(nroCelda+1))).value = ''
-                    shtTest.range('X'+str(int(nroCelda+1))).value = bid / 100
+                    shtTest.range('X'+str(int(nroCelda+1))).value = round(bid / 100,5)
                     enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),cantidad,nroCelda)
                 else: shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP' 
     except: pass
