@@ -154,7 +154,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     symbol = str(shtTest.range(str(symbol)).value).split()
     mas = float(shtTest.range('U1').value)
     por = int(shtTest.range('W1').value)
-    precio = float(shtTest.range(str(price)).value) + mas
+    if float(shtTest.range(str(price)).value): precio = float(shtTest.range(str(price)).value) + mas
     precioV = precio - (mas * 2)
 
     if not shtTest.range('V'+str(int(celda+1))).value: 

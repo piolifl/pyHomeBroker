@@ -263,11 +263,12 @@ def ilRulo():
 def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     global orderC, orderV
     symbol = str(shtTest.range(str(symbol)).value).split()
-    mas = float(shtTest.range('U1').value)
-    por = int(shtTest.range('W1').value)
-    precio = float(shtTest.range(str(price)).value) + mas
-    precioV = precio - (mas * 2)
-    if not shtTest.range('V'+str(int(celda+1))).value: 
+    mas = float(shtTest.range('U1').value) # Suma o Resta el valor en U1 a la punta de compra venta
+    por = int(shtTest.range('W1').value) # Multiplica el valor de W1 a la cantidad cargada en compra venta
+    if float(shtTest.range(str(price)).value): # Toma precio de la ubicacion solicitada
+        precio = float(shtTest.range(str(price)).value) + mas
+    precioV = precio - (mas * 2)# Ajusta precio en casos de venta para numeros negativos
+    if not shtTest.range('V'+str(int(celda+1))).value: #Si no hay stock entonces limpia valores en rango
         shtTest.range('W'+str(int(celda+1))+':'+'X'+str(int(celda+1))).value = ''
     if tipo.lower() == 'buy': 
         if len(symbol) < 2:
