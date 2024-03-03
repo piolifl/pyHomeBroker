@@ -268,7 +268,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     precio = float(shtTest.range(str(price)).value) + mas
     precioV = precio - (mas * 2)
     if not shtTest.range('V'+str(int(celda+1))).value: 
-        shtTest.range('W'+str(int(celda+1))+':'+'X'+str(int(celda+1))).value = 0
+        shtTest.range('W'+str(int(celda+1))+':'+'X'+str(int(celda+1))).value = ''
     if tipo.lower() == 'buy': 
         if len(symbol) < 2:
             orderC = hb.orders.send_buy_order(symbol[0],'24hs', float(precio),int(size))
@@ -278,26 +278,26 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
             shtTest.range('W'+str(int(celda+1))).value += int(size) * float(precio)*100
         else:
             orderC = hb.orders.send_buy_order(symbol[0],symbol[2],float(precio),int(size*por))
-            print(f'Buy {symbol[0]} {symbol[2]} // + {int(size*por)} // a {precio/100}')
+            print(f'Buy {symbol[0]} {symbol[2]} // + {int(size*por)} // a {round(precio/100,5)}')
             try: shtTest.range('V'+str(int(celda+1))).value += int(size*por)
             except: shtTest.range('V'+str(int(celda+1))).value = int(size*por)
-            shtTest.range('W'+str(int(celda+1))).value += int(size*por) * float(precio)/100
-        winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
+            shtTest.range('W'+str(int(celda+1))).value += int(size*por) * round(precio/100,5)
     else: 
         if len(symbol) < 2:
             orderV = hb.orders.send_sell_order(symbol[0],'24hs', float(precioV),int(size))
             print(f'Sell {symbol[0]} // - {int(size)} // a {precioV}')
-            shtTest.range('V'+str(int(celda+1))).value -= int(size)
+            try: shtTest.range('V'+str(int(celda+1))).value -= int(size)
+            except: shtTest.range('V'+str(int(celda+1))).value = int(size)
             shtTest.range('W'+str(int(celda+1))).value -= int(size) * float(precioV)*100
         else:
             orderV = hb.orders.send_sell_order(symbol[0],symbol[2],float(precioV),int(size*por))
-            print(f'Sell {symbol[0]} {symbol[2]} // - {int(size*por)} // a {precioV/100}')
-            shtTest.range('V'+str(int(celda+1))).value -= int(size*por)
-            shtTest.range('W'+str(int(celda+1))).value -= int(size*por) * float(precioV)/100
-        winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
-    
+            print(f'Sell {symbol[0]} {symbol[2]} // - {int(size*por)} // a {round(precioV/100,5)}')
+            try: shtTest.range('V'+str(int(celda+1))).value -= int(size*por)
+            except: shtTest.range('V'+str(int(celda+1))).value = int(size*por)
+            shtTest.range('W'+str(int(celda+1))).value -= int(size*por) * round(precioV/100,5)
     if shtTest.range('V'+str(int(celda+1))).value==0:shtTest.range('X'+str(int(celda+1))).value = shtTest.range('W'+str(int(celda+1))).value / -1
     else:shtTest.range('X'+str(int(celda+1))).value=shtTest.range('W'+str(int(celda+1))).value / shtTest.range('V'+str(int(celda+1))).value
+    winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
 
 ############################################ TRAILING STOP ################################################
 def trailingStop(nombre=str,cantidad=int,nroCelda=int):
@@ -340,7 +340,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                     enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),cantidad,nroCelda)
                 else: shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP' 
     except: pass
-#################################### CARGA BUCLE EN EXCEL #################################################
+########################################### CARGA BUCLE EN EXCEL ##########################################
 while True:
     time.sleep(2)
     if time.strftime("%H:%M:%S") > '17:06:00': break 
@@ -364,41 +364,41 @@ while True:
         if valor[1]: # COMPRAR precio BID _________________________________________________________________
             try: 
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0])
-                shtTest.range('Q'+str(int(valor[0]+1))).value = 0
-            except: shtTest.range('Q'+str(int(valor[0]+1))).value = 0
+                shtTest.range('Q'+str(int(valor[0]+1))).value = ''
+            except: shtTest.range('Q'+str(int(valor[0]+1))).value = ''
         elif valor[2]: # COMPRAR precio ASK _______________________________________________________________
             try: 
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[2],valor[0])
-                shtTest.range('R'+str(int(valor[0]+1))).value = 0
-            except: shtTest.range('R'+str(int(valor[0]+1))).value = 0
+                shtTest.range('R'+str(int(valor[0]+1))).value = ''
+            except: shtTest.range('R'+str(int(valor[0]+1))).value = ''
         elif valor[3]: # VENDER precio BID ________________________________________________________________
             try: 
                 enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[3],valor[0])
-                shtTest.range('S'+str(int(valor[0]+1))).value = 0
-            except: shtTest.range('S'+str(int(valor[0]+1))).value = 0
+                shtTest.range('S'+str(int(valor[0]+1))).value = ''
+            except: shtTest.range('S'+str(int(valor[0]+1))).value = ''
         elif valor[4]: # VENDER precio ASK ________________________________________________________________
             try: 
                 enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[4],valor[0])
-                shtTest.range('T'+str(int(valor[0]+1))).value = 0
-            except: shtTest.range('T'+str(int(valor[0]+1))).value = 0
+                shtTest.range('T'+str(int(valor[0]+1))).value = ''
+            except: shtTest.range('T'+str(int(valor[0]+1))).value = ''
         
         elif valor[5]:
-            try: # CANCELAR todas las ordenes ______________________________________________________________
+            try: # CANCELAR todas las ordenes _____________________________________________________________
                 if str(valor[5]).lower() == 'c': 
                     hb.orders.cancel_order(int(os.environ.get('account_id')),orderC)
-                    winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
                     shtTest.range('U'+str(int(valor[0]+1))+':'+'X'+str(int(valor[0]+1))).value = ''
                     print("Orden compra fue cancelada")
+                    winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
                 elif str(valor[5]).lower() == 'v': 
                     hb.orders.cancel_order(int(os.environ.get('account_id')),orderV)
                     shtTest.range('U'+str(int(valor[0]+1))+':'+'X'+str(int(valor[0]+1))).value = ''
-                    winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
                     print("Orden venta fue cancelada")
+                    winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
                 elif str(valor[5]).lower() == 'x': 
                     hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
                     shtTest.range('U'+str(int(valor[0]+1))+':'+'X'+str(int(valor[0]+1))).value = ''
-                    winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
                     print("Todas las ordenes activas canceladas")
+                    winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
             except: 
                 shtTest.range('U'+str(int(valor[0]+1))).value = ''
                 print('Error, al cancelar orden.')
