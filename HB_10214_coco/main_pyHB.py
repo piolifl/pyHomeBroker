@@ -134,7 +134,7 @@ print(time.strftime("%H:%M:%S"),f"Logueo en cuenta: {int(os.environ.get('account
 
 def namesArs(nombre,plazo): 
     if nombre[:2] == 'BA': return 'BA37D'+plazo
-    elif nombre[:2] == 'BP': return 'BPO27'+plazo
+    elif nombre[:2] == 'BP': return 'BPOA7'+plazo
     elif (nombre[:1] == 'X' or nombre[:1] == 'S') and (nombre[3:4] == 'D' or nombre[3:4] == 'C'):
         if (nombre[1:2] == 'F' or nombre[1:2] == 'Y'): return nombre[:1]+'20'+nombre[1:3]+plazo
         else: return nombre[:1]+'18'+nombre[1:3]+plazo
@@ -144,7 +144,7 @@ def namesArs(nombre,plazo):
 
 def namesCcl(nombre,plazo): 
     if nombre[:2] == 'BA': return 'BA7DC'+plazo
-    elif nombre[:2] == 'BP': return 'BP27C'+plazo
+    elif nombre[:2] == 'BP': return 'BPA7C'+plazo
     elif (nombre[:1] == 'X' or nombre[:1] == 'S') :
         if nombre[3:4] == 'D': return nombre[:3]+'C'+plazo
         else: return nombre[:1]+nombre[3:5]+'C'+plazo
@@ -154,7 +154,7 @@ def namesCcl(nombre,plazo):
 
 def namesMep(nombre,plazo): 
     if nombre[:2] == 'BA': return 'BA7DD'+plazo
-    elif nombre[:2] == 'BP': return 'BP27D'+plazo
+    elif nombre[:2] == 'BP': return 'BPA7D'+plazo
     elif (nombre[:1] == 'X' or nombre[:1] == 'S') :
         if nombre[3:4] == 'C': return nombre[:3]+'D'+plazo
         else: return nombre[:1]+nombre[3:5]+'D'+plazo
@@ -162,76 +162,55 @@ def namesMep(nombre,plazo):
         return nombre[:4]+'D'+plazo
     else: return nombre[:4]+'D'+plazo
 
-def cargoPlanilla(dicc):
-    if dicc['mepCI'][1] != 10000:
-        shtTest.range('A18').value = dicc['mepCI'][0]    
-        shtTest.range('Y18').value = dicc['mepCI'][1]
-        shtTest.range('Z18').value = namesArs(dicc['mepCI'][0],' - spot')
-        shtTest.range('AA18').value =namesCcl(dicc['mepCI'][0],' - spot')
-    if dicc['mep48'][1] != 10000:    
-        shtTest.range('A19').value = dicc['mep48'][0]
-        shtTest.range('Y19').value = dicc['mep48'][1]
-        shtTest.range('Z19').value = namesArs(dicc['mep48'][0],' - 48hs')
-        shtTest.range('AA19').value =namesCcl(dicc['mep48'][0],' - 48hs')
-    if dicc['cclCI'][1] != 10000:
-        shtTest.range('A20').value = dicc['cclCI'][0]
-        shtTest.range('Y20').value = dicc['cclCI'][1]
-        shtTest.range('Z20').value = namesArs(dicc['cclCI'][0],' - spot')
-        shtTest.range('AA20').value =namesMep(dicc['cclCI'][0],' - spot')
-    if dicc['ccl48'][1] != 10000:
-        shtTest.range('A21').value = dicc['ccl48'][0]
-        shtTest.range('Y21').value = dicc['ccl48'][1]
-        shtTest.range('Z21').value = namesArs(dicc['ccl48'][0],' - 48hs')
-        shtTest.range('AA21').value =namesMep(dicc['ccl48'][0],' - 48hs')
-
-    if dicc['arsCImep'][1] != 100:
-        shtTest.range('A22').value = dicc['arsCImep'][0]
-        shtTest.range('Y22').value = dicc['arsCImep'][1]
-        shtTest.range('Z22').value = namesMep(dicc['arsCImep'][0],' - spot')
-        shtTest.range('AA22').value =namesCcl(dicc['arsCImep'][0],' - spot')
-    if dicc['ars48mep'][1] != 100:
-        shtTest.range('A23').value = dicc['ars48mep'][0]
-        shtTest.range('Y23').value = dicc['ars48mep'][1]
-        shtTest.range('Z23').value = namesMep(dicc['ars48mep'][0],' - 48hs')
-        shtTest.range('AA23').value =namesCcl(dicc['ars48mep'][0],' - 48hs')
-    if dicc['arsCIccl'][1] != 100:
-        shtTest.range('A24').value = dicc['arsCIccl'][0]
-        shtTest.range('Y24').value = dicc['arsCIccl'][1]
-        shtTest.range('Z24').value = namesCcl(dicc['arsCIccl'][0],' - spot')
-        shtTest.range('AA24').value =namesMep(dicc['arsCIccl'][0],' - spot')
-    if dicc['ars48ccl'][1] != 100:
-        shtTest.range('A25').value = dicc['ars48ccl'][0]
-        shtTest.range('Y25').value = dicc['ars48ccl'][1]
-        shtTest.range('Z25').value = namesCcl(dicc['ars48ccl'][0],' - 48hs')
-        shtTest.range('AA25').value =namesMep(dicc['ars48ccl'][0],' - 48hs') 
-
-def limpio():
-    shtTest.range('A10:A25').value = ''
-    shtTest.range('Y18:AA25').value = ''
-
 def cargoXplazo(dicc):
+    shtTest.range('A1').value = 'symbol'
     if time.strftime("%H:%M:%S") > '16:26:00':
-        shtTest.range('A10').value = dicc['mep48'][0] # mep
+        # Carga el mejor pagador de MEP 48hs  
+        shtTest.range('A2').value = dicc['mep48'][0]
+        shtTest.range('A3').value = 'AL30D - 48hs'
+        shtTest.range('A4').value = 'AL30 - 48hs'
+        shtTest.range('A5').value = namesArs(dicc['mep48'][0],' - 48hs')# Ticker en ARS para reiniciar rulo en 48hs
+        shtTest.range('A6').value = dicc['mep48'][0]
+        shtTest.range('A7').value = 'GD30D - 48hs'
+        shtTest.range('A8').value = 'GD30 - 48hs'
+        shtTest.range('A9').value = namesArs(dicc['mep48'][0],' - 48hs')# Ticker en ARS para reiniciar rulo en 48hs
+        shtTest.range('A10').value = dicc['mep48'][0]
         shtTest.range('A11').value = namesMep(dicc['ars48mep'][0],' - 48hs') #  mep
         shtTest.range('A12').value = dicc['ars48mep'][0] #  ars
-        shtTest.range('A13').value = namesArs(dicc['mep48'][0],' - 48hs') # ars
-        shtTest.range('A14').value = dicc['mep48'][0] # mep
-        shtTest.range('A15').value = namesMep(dicc['ccl48'][0],' - 48hs')
-        shtTest.range('A16').value = dicc['ccl48'][0] # ccl
-        shtTest.range('A17').value = namesCcl(dicc['mep48'][0],' - 48hs')
+        shtTest.range('A13').value = namesArs(dicc['mep48'][0],' - 48hs')# Ticker en ARS para reiniciar rulo en 48hs
+        shtTest.range('A14').value = 'AL30C - 48hs'
+        shtTest.range('A15').value = 'GD30C - 48hs'
+        shtTest.range('A16').value = 'GD30D - 48hs'
+        shtTest.range('A17').value = 'AL30D - 48hs'
+        shtTest.range('A18').value = dicc['mep48'][0] # mep
+        shtTest.range('A19').value = namesMep(dicc['ccl48'][0],' - 48hs')
+        shtTest.range('A20').value = dicc['ccl48'][0] # ccl
+        shtTest.range('A21').value = namesCcl(dicc['mep48'][0],' - 48hs')
     else:
+        # Carga el mejor pagador de MEP CI  
+        shtTest.range('A2').value = dicc['mepCI'][0]
+        shtTest.range('A3').value = 'AL30D - spot'
+        shtTest.range('A4').value = 'AL30 - spot'
+        shtTest.range('A5').value = namesArs(dicc['mepCI'][0],' - spot')
+        shtTest.range('A6').value = dicc['mepCI'][0]
+        shtTest.range('A7').value = 'GD30D - spot'
+        shtTest.range('A8').value = 'GD30 - spot'
+        shtTest.range('A9').value = namesArs(dicc['mepCI'][0],' - spot')
         shtTest.range('A10').value = dicc['mepCI'][0]
         shtTest.range('A11').value = namesMep(dicc['arsCImep'][0],' - spot')
         shtTest.range('A12').value = dicc['arsCImep'][0]
-        shtTest.range('A13').value = namesArs(dicc['mepCI'][0],' - spot') 
-        shtTest.range('A14').value = dicc['mepCI'][0] # mep
-        shtTest.range('A15').value = namesMep(dicc['cclCI'][0],' - spot')
-        shtTest.range('A16').value = dicc['cclCI'][0] # ccl
-        shtTest.range('A17').value = namesCcl(dicc['mepCI'][0],' - spot')
+        shtTest.range('A13').value = namesArs(dicc['mepCI'][0],' - spot')
+        shtTest.range('A14').value = 'AL30C - spot'
+        shtTest.range('A15').value = 'GD30C - spot'
+        shtTest.range('A16').value = 'GD30D - spot'
+        shtTest.range('A17').value = 'AL30D - spot'
+        shtTest.range('A18').value = dicc['mepCI'][0] # mep
+        shtTest.range('A19').value = namesMep(dicc['cclCI'][0],' - spot')
+        shtTest.range('A20').value = dicc['cclCI'][0] # ccl
+        shtTest.range('A21').value = namesCcl(dicc['mepCI'][0],' - spot')
+    winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
 
 def ilRulo():
-    shtTest.range('A1').value = 'symbol'
-    limpio()
     celda,pesos,dolar = 46,1000,0
     tikers = {'cclCI':['',dolar],'ccl48':['',dolar],'mepCI':['',dolar],'mep48':['',dolar],'arsCIccl':['',pesos],'ars48ccl':['',pesos],'arsCImep':['',pesos],'ars48mep':['',pesos]}
     for valor in shtTest.range('A46:A153').value:
@@ -257,19 +236,19 @@ def ilRulo():
                 if mep > tikers['mep48'][1]: tikers['mep48'] = [valor,mep]
         celda +=1
     cargoXplazo(tikers)
-    cargoPlanilla(tikers)
 
 ############################################ ENVIAR ORDENES ################################################    
 def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     global orderC, orderV
     symbol = str(shtTest.range(str(symbol)).value).split()
-    mas = float(shtTest.range('U1').value) # Suma o Resta el valor en U1 a la punta de compra venta
-    por = int(shtTest.range('W1').value) # Multiplica el valor de W1 a la cantidad cargada en compra venta
-    if float(shtTest.range(str(price)).value): # Toma precio de la ubicacion solicitada
+    mas = float(shtTest.range('U1').value)
+    por = int(shtTest.range('W1').value)
+    if float(shtTest.range(str(price)).value): 
         precio = float(shtTest.range(str(price)).value) + mas
-    precioV = precio - (mas * 2)# Ajusta precio en casos de venta para numeros negativos
-    if not shtTest.range('V'+str(int(celda+1))).value: #Si no hay stock entonces limpia valores en rango
-        shtTest.range('W'+str(int(celda+1))+':'+'X'+str(int(celda+1))).value = ''
+    precioV = precio - (mas * 2)
+    shtTest.range('Q'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
+    if not shtTest.range('V'+str(int(celda+1))).value: 
+        shtTest.range('V'+str(int(celda+1))+':'+'X'+str(int(celda+1))).value = 0
     if tipo.lower() == 'buy': 
         if len(symbol) < 2:
             orderC = hb.orders.send_buy_order(symbol[0],'24hs', float(precio),int(size))
@@ -296,10 +275,10 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
             try: shtTest.range('V'+str(int(celda+1))).value -= int(size*por)
             except: shtTest.range('V'+str(int(celda+1))).value = int(size*por)
             shtTest.range('W'+str(int(celda+1))).value -= int(size*por) * round(precioV/100,5)
-    if shtTest.range('V'+str(int(celda+1))).value==0:shtTest.range('X'+str(int(celda+1))).value = shtTest.range('W'+str(int(celda+1))).value / -1
-    else:shtTest.range('X'+str(int(celda+1))).value=shtTest.range('W'+str(int(celda+1))).value / shtTest.range('V'+str(int(celda+1))).value
-    winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
 
+    shtTest.range('X'+str(int(celda+1))).value=shtTest.range('W'+str(int(celda+1))).value / shtTest.range('V'+str(int(celda+1))).value
+    
+    winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
 ############################################ TRAILING STOP ################################################
 def trailingStop(nombre=str,cantidad=int,nroCelda=int):
     try:
@@ -354,7 +333,7 @@ while True:
        #shtTest.range('A' + str(listLength)).options(index=True, header=False).value = options
     except: print("_____ error al cargar datos en Excel !!! ",time.strftime("%H:%M:%S"))
     
-    for valor in shtTest.range('P26:V59').value:
+    for valor in shtTest.range('P26:V44').value:
         if not shtTest.range('S1').value: # Activa TRAILING STOP __________________________________________
             try: stock = int(valor[6])
             except: stock = 0
@@ -363,24 +342,16 @@ while True:
                 else: cantidad = shtTest.range('Y'+str(int(valor[0]+1))).value
                 trailingStop('A'+str((int(valor[0])+1)),cantidad,valor[0])
         if valor[1]: # COMPRAR precio BID _________________________________________________________________
-            try: 
-                enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0])
-                shtTest.range('Q'+str(int(valor[0]+1))).value = ''
+            try:   enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0])
             except: shtTest.range('Q'+str(int(valor[0]+1))).value = ''
         elif valor[2]: # COMPRAR precio ASK _______________________________________________________________
-            try: 
-                enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[2],valor[0])
-                shtTest.range('R'+str(int(valor[0]+1))).value = ''
+            try:  enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[2],valor[0])
             except: shtTest.range('R'+str(int(valor[0]+1))).value = ''
         elif valor[3]: # VENDER precio BID ________________________________________________________________
-            try: 
-                enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[3],valor[0])
-                shtTest.range('S'+str(int(valor[0]+1))).value = ''
+            try:  enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[3],valor[0])
             except: shtTest.range('S'+str(int(valor[0]+1))).value = ''
         elif valor[4]: # VENDER precio ASK ________________________________________________________________
-            try: 
-                enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[4],valor[0])
-                shtTest.range('T'+str(int(valor[0]+1))).value = ''
+            try:  enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[4],valor[0])
             except: shtTest.range('T'+str(int(valor[0]+1))).value = ''
         
         elif valor[5]:
