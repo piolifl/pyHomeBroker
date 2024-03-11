@@ -210,7 +210,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
 while True:
     time.sleep(2)
     
-    for valor in shtTest.range('P26:V44').value:
+    for valor in shtTest.range('P22:V44').value:
         if not shtTest.range('S1').value: # Activa TRAILING STOP __________________________________________
             try: stock = int(valor[6])
             except: stock = 0
