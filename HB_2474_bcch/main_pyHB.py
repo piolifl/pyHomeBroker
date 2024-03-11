@@ -211,9 +211,9 @@ def cargoXplazo(dicc):
     winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
 
 def ilRulo():
-    celda,pesos,dolar = 46,1000,0
+    celda,pesos,dolar = 64,1000,0
     tikers = {'cclCI':['',dolar],'ccl48':['',dolar],'mepCI':['',dolar],'mep48':['',dolar],'arsCIccl':['',pesos],'ars48ccl':['',pesos],'arsCImep':['',pesos],'ars48mep':['',pesos]}
-    for valor in shtTest.range('A46:A153').value:
+    for valor in shtTest.range('A64:A165').value:
         arsM = shtTest.range('AA'+str(celda)).value
         if arsM == None: arsM = 1000
         arsC = arsM
@@ -324,6 +324,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
 while True:
     time.sleep(2)
     if time.strftime("%H:%M:%S") > '17:06:00': break 
+    if str(shtTest.range('A1').value) != 'symbol': ilRulo()
     try:
         if not shtTest.range('Q1').value:
             shtTest.range('A30').options(index=True,header=False).value=options
@@ -381,8 +382,6 @@ while True:
                 if valor[5] == '-':enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
                 else: enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
                 shtTest.range('U'+str(int(valor[0]+1))).value = ''
-
-    if str(shtTest.range('A1').value) != 'symbol': ilRulo()
 
 print(time.strftime("%H:%M:%S"), 'Mercado cerrado.')
   

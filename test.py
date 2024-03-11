@@ -97,9 +97,9 @@ def cargoXplazo(dicc):
     winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
 
 def ilRulo():
-    celda,pesos,dolar = 46,1000,0
+    celda,pesos,dolar = 64,1000,0
     tikers = {'cclCI':['',dolar],'ccl48':['',dolar],'mepCI':['',dolar],'mep48':['',dolar],'arsCIccl':['',pesos],'ars48ccl':['',pesos],'arsCImep':['',pesos],'ars48mep':['',pesos]}
-    for valor in shtTest.range('A46:A153').value:
+    for valor in shtTest.range('A64:A165').value:
         arsM = shtTest.range('AA'+str(celda)).value
         if arsM == None: arsM = 1000
         arsC = arsM
