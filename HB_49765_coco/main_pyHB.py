@@ -270,12 +270,18 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
             except: shtTest.range('V'+str(int(celda+1))).value = int(size)
             shtTest.range('W'+str(int(celda+1))).value -= int(size) * float(precioV)*100
         else:
-            if recompra: shtTest.range('Q'+str(int(celda+1))).value = int(size*por)
             orderV = hb.orders.send_sell_order(symbol[0],symbol[2],float(precioV),int(size*por))
             print(f'Sell {symbol[0]} {symbol[2]} // - {int(size*por)} // a {round(precioV/100,5)}')
             try: shtTest.range('V'+str(int(celda+1))).value -= int(size*por)
             except: shtTest.range('V'+str(int(celda+1))).value = int(size*por)
             shtTest.range('W'+str(int(celda+1))).value -= int(size*por) * round(precioV/100,5)
+
+            if recompra:
+                orderC = hb.orders.send_buy_order(symbol[0],symbol[2],float(precioV*(1-0.01)),int(size*por)) 
+                try: shtTest.range('V'+str(int(celda+1))).value += int(size*por)
+                except: shtTest.range('V'+str(int(celda+1))).value = int(size*por)
+                print(f'Recompra de {symbol[0]} // + {int(size)} // a {precioV*(1-0.01)}')
+                
     shtTest.range('X'+str(int(celda+1))).value=shtTest.range('W'+str(int(celda+1))).value / shtTest.range('V'+str(int(celda+1))).value
     winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
 ############################################ TRAILING STOP ################################################
@@ -292,30 +298,24 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
         ganancia = float(shtTest.range('T1').value)
         if cantidad > stock : cantidad = stock
         if cantidad > bid_size : cantidad = bid_size
-
         if len(nombre) < 2: #TRAILING sobre opciones financieras
             if bid * 100 > costo * (1 + ganancia): # Precio sube activo trailing y sube % ganancia               
-                if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='TRAILING': shtTest.range('T1').value*=1+0.0625
-                else: shtTest.range('W'+str(int(nroCelda+1))).value = 'TRAILING'
+                shtTest.range('W'+str(int(nroCelda+1))).value = 'TRAILING'
                 shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
-            if last * 100 < costo * (1 - 0.025): # Precio baja activo stop y envia orden venta
-                if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP' and bid > last * (1 - 0.025):
-                    print(f'{time.strftime("%H:%M:%S")} STOP %{(1-0.025)}',end=' || ')
-                    shtTest.range('T1').value = 0.025
+            if last * 100 < costo * (1 - ganancia): # Precio baja activo stop y envia orden venta
+                if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP' and bid>last*(1-ganancia):
+                    print(f'{time.strftime("%H:%M:%S")} STOP ',end=' || ')
                     shtTest.range('W'+str(int(nroCelda+1))).value = ''
                     shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
                     enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),cantidad,nroCelda)
                 else: shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'  
-
         else: #TRAILING sobre bonos / letras / ons
             if bid / 100 > costo * (1 + (ganancia/25)): # Precio sube activo trailing y sube % ganancia               
-                if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='TRAILING': shtTest.range('T1').value*= 1+0.0625
-                else: shtTest.range('W'+str(int(nroCelda+1))).value = 'TRAILING'
+                shtTest.range('W'+str(int(nroCelda+1))).value = 'TRAILING'
                 shtTest.range('X'+str(int(nroCelda+1))).value = round(bid / 100,5)
-            if last / 100 < costo * (1 - 0.0015): # Precio baja activo stop y envia orden venta
-                if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='STOP' and (bid/100)>(last/100)*(1-0.001):
-                    print(f'{time.strftime("%H:%M:%S")} STOP %{(1-0.001)}',end=' || ')
-                    shtTest.range('T1').value = 0.025
+            if last / 100 < costo * (1 - 0.0025): # Precio baja activo stop y envia orden venta
+                if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='STOP' and (bid/100)>(last/100)*(1-0.002):
+                    print(f'{time.strftime("%H:%M:%S")} STOP ',end=' || ')
                     shtTest.range('W'+str(int(nroCelda+1))).value = ''
                     shtTest.range('X'+str(int(nroCelda+1))).value = round(bid / 100,5)
                     recompra = True
