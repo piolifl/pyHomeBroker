@@ -5,7 +5,7 @@ from datetime import date, timedelta
 import time
 import winsound
 
-wb = xw.Book('D:\pyHomeBroker\epgb_pyHB.xlsx')
+wb = xw.Book('.\\epgb_pyHB.xlsx')
 shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
 shtTest.range('Q1').value = 'PRC'
@@ -133,8 +133,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     precio = shtTest.range(str(price)).value + masValor
     precioV = precio - (masValor * 2)
     shtTest.range('Q'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
-    if not shtTest.range('V'+str(int(celda+1))).value: 
-        shtTest.range('V'+str(int(celda+1))+':'+'X'+str(int(celda+1))).value = 0
+    if not shtTest.range('V'+str(int(celda+1))).value: shtTest.range('V'+str(int(celda+1))+':'+'X'+str(int(celda+1))).value = 0
     if tipo.lower() == 'buy': 
         if len(symbol) < 2:
             #orderC = hb.orders.send_buy_order(symbol[0],'24hs', round(precio,3),int(size))
@@ -143,9 +142,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
             except: shtTest.range('V'+str(int(celda+1))).value = int(size)
             shtTest.range('W'+str(int(celda+1))).value += int(size) * precio*100
         else:
-            if shtTest.range('S1').value == 'AUT': 
-                precio = (shtTest.range(str(price)).value + masValor)*(1-(ganancia*0.5))
-                shtTest.range('S1').value = ''
+            if str(shtTest.range('S1').value)=='AUT': precio=(shtTest.range(str(price)).value + masValor)*(1-(ganancia*0.5))
             #orderC = hb.orders.send_buy_order(symbol[0],symbol[2],round(precio,3),int(size*por))
             print(f'Buy {symbol[0]} {symbol[2]} // + {int(size*por)} // a {round(precio/100,2)}')
             try: shtTest.range('V'+str(int(celda+1))).value += int(size*por)
@@ -165,6 +162,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
             except: shtTest.range('V'+str(int(celda+1))).value = int(size*por)
             shtTest.range('W'+str(int(celda+1))).value -= int(size*por) * precioV/100
     shtTest.range('U1').value = 0
+    shtTest.range('S1').value = ''
     shtTest.range('X'+str(int(celda+1))).value=shtTest.range('W'+str(int(celda+1))).value / shtTest.range('V'+str(int(celda+1))).value
     winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
 ############################################ TRAILING STOP ################################################
