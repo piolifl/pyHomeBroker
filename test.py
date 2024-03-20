@@ -225,7 +225,6 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
 ########################################### CARGA BUCLE EN EXCEL ##########################################
 while True:
     time.sleep(1)
-    if '16:23:00' < time.strftime("%H:%M:%S") < '16:30:00': shtTest.range('R1').value = 'CAUCION'
 
     for valor in shtTest.range('P22:V59').value:
         if not shtTest.range('R1').value: # Activa TRAILING STOP __________________________________________
@@ -240,7 +239,6 @@ while True:
             try:   enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
             except: 
                 shtTest.range('R1').value = ''
-                shtTest.range('V'+str(int(valor[0]+1))).value = ''
                 print('Error no se ejecuta Recompra Automatica. Corregir valor en celda Y')
 
         if valor[1]: # COMPRAR precio BID _________________________________________________________________

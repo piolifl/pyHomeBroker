@@ -336,7 +336,6 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
 while True:
     time.sleep(2)
     if time.strftime("%H:%M:%S") > '17:03:00': break 
-    if '16:23:00' < time.strftime("%H:%M:%S") < '16:30:00': shtTest.range('R1').value = 'CAUCION'
     if str(shtTest.range('A1').value) != 'symbol': ilRulo()
     try:
         if not shtTest.range('Q1').value:
@@ -359,7 +358,6 @@ while True:
             try:   enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
             except: 
                 shtTest.range('R1').value = ''
-                shtTest.range('V'+str(int(valor[0]+1))).value = ''
                 print('Error no se ejecuta Recompra Automatica. Corregir valor en celda Y')
         if valor[1]: # COMPRAR precio BID _________________________________________________________________
             try:   enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0])
@@ -394,7 +392,8 @@ while True:
                 shtTest.range('U'+str(int(valor[0]+1))).value = ''
                 print('Error, al cancelar orden.')
             if valor[5] == '-' or valor[5] == '+': # buy//sell usando puntas ______________________________
-                try: cantidad = int(shtTest.range('Y'+str(int(valor[0]+1))).value)
+                try: 
+                    cantidad = int(shtTest.range('V'+str(int(valor[0]+1))).value)
                 except: cantidad = 1
                 if valor[5] == '-':enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
                 else: enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
