@@ -13,7 +13,8 @@ wb = xw.Book('D:\\pyHomeBroker\\epgb_pyHB.xlsx')
 shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
 shtTest.range('Q1').value = 'PRC'
-shtTest.range('R1').value ='TRAILING'
+shtTest.range('R1').value ='TRAIL'
+shtTest.range('S1').value ='STOP'
 shtTest.range('T1').value = 0.002
 shtTest.range('U1').value = 5
 shtTest.range('V1').value = 0
@@ -215,6 +216,7 @@ def ilRulo():
     celda,pesos,dolar = 64,1000,0
     tikers = {'cclCI':['',dolar],'ccl48':['',dolar],'mepCI':['',dolar],'mep48':['',dolar],'arsCIccl':['',pesos],'ars48ccl':['',pesos],'arsCImep':['',pesos],'ars48mep':['',pesos]}
     for valor in shtTest.range('A64:A165').value:
+        if not valor: continue
         arsM = shtTest.range('AA'+str(celda)).value
         if arsM == None: arsM = 1000
         arsC = arsM
@@ -248,7 +250,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     if not shtTest.range('V'+str(int(celda+1))).value: shtTest.range('V'+str(int(celda+1))+':'+'X'+str(int(celda+1))).value = 0
     if tipo.lower() == 'buy': 
         if len(symbol) < 2:
-            if str(shtTest.range('R1').value) == 'RECOMPRA': 
+            if str(shtTest.range('R1').value) == 'REC': 
                 if not menosRecompra: 
                     precio -= 1
                     shtTest.range('U1').value = 10
@@ -261,7 +263,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
             try: shtTest.range('W'+str(int(celda+1))).value += int(size) * precio*100
             except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio*100
         else:
-            if str(shtTest.range('R1').value) == 'RECOMPRA': 
+            if str(shtTest.range('R1').value) == 'REC': 
                 if not menosRecompra: 
                     precio -= 100
                     shtTest.range('U1').value = 10
@@ -311,26 +313,30 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
             if bid * 100 > costo * (1 + (ganancia*25)): # Precio sube activo trailing y sube % ganancia 
                 shtTest.range('W'+str(int(nroCelda+1))).value = 'TRAILING'
                 shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
-            if last * 100 < costo * (1 - (ganancia*10)): # Precio baja activo stop y envia orden venta
-                if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP' and bid>last*(1-(ganancia*10)):
-                    print(f'{time.strftime("%H:%M:%S")} STOP ',end=' || ')
-                    shtTest.range('R1').value = 'RECOMPRA'
-                    shtTest.range('W'+str(int(nroCelda+1))).value = ''
-                    shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
-                    enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),cantidad,nroCelda)
-                else: shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'  
+            else: shtTest.range('W'+str(int(nroCelda+1))).value = ''
+            if not shtTest.range('S1').value:
+                if last * 100 < costo * (1 - (ganancia*10)): # Precio baja activo stop y envia orden venta
+                    if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP' and bid>last*(1-(ganancia*10)):
+                        print(f'{time.strftime("%H:%M:%S")} STOP ',end=' || ')
+                        shtTest.range('R1').value = 'REC'
+                        shtTest.range('W'+str(int(nroCelda+1))).value = ''
+                        shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
+                        enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),cantidad,nroCelda)
+                    else: shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'  
         else: #TRAILING sobre bonos / letras / ons
             if bid / 100 > costo * (1 + ganancia): # Precio sube activo trailing y sube % ganancia               
                 shtTest.range('W'+str(int(nroCelda+1))).value = 'TRAILING'
                 shtTest.range('X'+str(int(nroCelda+1))).value = round(bid / 100,5)
-            if last / 100 < costo * (1 - ganancia): # Precio baja activo stop y envia orden venta
-                if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='STOP' and (bid/100)>(last/100)*(1-ganancia):
-                    print(f'{time.strftime("%H:%M:%S")} STOP ',end=' || ')
-                    shtTest.range('R1').value = 'RECOMPRA'
-                    shtTest.range('W'+str(int(nroCelda+1))).value = ''
-                    shtTest.range('X'+str(int(nroCelda+1))).value = round(bid / 100,5)
-                    enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),cantidad,nroCelda)
-                else: shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP' 
+            else: shtTest.range('W'+str(int(nroCelda+1))).value = ''
+            if not shtTest.range('S1').value:
+                if last / 100 < costo * (1 - ganancia): # Precio baja activo stop y envia orden venta
+                    if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='STOP' and (bid/100)>(last/100)*(1-ganancia):
+                        print(f'{time.strftime("%H:%M:%S")} STOP ',end=' || ')
+                        shtTest.range('R1').value = 'REC'
+                        shtTest.range('W'+str(int(nroCelda+1))).value = ''
+                        shtTest.range('X'+str(int(nroCelda+1))).value = round(bid / 100,5)
+                        enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),cantidad,nroCelda)
+                    else: shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP' 
     except: pass
 ########################################### CARGA BUCLE EN EXCEL ##########################################
 while True:
@@ -354,7 +360,7 @@ while True:
                 if not shtTest.range('Y'+str(int(valor[0]+1))).value: cantidad = 1
                 else: cantidad = int(shtTest.range('Y'+str(int(valor[0]+1))).value)
                 trailingStop('A'+str((int(valor[0])+1)),cantidad,valor[0])
-        if str(shtTest.range('R1').value).upper() == 'RECOMPRA': # Activa RECOMPRA AUTOMATICA _____________
+        if str(shtTest.range('R1').value).upper() == 'REC': # Activa RECOMPRA AUTOMATICA _____________
             try:   enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
             except: 
                 shtTest.range('R1').value = ''
