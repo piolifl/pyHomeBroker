@@ -403,12 +403,14 @@ while True:
                 else: cantidad = int(shtTest.range('Y'+str(int(valor[0]+1))).value)
                 trailingStop('A'+str((int(valor[0])+1)),cantidad,valor[0])
         if str(shtTest.range('R1').value).upper() == 'REC': # Activa RECOMPRA AUTOMATICA _____________
-            try:   enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
+            try:   
+                enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
+                shtTest.range('Q'+str(int(valor[0]+1))).value = 1
             except: 
                 winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
                 shtTest.range('R1').value = ''
                 print('Error RECOMPRA Automatica.')
-            shtTest.range('Q'+str(int(valor[0]+1))).value = 1
+            
 
     if time.strftime("%H:%M:%S") > '17:03:00': break 
     if str(shtTest.range('A1').value) != 'symbol': ilRulo()
