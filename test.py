@@ -239,22 +239,26 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
 while True:
     for valor in shtTest.range('P22:V59').value:
         if valor[1]: # COMPRAR precio BID _________________________________________________________________
-            try:   enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0])
+            try:   
+                enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0])
             except: 
                 shtTest.range('Q'+str(int(valor[0]+1))).value = ''
                 winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
         if valor[2]: # COMPRAR precio ASK _______________________________________________________________
-            try:  enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[2],valor[0])
+            try: 
+                enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[2],valor[0])
             except: 
                 shtTest.range('R'+str(int(valor[0]+1))).value = ''
                 winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
         if valor[3]: # VENDER precio BID ________________________________________________________________
-            try:  enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[3],valor[0])
+            try:  
+                enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[3],valor[0])
             except: 
                 shtTest.range('S'+str(int(valor[0]+1))).value = ''
                 winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
         if valor[4]: # VENDER precio ASK ________________________________________________________________
-            try:  enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[4],valor[0])
+            try:  
+                enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[4],valor[0])
             except: 
                 shtTest.range('T'+str(int(valor[0]+1))).value = ''
                 winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
@@ -278,30 +282,39 @@ while True:
                 print('Error, al cancelar orden.')
 
             if valor[5] == '-' or valor[5] == '+': # buy//sell usando puntas ______________________________
-                try: cantidad = int(shtTest.range('Y'+str(int(valor[0]+1))).value)
-                except: cantidad = 1
-                if valor[5] == '-':enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
-                else: enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
+                try: 
+                    cantidad = int(shtTest.range('Y'+str(int(valor[0]+1))).value)
+                except: 
+                    cantidad = 1
+                if valor[5] == '-':
+                    enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
+                else: 
+                    enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
                 shtTest.range('U'+str(int(valor[0]+1))).value = ''
 
         if not shtTest.range('R1').value: # Activa TRAILING  __________________________________________
-            try: stock = int(valor[6])
-            except: stock = 0
+            try: 
+                stock = int(valor[6])
+            except: 
+                stock = 0
             if stock > 0:
-                if not shtTest.range('Y'+str(int(valor[0]+1))).value: cantidad = 1
-                else: cantidad = int(shtTest.range('Y'+str(int(valor[0]+1))).value)
+                if not shtTest.range('Y'+str(int(valor[0]+1))).value: 
+                    cantidad = 1
+                else: 
+                    cantidad = int(shtTest.range('Y'+str(int(valor[0]+1))).value)
                 trailingStop('A'+str((int(valor[0])+1)),cantidad,valor[0])
 
         if str(shtTest.range('R1').value).upper() == 'REC': # Activa RECOMPRA AUTOMATICA _____________
-            try:   enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
+            try:   
+                enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
             except: 
                 winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
                 shtTest.range('R1').value = ''
                 print('Error RECOMPRA Automatica.')
-
-
-    '''if time.strftime("%H:%M:%S") > '17:03:00': break 
+            shtTest.range('Q'+str(int(valor[0]+1))).value = 1
+            
     if str(shtTest.range('A1').value) != 'symbol': ilRulo()
+    '''if time.strftime("%H:%M:%S") > '17:03:00': break 
     try:
         if not shtTest.range('Q1').value:
             shtTest.range('A30').options(index=True,header=False).value=options
@@ -313,6 +326,5 @@ while True:
         winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
         print("_____ error al cargar datos en Excel !!! ______ ",time.strftime("%H:%M:%S"))    
 '''
-print(time.strftime("%H:%M:%S"), 'Mercado cerrado.')
-  
+
 #[ ]><   \n

@@ -132,7 +132,7 @@ hb.auth.login(dni=str(os.environ.get('dni')),
 getGrupos()
 
 #-------------------------------------------------------------------------------------------------------
-print(time.strftime("%H:%M:%S"),f"Logueo correcto en cuenta: {int(os.environ.get('account_id'))} broker: {os.environ.get('name')}")
+print(time.strftime("%H:%M:%S"),f"Logueo correcto: {os.environ.get('name')} cuenta: {int(os.environ.get('account_id'))}")
 
 def namesArs(nombre,plazo): 
     if nombre[:2] == 'BA': return 'BA37D'+plazo
@@ -408,8 +408,8 @@ while True:
                 winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
                 shtTest.range('R1').value = ''
                 print('Error RECOMPRA Automatica.')
+            shtTest.range('Q'+str(int(valor[0]+1))).value = 1
 
-    #time.sleep(2)
     if time.strftime("%H:%M:%S") > '17:03:00': break 
     if str(shtTest.range('A1').value) != 'symbol': ilRulo()
     try:
