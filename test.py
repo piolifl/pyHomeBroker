@@ -177,7 +177,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                 print(f'Sell {symbol[0]} // cantidad: - {int(size)} // precio: {precio}')
                 try: shtTest.range('V'+str(int(celda+1))).value -= int(size)
                 except: shtTest.range('V'+str(int(celda+1))).value = int(size)
-                try: shtTest.range('W'+str(int(celda+1))).value -= int(size) * precio*100
+                try: shtTest.range('W'+str(int(celda+1))).value -=int(size) * precio*100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio*100
             else:
                 #orderV = hb.orders.send_sell_order(symbol[0],symbol[2], float(precio), int(size*por))
