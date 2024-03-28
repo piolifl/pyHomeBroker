@@ -48,7 +48,7 @@ def getAccionesList():
 
 i = 1
 fechas = []
-while i < 8:
+while i < 11:
     fecha = date.today() + timedelta(days=i)
     fechas.extend([fecha])
     i += 1
@@ -98,10 +98,10 @@ def on_repos(online, quotes):
 #-------------------------------------------------------------------------------------------------------
 def getGrupos():
     hb.online.connect()
-    hb.online.subscribe_options()
-    hb.online.subscribe_securities('bluechips', '48hs')    # Acciones del Panel lider - 48hs
+    #hb.online.subscribe_options()
+    #hb.online.subscribe_securities('bluechips', '48hs')    # Acciones del Panel lider - 48hs
     # hb.online.subscribe_securities('bluechips', '24hs')   # Acciones del Panel lider - 24hs
-    hb.online.subscribe_securities('bluechips', 'SPOT')    # Acciones del Panel lider - spot
+    #hb.online.subscribe_securities('bluechips', 'SPOT')    # Acciones del Panel lider - spot
     hb.online.subscribe_securities('government_bonds', '48hs')  # Bonos - 48hs
     # hb.online.subscribe_securities('government_bonds', '24hs') # Bonos - 24hs
     hb.online.subscribe_securities('government_bonds', 'SPOT')  # Bonos - spot
@@ -120,7 +120,7 @@ def getGrupos():
     hb.online.subscribe_repos()
 
 hb = HomeBroker(int(os.environ.get('broker')),
-                on_options=on_options,
+                #on_options=on_options,
                 on_securities=on_securities,
                 on_repos=on_repos)
 
@@ -351,7 +351,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
     except: pass
 ########################################### CARGA BUCLE EN EXCEL ##########################################
 while True:
-    for valor in shtTest.range('P22:V59').value:
+    for valor in shtTest.range('P22:V29').value:
         if valor[1]: # COMPRAR precio BID _________________________________________________________________
             try:   enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0])
             except: 
@@ -419,7 +419,7 @@ while True:
     if str(shtTest.range('A1').value) != 'symbol': ilRulo()
     try:
         if not shtTest.range('Q1').value:
-            shtTest.range('A30').options(index=True,header=False).value=options
+            #shtTest.range('A30').options(index=True,header=False).value=options
             shtTest.range('A'+str(listLength)).options(index=True,header=False).value = everything
             shtTest.range('AE2').options(index=True, header=False).value = cauciones
        #shtTest.range('A26').options(index=True, header=False).value = everything

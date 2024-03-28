@@ -48,7 +48,7 @@ def getAccionesList():
 
 i = 1
 fechas = []
-while i < 8:
+while i < 11:
     fecha = date.today() + timedelta(days=i)
     fechas.extend([fecha])
     i += 1
