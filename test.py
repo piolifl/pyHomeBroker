@@ -24,16 +24,18 @@ print(time.strftime("%H:%M:%S"),"Inicando TESTER ...")
 def namesArs(nombre,plazo): 
     if nombre[:2] == 'BA': return 'BA37D'+plazo
     elif nombre[:2] == 'BP': return 'BPOA7'+plazo
+    elif nombre[:2] == 'KO': return 'KO'+plazo
     elif (nombre[:1] == 'X' or nombre[:1] == 'S') and (nombre[3:4] == 'D' or nombre[3:4] == 'C'):
         if (nombre[1:2] == 'F' or nombre[1:2] == 'Y'): return nombre[:1]+'20'+nombre[1:3]+plazo
         else: return nombre[:1]+'18'+nombre[1:3]+plazo
-    elif (nombre[:2] == 'AL' or nombre[:2] == 'GD' or nombre[:2] == 'AE') and (nombre[4:5] == 'D' or nombre[4:5] == 'C'):
-        return nombre[:4]+plazo
-    else: return nombre[:4]+'O'+plazo
+    elif (nombre[:2] == 'MR' or nombre[:2] == 'CL') and (nombre[4:5] == 'D' or nombre[4:5] == 'C'):
+        return nombre[:4]+'O'+plazo 
+    else: return nombre[:4]+plazo
 
 def namesCcl(nombre,plazo): 
     if nombre[:2] == 'BA': return 'BA7DC'+plazo
     elif nombre[:2] == 'BP': return 'BPA7C'+plazo
+    elif nombre[:2] == 'KO': return 'KOC'+plazo
     elif (nombre[:1] == 'X' or nombre[:1] == 'S') :
         if nombre[3:4] == 'D': return nombre[:3]+'C'+plazo
         else: return nombre[:1]+nombre[3:5]+'C'+plazo
@@ -44,6 +46,7 @@ def namesCcl(nombre,plazo):
 def namesMep(nombre,plazo): 
     if nombre[:2] == 'BA': return 'BA7DD'+plazo
     elif nombre[:2] == 'BP': return 'BPA7D'+plazo
+    elif nombre[:2] == 'KO': return 'KOD'+plazo
     elif (nombre[:1] == 'X' or nombre[:1] == 'S') :
         if nombre[3:4] == 'C': return nombre[:3]+'D'+plazo
         else: return nombre[:1]+nombre[3:5]+'D'+plazo
@@ -102,7 +105,7 @@ def cargoXplazo(dicc):
 def ilRulo():
     celda,pesos,dolar = 64,1000,0
     tikers = {'cclCI':['',dolar],'ccl48':['',dolar],'mepCI':['',dolar],'mep48':['',dolar],'arsCIccl':['',pesos],'ars48ccl':['',pesos],'arsCImep':['',pesos],'ars48mep':['',pesos]}
-    for valor in shtTest.range('A64:A165').value:
+    for valor in shtTest.range('A64:A201').value:
         if not valor: continue
         arsM = shtTest.range('AA'+str(celda)).value
         if arsM == None: arsM = 1000
@@ -110,6 +113,22 @@ def ilRulo():
         ccl = shtTest.range('Z'+str(celda)).value
         if ccl == None: ccl = 0
         mep = ccl
+        if str(valor[:2]).upper() == 'KO':
+            if str(valor[5:6]).lower() == 's' or str(valor[6:7]).lower() == 's':
+                if str(valor[2:3]).upper() == 'C': 
+                    if arsC > tikers['arsCIccl'][1]: tikers['arsCIccl'] = [namesArs(valor[:2],' - spot'),arsC]
+                    if ccl > tikers['cclCI'][1]: tikers['cclCI'] = [valor,ccl]
+                if str(valor[2:3]).upper() == 'D':
+                    if arsM > tikers['arsCImep'][1]: tikers['arsCImep'] = [namesArs(valor[:2],' - spot'),arsM]
+                    if mep > tikers['mepCI'][1]: tikers['mepCI'] = [valor,mep]
+            if valor[5:7] == '48' or valor[6:8]=='48':
+                if str(valor[2:3]).upper() == 'C': 
+                    if arsC > tikers['ars48ccl'][1]: tikers['ars48ccl'] = [namesArs(valor[:2],' - 48hs'),arsC]
+                    if ccl > tikers['ccl48'][1]: tikers['ccl48'] = [valor,ccl]
+                if str(valor[2:3]).upper() == 'D': 
+                    if arsM > tikers['ars48mep'][1]: tikers['ars48mep'] = [namesArs(valor[:2],' - 48hs'),arsM]
+                    if mep > tikers['mep48'][1]: tikers['mep48'] = [valor,mep]
+
         if (valor[7:8] == 's' or valor[8:9] == 's'):
             if valor[3:4] == 'C' or valor[4:5] == 'C': 
                 if arsC > tikers['arsCIccl'][1]: tikers['arsCIccl'] = [namesArs(valor[:5],' - spot'),arsC]
