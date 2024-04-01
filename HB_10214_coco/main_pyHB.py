@@ -137,6 +137,7 @@ print(time.strftime("%H:%M:%S"),f"Logueo correcto: {os.environ.get('name')} cuen
 def namesArs(nombre,plazo): 
     if nombre[:2] == 'BA': return 'BA37D'+plazo
     elif nombre[:2] == 'BP': return 'BPOA7'+plazo
+    elif nombre[:2] == 'KO': return 'KO'+plazo
     elif (nombre[:1] == 'X' or nombre[:1] == 'S') and (nombre[3:4] == 'D' or nombre[3:4] == 'C'):
         if (nombre[1:2] == 'F' or nombre[1:2] == 'Y'): return nombre[:1]+'20'+nombre[1:3]+plazo
         else: return nombre[:1]+'18'+nombre[1:3]+plazo
@@ -147,21 +148,20 @@ def namesArs(nombre,plazo):
 def namesCcl(nombre,plazo): 
     if nombre[:2] == 'BA': return 'BA7DC'+plazo
     elif nombre[:2] == 'BP': return 'BPA7C'+plazo
+    elif nombre[:2] == 'KO': return 'KOC'+plazo
     elif (nombre[:1] == 'X' or nombre[:1] == 'S') :
         if nombre[3:4] == 'D': return nombre[:3]+'C'+plazo
         else: return nombre[:1]+nombre[3:5]+'C'+plazo
-    elif (nombre[:2] == 'AL' or nombre[:2] == 'GD' or nombre[:2] == 'AE') and (nombre[4:5] == 'D' or nombre[4:5] == ' '):
-        return nombre[:4]+'C'+plazo
     else: return nombre[:4]+'C'+plazo
 
 def namesMep(nombre,plazo): 
     if nombre[:2] == 'BA': return 'BA7DD'+plazo
     elif nombre[:2] == 'BP': return 'BPA7D'+plazo
+    elif nombre[:2] == 'KO': return 'KOD'+plazo
     elif (nombre[:1] == 'X' or nombre[:1] == 'S') :
         if nombre[3:4] == 'C': return nombre[:3]+'D'+plazo
         else: return nombre[:1]+nombre[3:5]+'D'+plazo
-    elif (nombre[:2] == 'AL' or nombre[:2] == 'GD' or nombre[:2] == 'AE') and (nombre[4:5] == 'D' or nombre[4:5] == ' '):
-        return nombre[:4]+'D'+plazo
+    #elif (nombre[:2] == 'AL' or nombre[:2] == 'GD' or nombre[:2] == 'AE') and (nombre[4:5] == 'D' or nombre[4:5] == ' '): return nombre[:4]+'D'+plazo
     else: return nombre[:4]+'D'+plazo
 
 def cargoXplazo(dicc):
@@ -186,7 +186,7 @@ def cargoXplazo(dicc):
         shtTest.range('A17').value = 'AL30D - 48hs'
         shtTest.range('A18').value = dicc['mep48'][0] # mep
         shtTest.range('A19').value = namesMep(dicc['ccl48'][0],' - 48hs')
-        shtTest.range('A20').value = dicc['ccl48'][0] # ccl
+        shtTest.range('A20').value = namesCcl(dicc['ccl48'][0],' - 48hs')
         shtTest.range('A21').value = namesCcl(dicc['mep48'][0],' - 48hs')
     else:
         # Carga el mejor pagador de MEP CI  
@@ -208,54 +208,52 @@ def cargoXplazo(dicc):
         shtTest.range('A17').value = 'AL30D - spot'
         shtTest.range('A18').value = dicc['mepCI'][0] # mep
         shtTest.range('A19').value = namesMep(dicc['cclCI'][0],' - spot')
-        shtTest.range('A20').value = dicc['cclCI'][0] # ccl
+        shtTest.range('A20').value = namesCcl(dicc['cclCI'][0],' - spot')
         shtTest.range('A21').value = namesCcl(dicc['mepCI'][0],' - spot')
     winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
 
 def ilRulo():
-    celda,pesos,dolar = 64,1000,0
+    celda,pesos,dolar = 64,1000,0.01
     tikers = {'cclCI':['',dolar],'ccl48':['',dolar],'mepCI':['',dolar],'mep48':['',dolar],'arsCIccl':['',pesos],'ars48ccl':['',pesos],'arsCImep':['',pesos],'ars48mep':['',pesos]}
-    for valor in shtTest.range('A64:A201').value:
+    
+    for valor in shtTest.range('A64:A93').value:
         if not valor: continue
-        arsM = shtTest.range('AA'+str(celda)).value
-        if arsM == None: arsM = 1000
-        arsC = arsM
-        ccl = shtTest.range('Z'+str(celda)).value
-        if ccl == None: ccl = 0
-        mep = ccl
-
-        if str(valor[:2]).upper() == 'KO':
-            if str(valor[5:6]).lower() == 's' or str(valor[6:7]).lower() == 's':
-                if str(valor[2:3]).upper() == 'C': 
-                    if arsC > tikers['arsCIccl'][1]: tikers['arsCIccl'] = [namesArs(valor[:2],' - spot'),arsC]
-                    if ccl > tikers['cclCI'][1]: tikers['cclCI'] = [valor,ccl]
-                if str(valor[2:3]).upper() == 'D':
-                    if arsM > tikers['arsCImep'][1]: tikers['arsCImep'] = [namesArs(valor[:2],' - spot'),arsM]
-                    if mep > tikers['mepCI'][1]: tikers['mepCI'] = [valor,mep]
-            if valor[5:7] == '48' or valor[6:8]=='48':
-                if str(valor[2:3]).upper() == 'C': 
-                    if arsC > tikers['ars48ccl'][1]: tikers['ars48ccl'] = [namesArs(valor[:2],' - 48hs'),arsC]
-                    if ccl > tikers['ccl48'][1]: tikers['ccl48'] = [valor,ccl]
-                if str(valor[2:3]).upper() == 'D': 
-                    if arsM > tikers['ars48mep'][1]: tikers['ars48mep'] = [namesArs(valor[:2],' - 48hs'),arsM]
-                    if mep > tikers['mep48'][1]: tikers['mep48'] = [valor,mep]
-
-        if (valor[7:8] == 's' or valor[8:9] == 's'):
-            if valor[3:4] == 'C' or valor[4:5] == 'C': 
-                if arsC > tikers['arsCIccl'][1]: tikers['arsCIccl'] = [namesArs(valor[:5],' - spot'),arsC]
+        name = str(valor).split()
+        if str(name[2]).lower() == 'spot':
+            if str(name[0][-1:]).upper()=='C':
+                arsC = shtTest.range('AA'+str(celda)).value
+                if not arsC: arsC = 1000
+                if arsC > tikers['arsCIccl'][1]: tikers['arsCIccl'] = [namesArs(name[0],' - spot'),arsC]
+                ccl = shtTest.range('Z'+str(celda)).value
+                if not ccl: ccl = 0.01
                 if ccl > tikers['cclCI'][1]: tikers['cclCI'] = [valor,ccl]
-            if valor[3:4] == 'D' or valor[4:5] == 'D':
-                if arsM > tikers['arsCImep'][1]: tikers['arsCImep'] = [namesArs(valor[:5],' - spot'),arsM]
+            if str(name[0][-1:]).upper()=='D': 
+                arsM = shtTest.range('AA'+str(celda)).value
+                if not arsM: arsM = 1000
+                if arsM > tikers['arsCImep'][1]: tikers['arsCImep'] = [namesArs(name[0],' - spot'),arsM]
+                mep = shtTest.range('Z'+str(celda)).value
+                if not mep: mep = 0.01
                 if mep > tikers['mepCI'][1]: tikers['mepCI'] = [valor,mep]
-        if (valor[7:9]=='48' or valor[8:10]=='48'):
-            if valor[3:4] == 'C' or valor[4:5] == 'C': 
-                if arsC > tikers['ars48ccl'][1]: tikers['ars48ccl'] = [namesArs(valor[:5],' - 48hs'),arsC]
+
+        if str(name[2]) == '48hs':
+            if str(name[0][-1:]).upper()=='C':
+                arsC = shtTest.range('AA'+str(celda)).value
+                if not arsC: arsC = 1000
+                if arsC > tikers['ars48ccl'][1]: tikers['ars48ccl'] = [namesArs(name[0],' - 48hs'),arsC]
+                ccl = shtTest.range('Z'+str(celda)).value
+                if not ccl: ccl = 0.01
                 if ccl > tikers['ccl48'][1]: tikers['ccl48'] = [valor,ccl]
-            if valor[3:4] == 'D' or valor[4:5] == 'D': 
-                if arsM > tikers['ars48mep'][1]: tikers['ars48mep'] = [namesArs(valor[:5],' - 48hs'),arsM]
+                
+            if str(name[0][-1:]).upper()=='D': 
+                arsM = shtTest.range('AA'+str(celda)).value
+                if not arsM: arsM = 1000
+                if arsM > tikers['ars48mep'][1]: tikers['ars48mep'] = [namesArs(name[0],' - 48hs'),arsM]
+                mep = shtTest.range('Z'+str(celda)).value
+                if not mep: mep = 0.01
                 if mep > tikers['mep48'][1]: tikers['mep48'] = [valor,mep]
 
         celda +=1
+    #print(tikers)
     cargoXplazo(tikers)
 
 ############################################ ENVIAR ORDENES ################################################    
