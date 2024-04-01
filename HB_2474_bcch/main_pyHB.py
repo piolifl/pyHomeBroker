@@ -165,58 +165,46 @@ def namesMep(nombre,plazo):
     else: return nombre[:4]+'D'+plazo
 
 def cargoXplazo(dicc):
+    mejorMep = dicc['mepCI'][0]
+    if mejorMep == 'AL30D - spot': shtTest.range('A2').value = ''
+    else: shtTest.range('A2').value = mejorMep
+    shtTest.range('A3').value = 'AL30D - spot'
+    shtTest.range('A4').value = 'AL30 - spot'
+    shtTest.range('A5').value = namesArs(dicc['mepCI'][0],' - spot')
+
+    mejorMep = dicc['mep48'][0]
+    if mejorMep == 'AL30D - 48hs': shtTest.range('A6').value = ''
+    else: shtTest.range('A6').value = mejorMep
+    shtTest.range('A7').value = 'AL30D - 48hs'
+    shtTest.range('A8').value = 'AL30 - 48hs'
+    shtTest.range('A9').value = namesArs(dicc['mep48'][0],' - 48hs')
+    
+    shtTest.range('A10').value = dicc['mepCI'][0]
+    shtTest.range('A11').value = namesMep(dicc['arsCImep'][0],' - spot')
+    shtTest.range('A12').value = dicc['arsCImep'][0]
+    shtTest.range('A13').value = namesArs(dicc['mepCI'][0],' - spot')
+    shtTest.range('A14').value = dicc['mep48'][0]
+    shtTest.range('A15').value = namesMep(dicc['ars48mep'][0],' - 48hs')
+    shtTest.range('A16').value = dicc['ars48mep'][0]
+    shtTest.range('A17').value = namesArs(dicc['mep48'][0],' - 48hs')
+
+    shtTest.range('A18').value = dicc['mepCI'][0]
+    shtTest.range('A19').value = namesMep(dicc['cclCI'][0],' - spot')
+    shtTest.range('A20').value = dicc['cclCI'][0]
+    shtTest.range('A21').value = namesCcl(dicc['mepCI'][0],' - spot')
+    shtTest.range('A22').value = dicc['mep48'][0]
+    shtTest.range('A23').value = namesMep(dicc['ccl48'][0],' - 48hs')
+    shtTest.range('A24').value = dicc['ccl48'][0]
+    shtTest.range('A25').value = namesCcl(dicc['mep48'][0],' - 48hs')
+
     shtTest.range('A1').value = 'symbol'
-    if time.strftime("%H:%M:%S") > '16:26:00':
-        # Carga el mejor pagador de MEP 48hs  
-        shtTest.range('A2').value = dicc['mep48'][0]
-        shtTest.range('A3').value = 'AL30D - 48hs'
-        shtTest.range('A4').value = 'AL30 - 48hs'
-        shtTest.range('A5').value = namesArs(dicc['mep48'][0],' - 48hs')# Ticker en ARS para reiniciar rulo en 48hs
-        shtTest.range('A6').value = dicc['mep48'][0]
-        shtTest.range('A7').value = 'GD30D - 48hs'
-        shtTest.range('A8').value = 'GD30 - 48hs'
-        shtTest.range('A9').value = namesArs(dicc['mep48'][0],' - 48hs')# Ticker en ARS para reiniciar rulo en 48hs
-        shtTest.range('A10').value = dicc['mep48'][0]
-        shtTest.range('A11').value = namesMep(dicc['ars48mep'][0],' - 48hs') #  mep
-        shtTest.range('A12').value = dicc['ars48mep'][0] #  ars
-        shtTest.range('A13').value = namesArs(dicc['mep48'][0],' - 48hs')# Ticker en ARS para reiniciar rulo en 48hs
-        shtTest.range('A14').value = 'AL30C - 48hs'
-        shtTest.range('A15').value = 'GD30C - 48hs'
-        shtTest.range('A16').value = 'GD30D - 48hs'
-        shtTest.range('A17').value = 'AL30D - 48hs'
-        shtTest.range('A18').value = dicc['mep48'][0] # mep
-        shtTest.range('A19').value = namesMep(dicc['ccl48'][0],' - 48hs')
-        shtTest.range('A20').value = namesCcl(dicc['ccl48'][0],' - 48hs')
-        shtTest.range('A21').value = namesCcl(dicc['mep48'][0],' - 48hs')
-    else:
-        # Carga el mejor pagador de MEP CI  
-        shtTest.range('A2').value = dicc['mepCI'][0]
-        shtTest.range('A3').value = 'AL30D - spot'
-        shtTest.range('A4').value = 'AL30 - spot'
-        shtTest.range('A5').value = namesArs(dicc['mepCI'][0],' - spot')
-        shtTest.range('A6').value = dicc['mepCI'][0]
-        shtTest.range('A7').value = 'GD30D - spot'
-        shtTest.range('A8').value = 'GD30 - spot'
-        shtTest.range('A9').value = namesArs(dicc['mepCI'][0],' - spot')
-        shtTest.range('A10').value = dicc['mepCI'][0]
-        shtTest.range('A11').value = namesMep(dicc['arsCImep'][0],' - spot')
-        shtTest.range('A12').value = dicc['arsCImep'][0]
-        shtTest.range('A13').value = namesArs(dicc['mepCI'][0],' - spot')
-        shtTest.range('A14').value = 'AL30C - spot'
-        shtTest.range('A15').value = 'GD30C - spot'
-        shtTest.range('A16').value = 'GD30D - spot'
-        shtTest.range('A17').value = 'AL30D - spot'
-        shtTest.range('A18').value = dicc['mepCI'][0] # mep
-        shtTest.range('A19').value = namesMep(dicc['cclCI'][0],' - spot')
-        shtTest.range('A20').value = namesCcl(dicc['cclCI'][0],' - spot')
-        shtTest.range('A21').value = namesCcl(dicc['mepCI'][0],' - spot')
     winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
 
 def ilRulo():
     celda,pesos,dolar = 64,1000,0.01
     tikers = {'cclCI':['',dolar],'ccl48':['',dolar],'mepCI':['',dolar],'mep48':['',dolar],'arsCIccl':['',pesos],'ars48ccl':['',pesos],'arsCImep':['',pesos],'ars48mep':['',pesos]}
     
-    for valor in shtTest.range('A64:A93').value:
+    for valor in shtTest.range('A64:A201').value:
         if not valor: continue
         name = str(valor).split()
         if str(name[2]).lower() == 'spot':
@@ -367,7 +355,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
     except: pass
 ########################################### CARGA BUCLE EN EXCEL ##########################################
 while True:
-    for valor in shtTest.range('P22:V59').value:
+    for valor in shtTest.range('P26:V59').value:
         if valor[1]: # COMPRAR precio BID _________________________________________________________________
             try:   enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0])
             except: 
