@@ -16,7 +16,7 @@ shtTest.range('Q1').value = 'PRC'
 shtTest.range('R1').value ='TRAIL'
 shtTest.range('S1').value ='STOP'
 shtTest.range('T1').value = 0.001
-shtTest.range('U1').value = 2
+shtTest.range('U1').value = 1
 shtTest.range('V1').value = 0
 shtTest.range('W1').value = 1
 
@@ -307,7 +307,10 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
             shtTest.range('Q'+str(int(celda+1))+':'+'U'+str(int(celda+1))).value = ''
             print('Error al enviar Venta.')
 
-    shtTest.range('X'+str(int(celda+1))).value=shtTest.range('W'+str(int(celda+1))).value / shtTest.range('V'+str(int(celda+1))).value
+    try: shtTest.range('X'+str(int(celda+1))).value=shtTest.range('W'+str(int(celda+1))).value / shtTest.range('V'+str(int(celda+1))).value
+    except: 
+        print('Error al calcular ultipo precio compra/venta')
+        shtTest.range('U'+str(int(celda+1))+':'+'X'+str(int(celda+1))).value = ''
     shtTest.range('Q'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
 ############################################ TRAILING STOP ################################################
 def trailingStop(nombre=str,cantidad=int,nroCelda=int):
@@ -411,12 +414,11 @@ while True:
                 trailingStop('A'+str((int(valor[0])+1)),cantidad,int(valor[0]))
 
         if str(shtTest.range('R1').value).upper() == 'REC': # Activa RECOMPRA AUTOMATICA _____________
-            try: 
-                enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
-                shtTest.range('Q'+str(int(valor[0]+1))).value = 1
+            try: enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
             except: 
                 winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
-                print('Error RECOMPRA Automatica.')
+                print('Error RECOMPRA Automatica. Intenta compra en punta BID')
+                shtTest.range('U'+str(int(valor[0]+1))).value = '+'
             
     time.sleep(2)
     if time.strftime("%H:%M:%S") > '17:03:00': break 
