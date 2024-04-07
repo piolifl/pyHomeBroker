@@ -291,6 +291,7 @@ while True:
                 shtTest.range('U'+str(int(valor[0]+1))).value = ''
 
         if not shtTest.range('R1').value: # Activa TRAILING  __________________________________________
+            if time.strftime("%H:%M:%S") > '16:24:50': shtTest.range('R1').value = 'TRAIL'
             try: stock = int(valor[6])
             except: stock = 0
             if stock > 0:
