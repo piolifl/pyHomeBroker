@@ -216,7 +216,6 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
             if bid * 100 > costo * (1 + (ganancia*25)): # Precio sube activo trailing y sube % ganancia 
                 shtTest.range('W'+str(int(nroCelda+1))).value = 'TRAILING'
                 shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
-            
             if not shtTest.range('S1').value:
                 if last * 100 < costo * (1 - (ganancia*10)): # Precio baja activo stop y envia orden venta
                     if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP' and bid>last*(1-(ganancia*10)):
@@ -227,10 +226,10 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                         enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),cantidad,nroCelda)
                     else: shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'  
         else: #TRAILING sobre bonos / letras / ons
+            if time.strftime("%H:%M:%S") > '16:24:50' and str(nombre[2]).lower() == 'spot': pass
             if bid / 100 > costo * (1 + ganancia): # Precio sube activo trailing y sube % ganancia               
                 shtTest.range('W'+str(int(nroCelda+1))).value = 'TRAILING'
                 shtTest.range('X'+str(int(nroCelda+1))).value = round(bid / 100,5)
-            
             if not shtTest.range('S1').value:
                 if last / 100 < costo * (1 - ganancia): # Precio baja activo stop y envia orden venta
                     if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='STOP' and (bid/100)>(last/100)*(1-ganancia):
@@ -291,7 +290,6 @@ while True:
                 shtTest.range('U'+str(int(valor[0]+1))).value = ''
 
         if not shtTest.range('R1').value: # Activa TRAILING  __________________________________________
-            if time.strftime("%H:%M:%S") > '16:24:50': shtTest.range('R1').value = 'TRAIL'
             try: stock = int(valor[6])
             except: stock = 0
             if stock > 0:
