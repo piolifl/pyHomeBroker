@@ -15,7 +15,7 @@ shtTest.range('S1').value ='STOP'
 shtTest.range('T1').value = 0.001
 shtTest.range('U1').value = 1
 shtTest.range('V1').value = 0
-shtTest.range('W1').value = 1
+
 
 
 #-------------------------------------------------------------------------------------------------------
@@ -307,4 +307,7 @@ while True:
             
     time.sleep(2)
     if str(shtTest.range('A1').value) != 'symbol': ilRulo()
+    shtTest.range('Q1').value = 'PRC'
+    shtTest.range('R1').value ='TRAIL'
+    shtTest.range('S1').value ='STOP'
 #[ ]><   \n
