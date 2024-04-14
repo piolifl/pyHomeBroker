@@ -4,6 +4,7 @@ import pandas as pd
 from datetime import date, timedelta
 import time
 import winsound
+import os
 
 
 wb = xw.Book('D:\\pyHomeBroker\\epgb_pyHB.xlsx')
@@ -12,10 +13,28 @@ shtTickers = wb.sheets('Tickers')
 shtTest.range('Q1').value = 'PRC'
 shtTest.range('R1').value ='TRAIL'
 shtTest.range('S1').value ='STOP'
-shtTest.range('T1').value = 5
+shtTest.range('T1').value = 20
 shtTest.range('U1').value = 0.001
 shtTest.range('V1').value = 0
 
+
+rangoDesde = 'P26'
+rangoHasta = 'V59'
+
+
+print( '\t\t\t\t MENU: ')
+print(' \t Selecciona: B ------> para operaciones solo con Bonos')
+print(' \t Selecciona: O ------> para operaciones solo con Opciones')
+print(' \t Precionar : ENTER --> para operaciones con Todos')
+print()
+queHacemos = input('Seleccionar los instrumentos para cargar ---> ')
+
+if not queHacemos: print('getTodos()')
+else: 
+    print('getOpciones()')
+    rangoDesde = 'P30'
+
+os.system('cls')
 
 
 #-------------------------------------------------------------------------------------------------------
@@ -218,7 +237,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                 if last * 100 < costo * (1 - (ganancia*10)): # Precio baja activo stop y envia orden venta
                     if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP' and bid>last*(1-(ganancia*10)):
                         print(f'{time.strftime("%H:%M:%S")} STOP     ',end=' || ')
-                        shtTest.range('R1').value = 'REC'
+                        shtTest.range('Q1').value = 'REC'
                         shtTest.range('W'+str(int(nroCelda+1))).value = ''
                         shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
                         enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),cantidad,nroCelda)
@@ -251,7 +270,7 @@ while True:
     if str(shtTest.range('A1').value) != 'symbol': ilRulo()
     
     time.sleep(3)
-    for valor in shtTest.range('P26:V59').value:
+    for valor in shtTest.range(str(rangoDesde) + ':' + str(rangoHasta)).value:
         if valor[1]: # COMPRAR precio BID _________________________________________________________________
             try:   enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0])
             except: 
@@ -299,9 +318,8 @@ while True:
                 shtTest.range('U'+str(int(valor[0]+1))).value = ''
 
         if not shtTest.range('R1').value: # Activa TRAILING  __________________________________________
-            try: stock = int(valor[6])
-            except: stock = 0
-            if stock > 0:
+            if not valor[6]: valor[6] = 0
+            if int(valor[6]) > 0:
                 if not shtTest.range('Y'+str(int(valor[0]+1))).value: cantidad = 1
                 else: cantidad = int(shtTest.range('Y'+str(int(valor[0]+1))).value)
                 trailingStop('A'+str((int(valor[0])+1)),cantidad,int(valor[0]))
