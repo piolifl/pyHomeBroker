@@ -15,10 +15,11 @@ shtTickers = wb.sheets('Tickers')
 shtTest.range('Q1').value = 'PRC'
 shtTest.range('R1').value ='TRAIL'
 shtTest.range('S1').value ='STOP'
-shtTest.range('T1').value = 0.001
-shtTest.range('U1').value = -1
+shtTest.range('T1').value = 20
+shtTest.range('U1').value = 0.001
 shtTest.range('V1').value = 0
-
+rangoDesde = 'P26'
+rangoHasta = 'V59'
 
 
 def getOptionsList():
@@ -96,7 +97,7 @@ def on_repos(online, quotes):
     thisData = thisData[['last', 'turnover', 'bid_amount', 'bid_rate', 'ask_rate', 'ask_amount']]
     cauciones.update(thisData)
 #-------------------------------------------------------------------------------------------------------
-def getGrupos():
+def getTodos():
     hb.online.connect()
     hb.online.subscribe_options()
     hb.online.subscribe_securities('bluechips', '48hs')    # Acciones del Panel lider - 48hs
@@ -119,20 +120,63 @@ def getGrupos():
     hb.online.subscribe_securities('corporate_bonds', 'SPOT')  # Obligaciones Negociables - spot
     hb.online.subscribe_repos()
 
-hb = HomeBroker(int(os.environ.get('broker')),
-                on_options=on_options,
-                on_securities=on_securities,
-                on_repos=on_repos)
+def getBonos():
+    hb.online.connect()
+    hb.online.subscribe_securities('government_bonds', '48hs')  # Bonos - 48hs
+    # hb.online.subscribe_securities('government_bonds', '24hs') # Bonos - 24hs
+    hb.online.subscribe_securities('government_bonds', 'SPOT')  # Bonos - spot
+    hb.online.subscribe_securities('cedears', '48hs')      # CEDEARS - 48hs
+    # hb.online.subscribe_securities('cedears', '24hs')      # CEDEARS - 24hs
+    hb.online.subscribe_securities('cedears', 'SPOT')      # CEDEARS - spot
+    hb.online.subscribe_securities('short_term_government_bonds', '48hs')   # LETRAS - 48hs
+    # hb.online.subscribe_securities('short_term_government_bonds', '24hs')  # LETRAS - 24hs
+    hb.online.subscribe_securities('short_term_government_bonds', 'SPOT')   # LETRAS - spot
+    hb.online.subscribe_securities('corporate_bonds', '48hs')  # Obligaciones Negociables - 48hs
+    # hb.online.subscribe_securities('corporate_bonds', '24hs')  # Obligaciones Negociables - 24hs
+    hb.online.subscribe_securities('corporate_bonds', 'SPOT')  # Obligaciones Negociables - spot
+    hb.online.subscribe_repos()
 
-hb.auth.login(dni=str(os.environ.get('dni')),
-              user=str(os.environ.get('user')),
-              password=str(os.environ.get('password')),
+def getOpciones():
+    hb.online.connect()
+    hb.online.subscribe_options()
+    hb.online.subscribe_securities('bluechips', '48hs')    # Acciones del Panel lider - 48hs
+    # hb.online.subscribe_securities('bluechips', '24hs')   # Acciones del Panel lider - 24hs
+    hb.online.subscribe_securities('bluechips', 'SPOT')    # Acciones del Panel lider - spot
+    hb.online.subscribe_repos()
+
+def login():
+    hb.auth.login(dni=str(os.environ.get('dni')), user=str(os.environ.get('user')),  password=str(os.environ.get('password')),
               raise_exception=True)
 
-getGrupos()
+print( '\t\t\t\t MENU: ')
+print(' \t Selecciona: B ------> para operaciones solo con Bonos')
+print(' \t Selecciona: O ------> para operaciones solo con Opciones')
+print(' \t Precionar : ENTER --> para operaciones con Todos')
+print()
+queHacemos = input('Seleccionar los instrumentos para cargar ---> ')
+
+if str(queHacemos).upper() == 'B': 
+    rangoHasta = 'V29'
+    queHacemos = 'Bonos, Letras, On, Cederar y Caucion'
+    hb = HomeBroker(int(os.environ.get('broker')), on_securities=on_securities, on_repos=on_repos)
+    login()
+    getBonos()
+elif str(queHacemos).upper() == 'O':
+    rangoDesde = 'P30'
+    queHacemos = 'Panel Lider y Opciones'
+    hb = HomeBroker(int(os.environ.get('broker')), on_options=on_options, on_securities=on_securities)
+    login()
+    getOpciones()
+else: 
+    queHacemos = 'Todas las especies activas'
+    hb = HomeBroker(int(os.environ.get('broker')), on_options=on_options, on_securities=on_securities, on_repos=on_repos)
+    login()
+    getTodos()
+    
+os.system('cls')
 
 #-------------------------------------------------------------------------------------------------------
-print(time.strftime("%H:%M:%S"),f"Logueo correcto: {os.environ.get('name')} cuenta: {int(os.environ.get('account_id'))}")
+print(time.strftime("%H:%M:%S"),f"Logueo correcto: {os.environ.get('name')} cuenta: {int(os.environ.get('account_id'))} | {queHacemos}")
 
 def namesArs(nombre,plazo): 
     if nombre[:2] == 'BA': return 'BA37D'+plazo
@@ -317,8 +361,10 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
         stock = int(shtTest.range('V'+str(int(nroCelda+1))).value)
         last = float(shtTest.range('F'+str(int(nroCelda+1))).value)
         costo = float(shtTest.range('X'+str(int(nroCelda+1))).value) 
-        if not ganancia: ganancia = 0.001
-        else: shtTest.range('U1').value = 0.001
+        ganancia = shtTest.range('U1').value
+        if not ganancia: 
+            ganancia = 0.001
+            shtTest.range('U1').value = 0.001
         if cantidad > stock : cantidad = stock
         if cantidad > bid_size : cantidad = bid_size
         if len(nombre) < 2: #TRAILING sobre opciones financieras
@@ -329,7 +375,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                 if last * 100 < costo * (1 - (ganancia*10)): # Precio baja activo stop y envia orden venta
                     if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP' and bid>last*(1-(ganancia*10)):
                         print(f'{time.strftime("%H:%M:%S")} STOP     ',end=' || ')
-                        shtTest.range('R1').value = 'REC'
+                        shtTest.range('Q1').value = 'REC'
                         shtTest.range('W'+str(int(nroCelda+1))).value = ''
                         shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
                         enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),cantidad,nroCelda)
@@ -370,8 +416,8 @@ while True:
     except: 
         winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
         print("_____ error al cargar datos en Excel !!! ______ ",time.strftime("%H:%M:%S")) 
-    time.sleep(3)
-    for valor in shtTest.range('P26:V59').value:
+
+    for valor in shtTest.range(str(rangoDesde) + ':' + str(rangoHasta)).value:
         if valor[1]: # COMPRAR precio BID _________________________________________________________________
             try:   enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0])
             except: 
@@ -419,24 +465,24 @@ while True:
                 shtTest.range('U'+str(int(valor[0]+1))).value = ''
 
         if not shtTest.range('R1').value: # Activa TRAILING  __________________________________________
-            try: stock = int(valor[6])
-            except: stock = 0
-            if stock > 0:
+            if not valor[6]: pass
+            elif valor[6] > 0:
                 if not shtTest.range('Y'+str(int(valor[0]+1))).value: cantidad = 1
                 else: cantidad = int(shtTest.range('Y'+str(int(valor[0]+1))).value)
                 trailingStop('A'+str((int(valor[0])+1)),cantidad,int(valor[0]))
 
-        if str(shtTest.range('R1').value).upper() == 'REC': # Activa RECOMPRA AUTOMATICA _____________
+        if str(shtTest.range('Q1').value).upper() == 'REC': # Activa RECOMPRA AUTOMATICA _____________
             try:  enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
             except: 
                 winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
                 shtTest.range('U'+str(int(valor[0]+1))).value = '+'
                 print(time.strftime("%H:%M:%S"), 'Error RECOMPRA Automatica. Intenta compra en punta BID')
-       
+    time.sleep(3)
 print(time.strftime("%H:%M:%S"), 'Mercado cerrado.')
 shtTest.range('Q1').value = 'PRC'
 shtTest.range('R1').value ='TRAIL'
 shtTest.range('S1').value ='STOP'
+
 
   
 #[ ]><   \n

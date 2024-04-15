@@ -168,7 +168,7 @@ elif str(queHacemos).upper() == 'O':
     login()
     getOpciones()
 else: 
-    queHacemos = 'Bonos, Letras, On, Cederar, Lider, Opciones y Caucion'
+    queHacemos = 'Todas las especies activas'
     hb = HomeBroker(int(os.environ.get('broker')), on_options=on_options, on_securities=on_securities, on_repos=on_repos)
     login()
     getTodos()
@@ -361,8 +361,10 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
         stock = int(shtTest.range('V'+str(int(nroCelda+1))).value)
         last = float(shtTest.range('F'+str(int(nroCelda+1))).value)
         costo = float(shtTest.range('X'+str(int(nroCelda+1))).value) 
-        if not ganancia: ganancia = 0.001
-        else: shtTest.range('U1').value = 0.001
+        ganancia = shtTest.range('U1').value
+        if not ganancia: 
+            ganancia = 0.001
+            shtTest.range('U1').value = 0.001
         if cantidad > stock : cantidad = stock
         if cantidad > bid_size : cantidad = bid_size
         if len(nombre) < 2: #TRAILING sobre opciones financieras
@@ -402,7 +404,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
     except: pass
 ########################################### CARGA BUCLE EN EXCEL ##########################################
 while True:
-    if time.strftime("%H:%M:%S") > '13:50:30': break 
+    if time.strftime("%H:%M:%S") > '17:00:30': break 
     if str(shtTest.range('A1').value) != 'symbol': ilRulo()
     try:
         if not shtTest.range('Q1').value:
@@ -414,8 +416,6 @@ while True:
     except: 
         winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
         print("_____ error al cargar datos en Excel !!! ______ ",time.strftime("%H:%M:%S")) 
-
-    time.sleep(3)
 
     for valor in shtTest.range(str(rangoDesde) + ':' + str(rangoHasta)).value:
         if valor[1]: # COMPRAR precio BID _________________________________________________________________
@@ -465,25 +465,24 @@ while True:
                 shtTest.range('U'+str(int(valor[0]+1))).value = ''
 
         if not shtTest.range('R1').value: # Activa TRAILING  __________________________________________
-            try: stock = int(valor[6])
-            except: stock = 0
-            if stock > 0:
+            if not valor[6]: pass
+            elif valor[6] > 0:
                 if not shtTest.range('Y'+str(int(valor[0]+1))).value: cantidad = 1
                 else: cantidad = int(shtTest.range('Y'+str(int(valor[0]+1))).value)
                 trailingStop('A'+str((int(valor[0])+1)),cantidad,int(valor[0]))
 
-        if str(shtTest.range('R1').value).upper() == 'REC': # Activa RECOMPRA AUTOMATICA _____________
+        if str(shtTest.range('Q1').value).upper() == 'REC': # Activa RECOMPRA AUTOMATICA _____________
             try:  enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
             except: 
                 winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
                 shtTest.range('U'+str(int(valor[0]+1))).value = '+'
                 print(time.strftime("%H:%M:%S"), 'Error RECOMPRA Automatica. Intenta compra en punta BID')
-       
+    time.sleep(3)
 print(time.strftime("%H:%M:%S"), 'Mercado cerrado.')
 shtTest.range('Q1').value = 'PRC'
 shtTest.range('R1').value ='TRAIL'
 shtTest.range('S1').value ='STOP'
-exit()
+
 
   
 #[ ]><   \n
