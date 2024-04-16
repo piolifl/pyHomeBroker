@@ -15,7 +15,7 @@ shtTickers = wb.sheets('Tickers')
 shtTest.range('Q1').value = 'PRC'
 shtTest.range('R1').value ='TRAIL'
 shtTest.range('S1').value ='STOP'
-shtTest.range('T1').value = 20
+shtTest.range('T1').value = -1
 shtTest.range('U1').value = 0.001
 shtTest.range('V1').value = 0
 rangoDesde = 'P26'
@@ -138,10 +138,21 @@ def getBonos():
 
 def getOpciones():
     hb.online.connect()
+
     hb.online.subscribe_options()
+
     hb.online.subscribe_securities('bluechips', '48hs')    # Acciones del Panel lider - 48hs
     # hb.online.subscribe_securities('bluechips', '24hs')   # Acciones del Panel lider - 24hs
     hb.online.subscribe_securities('bluechips', 'SPOT')    # Acciones del Panel lider - spot
+
+    hb.online.subscribe_securities('government_bonds', '48hs')  # Bonos - 48hs
+    # hb.online.subscribe_securities('government_bonds', '24hs') # Bonos - 24hs
+    hb.online.subscribe_securities('government_bonds', 'SPOT')  # Bonos - spot
+
+    hb.online.subscribe_securities('short_term_government_bonds', '48hs')   # LETRAS - 48hs
+    # hb.online.subscribe_securities('short_term_government_bonds', '24hs')  # LETRAS - 24hs
+    hb.online.subscribe_securities('short_term_government_bonds', 'SPOT')   # LETRAS - spot
+
     hb.online.subscribe_repos()
 
 def login():
@@ -149,22 +160,22 @@ def login():
               raise_exception=True)
 
 print( '\t\t\t\t MENU: ')
-print(' \t Selecciona: B ------> para operaciones solo con Bonos')
-print(' \t Selecciona: O ------> para operaciones solo con Opciones')
-print(' \t Precionar : ENTER --> para operaciones con Todos')
+print(' \t Selecciona: B ------> para operaciones con Renta Fija')
+print(' \t Selecciona: O ------> para operaciones con Opciones y Renta Fija')
+print(' \t Precionar : ENTER --> para operaciones con Todos los instrumentos')
 print()
 queHacemos = input('Seleccionar los instrumentos para cargar ---> ')
 
 if str(queHacemos).upper() == 'B': 
     rangoHasta = 'V29'
-    queHacemos = 'Bonos, Letras, On, Cederar y Caucion'
+    queHacemos = 'Renta Fija'
     hb = HomeBroker(int(os.environ.get('broker')), on_securities=on_securities, on_repos=on_repos)
     login()
     getBonos()
 elif str(queHacemos).upper() == 'O':
-    rangoDesde = 'P30'
-    queHacemos = 'Panel Lider y Opciones'
-    hb = HomeBroker(int(os.environ.get('broker')), on_options=on_options, on_securities=on_securities)
+    rangoDesde = 'P26'
+    queHacemos = 'Opciones y Renta Fija'
+    hb = HomeBroker(int(os.environ.get('broker')), on_options=on_options, on_securities=on_securities, on_repos=on_repos)
     login()
     getOpciones()
 else: 
@@ -324,7 +335,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                 except: shtTest.range('V'+str(int(celda+1))).value = int(size)
                 try: shtTest.range('W'+str(int(celda+1))).value += int(size) * precio/100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio/100
-                print(f'Buy  {symbol[0]} {symbol[2]} // cantidad: + {int(size)} // precio {round(precio/100,2)}')
+                print(f'Buy  {symbol[0]} {symbol[2]} // cantidad: + {int(size)} // precio {round(precio/100,4)}')
         except: 
             winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
             shtTest.range('Q'+str(int(celda+1))+':'+'U'+str(int(celda+1))).value = ''
@@ -344,7 +355,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                 except: shtTest.range('V'+str(int(celda+1))).value = int(size)
                 try: shtTest.range('W'+str(int(celda+1))).value -= int(size) * precio/100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio/100
-                print(f'Sell {symbol[0]} {symbol[2]} // cantidad: - {int(size)} // precio: {round(precio/100,2)}')
+                print(f'Sell {symbol[0]} {symbol[2]} // cantidad: - {int(size)} // precio: {round(precio/100,4)}')
         except:
             winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
             shtTest.range('Q'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
@@ -415,7 +426,7 @@ while True:
        #shtTest.range('A' + str(listLength)).options(index=True, header=False).value = options
     except: 
         winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
-        print("_____ error al cargar datos en Excel !!! ______ ",time.strftime("%H:%M:%S")) 
+        print("______ error al cargar datos en Excel ______ ",time.strftime("%H:%M:%S")) 
 
     for valor in shtTest.range(str(rangoDesde) + ':' + str(rangoHasta)).value:
         if valor[1]: # COMPRAR precio BID _________________________________________________________________
@@ -458,8 +469,8 @@ while True:
                 print('Error, al cancelar orden.')
 
             if valor[5] == '-' or valor[5] == '+': # buy//sell usando puntas ______________________________
-                try: cantidad = int(shtTest.range('Y'+str(int(valor[0]+1))).value)
-                except: cantidad = 1
+                cantidad = int(shtTest.range('Y'+str(int(valor[0]+1))).value)
+                if not cantidad: cantidad = 1
                 if valor[5] == '-':enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
                 else: enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
                 shtTest.range('U'+str(int(valor[0]+1))).value = ''
@@ -477,7 +488,11 @@ while True:
                 winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
                 shtTest.range('U'+str(int(valor[0]+1))).value = '+'
                 print(time.strftime("%H:%M:%S"), 'Error RECOMPRA Automatica. Intenta compra en punta BID')
-    time.sleep(3)
+
+    time.sleep(2)
+    
+try: hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
+except: pass
 print(time.strftime("%H:%M:%S"), 'Mercado cerrado.')
 shtTest.range('Q1').value = 'PRC'
 shtTest.range('R1').value ='TRAIL'
