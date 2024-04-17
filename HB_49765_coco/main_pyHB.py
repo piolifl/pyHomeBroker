@@ -381,7 +381,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                 if last * 100 < costo * (1 - (ganancia*10)): # Precio baja activo stop y envia orden venta
                     if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP' and bid>last*(1-(ganancia*10)):
                         print(f'{time.strftime("%H:%M:%S")} STOP     ',end=' || ')
-                        shtTest.range('Q1').value = 'REC'
+                        shtTest.range('U'+str(int(nroCelda+1))).value = '+'
                         shtTest.range('W'+str(int(nroCelda+1))).value = ''
                         shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
                         enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),cantidad,nroCelda)
@@ -466,8 +466,8 @@ while True:
             if valor[5] == '-' or valor[5] == '+': # buy//sell usando puntas ______________________________
                 cantidad = int(shtTest.range('Y'+str(int(valor[0]+1))).value)
                 if not cantidad: cantidad = 1
-                if valor[5] == '-':enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
-                else: enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
+                if valor[5] == '-':enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
+                else: enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
                 shtTest.range('U'+str(int(valor[0]+1))).value = ''
 
         if not shtTest.range('R1').value: # Activa TRAILING  __________________________________________
