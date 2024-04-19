@@ -21,17 +21,58 @@ shtTest.range('V1').value = 0
 rangoDesde = 'P26'
 rangoHasta = 'V59'
 
+print( '\t\t\t\t MENU: ')
+print(' \t Selecciona: B ------> para operaciones con Renta Fija')
+print(' \t Selecciona: O ------> para operaciones con Opciones y Renta Fija')
+print(' \t Precionar : ENTER --> para operaciones con Todos los instrumentos')
+print()
+queHacemos = input('Seleccionar los instrumentos para cargar ---> ')
 
-def getOptionsList():
-    global allOptions
-    rng = shtTickers.range('A2:A35').expand()
-    oOpciones = rng.value
-    allOptions = pd.DataFrame({'symbol': oOpciones},columns=["symbol", "bid_size", "bid", "ask", "ask_size", "last","change", "open", "high", "low", "previous_close", "turnover", "volume",'operations', 'datetime'])
-    allOptions = allOptions.set_index('symbol')
-    allOptions['datetime'] = pd.to_datetime(allOptions['datetime'])
-    return allOptions
+if not queHacemos:
+    def getBonosList():
+        rng = shtTickers.range('E2:E145').expand()
+        oBonos = rng.value
+        Bonos = pd.DataFrame({'symbol' : oBonos}, columns=["symbol", "bid_size", "bid", "ask", "ask_size", "last", "change", "open", "high", "low", "previous_close", "turnover", "volume", 'operations', 'datetime'])
+        Bonos = Bonos.set_index('symbol')
+        Bonos['datetime'] = pd.to_datetime(Bonos['datetime'])
+        return Bonos
+    def getOptionsList():
+        global allOptions
+        rng = shtTickers.range('A2:A35').expand()
+        oOpciones = rng.value
+        allOptions = pd.DataFrame({'symbol': oOpciones},columns=["symbol", "bid_size", "bid", "ask", "ask_size", "last","change", "open", "high", "low", "previous_close", "turnover", "volume",'operations', 'datetime'])
+        allOptions = allOptions.set_index('symbol')
+        allOptions['datetime'] = pd.to_datetime(allOptions['datetime'])
+        return allOptions
 
-def getBonosList():
+if str(queHacemos).upper() == 'B':
+    def getBonosList():
+        rng = shtTickers.range('E2:E143').expand()
+        oBonos = rng.value
+        Bonos = pd.DataFrame({'symbol' : oBonos}, columns=["symbol", "bid_size", "bid", "ask", "ask_size", "last", "change", "open", "high", "low", "previous_close", "turnover", "volume", 'operations', 'datetime'])
+        Bonos = Bonos.set_index('symbol')
+        Bonos['datetime'] = pd.to_datetime(Bonos['datetime'])
+        return Bonos
+    
+if str(queHacemos).upper() == 'O':
+    def getBonosList():
+        rng = shtTickers.range('E2:E29').expand()
+        oBonos = rng.value
+        Bonos = pd.DataFrame({'symbol' : oBonos}, columns=["symbol", "bid_size", "bid", "ask", "ask_size", "last", "change", "open", "high", "low", "previous_close", "turnover", "volume", 'operations', 'datetime'])
+        Bonos = Bonos.set_index('symbol')
+        Bonos['datetime'] = pd.to_datetime(Bonos['datetime'])
+        return Bonos
+    def getOptionsList():
+        global allOptions
+        rng = shtTickers.range('A2:A35').expand()
+        oOpciones = rng.value
+        allOptions = pd.DataFrame({'symbol': oOpciones},columns=["symbol", "bid_size", "bid", "ask", "ask_size", "last","change", "open", "high", "low", "previous_close", "turnover", "volume",'operations', 'datetime'])
+        allOptions = allOptions.set_index('symbol')
+        allOptions['datetime'] = pd.to_datetime(allOptions['datetime'])
+        return allOptions
+    
+
+'''def getBonosList():
     rng = shtTickers.range('E2:E143').expand()
     oBonos = rng.value
     Bonos = pd.DataFrame({'symbol' : oBonos}, columns=["symbol", "bid_size", "bid", "ask", "ask_size", "last", "change", "open", "high", "low", "previous_close", "turnover", "volume", 'operations', 'datetime'])
@@ -45,7 +86,7 @@ def getAccionesList():
     ACC = pd.DataFrame({'symbol' : oAcciones}, columns=["symbol", "bid_size", "bid", "ask", "ask_size", "last", "change", "open", "high", "low", "previous_close", "turnover", "volume", 'operations', 'datetime'])
     ACC = ACC.set_index('symbol')
     ACC['datetime'] = pd.to_datetime(ACC['datetime'])
-    return ACC
+    return ACC'''
 
 i = 1
 fechas = []
@@ -154,12 +195,7 @@ def login():
     hb.auth.login(dni=str(os.environ.get('dni')), user=str(os.environ.get('user')),  password=str(os.environ.get('password')),
               raise_exception=True)
 
-print( '\t\t\t\t MENU: ')
-print(' \t Selecciona: B ------> para operaciones con Renta Fija')
-print(' \t Selecciona: O ------> para operaciones con Opciones y Renta Fija')
-print(' \t Precionar : ENTER --> para operaciones con Todos los instrumentos')
-print()
-queHacemos = input('Seleccionar los instrumentos para cargar ---> ')
+
 
 if str(queHacemos).upper() == 'B': 
     rangoHasta = 'V29'
@@ -381,7 +417,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                 if last * 100 < costo * (1 - (ganancia*10)): # Precio baja activo stop y envia orden venta
                     if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP' and bid>last*(1-(ganancia*10)):
                         print(f'{time.strftime("%H:%M:%S")} STOP     ',end=' || ')
-                        shtTest.range('U'+str(int(nroCelda+1))).value = '+'
+                        shtTest.range('Q1').value = 'REC'
                         shtTest.range('W'+str(int(nroCelda+1))).value = ''
                         shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
                         enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),cantidad,nroCelda)
@@ -448,11 +484,11 @@ while True:
             try: # CANCELAR todas las ordenes _____________________________________________________________
                 if str(valor[5]).lower() == 'c': 
                     hb.orders.cancel_order(int(os.environ.get('account_id')),orderC)
-                    shtTest.range('U'+str(int(valor[0]+1))+':'+'X'+str(int(valor[0]+1))).value = ''
+                    shtTest.range('U'+str(int(valor[0]+1))).value = ''
                     print(time.strftime("%H:%M:%S")," // Orden compra fue cancelada")
                 elif str(valor[5]).lower() == 'v': 
                     hb.orders.cancel_order(int(os.environ.get('account_id')),orderV)
-                    shtTest.range('U'+str(int(valor[0]+1))+':'+'X'+str(int(valor[0]+1))).value = ''
+                    shtTest.range('U'+str(int(valor[0]+1))).value = ''
                     print(time.strftime("%H:%M:%S")," // Orden venta fue cancelada")
                 elif str(valor[5]).lower() == 'x': 
                     hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
