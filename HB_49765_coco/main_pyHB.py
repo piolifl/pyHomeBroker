@@ -23,7 +23,8 @@ rangoHasta = 'V59'
 
 print( '\t\t\t\t MENU: ')
 print(' \t Selecciona: B ------> para operaciones con Renta Fija')
-print(' \t Selecciona: O ------> para operaciones con Opciones, Panel Lider y Renta Fija')
+print(' \t Selecciona: O ------> para operaciones con Opciones y Panel Lider')
+print(' \t Selecciona: OB ------> para operaciones con Opciones, Panel Lider y Renta Fija')
 print(' \t Precionar : ENTER --> para operaciones con Todos los instrumentos')
 print()
 
@@ -54,8 +55,25 @@ if str(queHacemos).upper() == 'B':
         Bonos = Bonos.set_index('symbol')
         Bonos['datetime'] = pd.to_datetime(Bonos['datetime'])
         return Bonos
-    
+
 if str(queHacemos).upper() == 'O':
+    def getBonosList():
+        rng = shtTickers.range('I2:I5').expand()
+        oBonos = rng.value
+        Bonos = pd.DataFrame({'symbol' : oBonos}, columns=["symbol", "bid_size", "bid", "ask", "ask_size", "last", "change", "open", "high", "low", "previous_close", "turnover", "volume", 'operations', 'datetime'])
+        Bonos = Bonos.set_index('symbol')
+        Bonos['datetime'] = pd.to_datetime(Bonos['datetime'])
+        return Bonos
+    def getOptionsList():
+        global allOptions
+        rng = shtTickers.range('A2:A35').expand()
+        oOpciones = rng.value
+        allOptions = pd.DataFrame({'symbol': oOpciones},columns=["symbol", "bid_size", "bid", "ask", "ask_size", "last","change", "open", "high", "low", "previous_close", "turnover", "volume",'operations', 'datetime'])
+        allOptions = allOptions.set_index('symbol')
+        allOptions['datetime'] = pd.to_datetime(allOptions['datetime'])
+        return allOptions
+    
+if str(queHacemos).upper() == 'OB':
     def getBonosList():
         rng = shtTickers.range('C2:C29').expand()
         oBonos = rng.value
@@ -167,6 +185,14 @@ def getOpciones():
     hb.online.subscribe_securities('bluechips', '48hs')    # Acciones del Panel lider - 48hs
     # hb.online.subscribe_securities('bluechips', '24hs')   # Acciones del Panel lider - 24hs
     hb.online.subscribe_securities('bluechips', 'SPOT')    # Acciones del Panel lider - spot
+    
+
+def getOpcionesMas():
+    hb.online.connect()
+    hb.online.subscribe_options()
+    hb.online.subscribe_securities('bluechips', '48hs')    # Acciones del Panel lider - 48hs
+    # hb.online.subscribe_securities('bluechips', '24hs')   # Acciones del Panel lider - 24hs
+    hb.online.subscribe_securities('bluechips', 'SPOT')    # Acciones del Panel lider - spot
     hb.online.subscribe_securities('government_bonds', '48hs')  # Bonos - 48hs
     # hb.online.subscribe_securities('government_bonds', '24hs') # Bonos - 24hs
     hb.online.subscribe_securities('government_bonds', 'SPOT')  # Bonos - spot
@@ -187,10 +213,16 @@ if str(queHacemos).upper() == 'B':
     getBonos()
 elif str(queHacemos).upper() == 'O':
     rangoDesde = 'P26'
+    queHacemos = 'Opciones'
+    hb = HomeBroker(int(os.environ.get('broker')), on_options=on_options, on_securities=on_securities)
+    login()
+    getOpciones()
+elif str(queHacemos).upper() == 'OB':
+    rangoDesde = 'P26'
     queHacemos = 'Opciones y Renta Fija'
     hb = HomeBroker(int(os.environ.get('broker')), on_options=on_options, on_securities=on_securities, on_repos=on_repos)
     login()
-    getOpciones()
+    getOpcionesMas()
 else: 
     queHacemos = 'Todas los instrumentos solicitados en Tickers'
     hb = HomeBroker(int(os.environ.get('broker')), on_options=on_options, on_securities=on_securities, on_repos=on_repos)
@@ -334,7 +366,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                 except: shtTest.range('V'+str(int(celda+1))).value = int(size)
                 try: shtTest.range('W'+str(int(celda+1))).value += int(size) * precio*100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio*100
-                print(f'Buy  {symbol[0]} 24hs // precio: {precio} // + {int(size)}')
+                print(f'Buy  {symbol[0]} 24hs // precio: {precio} // + {int(size)} // orden: {orderC}')
             else:
                 if str(shtTest.range('Q1').value) == 'REC': 
                     if not menosRecompra: 
@@ -348,7 +380,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                 except: shtTest.range('V'+str(int(celda+1))).value = int(size)
                 try: shtTest.range('W'+str(int(celda+1))).value += int(size) * precio/100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio/100
-                print(f'Buy  {symbol[0]} {symbol[2]} // precio {round(precio/100,4)} // + {int(size)} ')
+                print(f'Buy  {symbol[0]} {symbol[2]} // precio {round(precio/100,4)} // + {int(size)} // orden: {orderC}')
         except: 
             winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
             shtTest.range('Q'+str(int(celda+1))+':'+'U'+str(int(celda+1))).value = ''
@@ -361,14 +393,14 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                 except: shtTest.range('V'+str(int(celda+1))).value = int(size)
                 try: shtTest.range('W'+str(int(celda+1))).value -= int(size) * precio*100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio*100
-                print(f'Sell {symbol[0]} 24hs // precio: {precio} // - {int(size)} ')
+                print(f'Sell {symbol[0]} 24hs // precio: {precio} // - {int(size)} / orden: {orderV}')
             else:
                 orderV = hb.orders.send_sell_order(symbol[0],symbol[2], float(precio), int(size))
                 try: shtTest.range('V'+str(int(celda+1))).value -= int(size)
                 except: shtTest.range('V'+str(int(celda+1))).value = int(size)
                 try: shtTest.range('W'+str(int(celda+1))).value -= int(size) * precio/100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio/100
-                print(f'Sell {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // - {int(size)} ')
+                print(f'Sell {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // - {int(size)} // orden: {orderV}')
         except:
             winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
             shtTest.range('Q'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
@@ -467,11 +499,11 @@ while True:
                 if str(valor[5]).lower() == 'c':
                     hb.orders.cancel_order(int(os.environ.get('account_id')),orderC)
                     shtTest.range('U'+str(int(valor[0]+1))).value = ''
-                    print(time.strftime("%H:%M:%S")," // Orden compra fue cancelada")
+                    print(time.strftime("%H:%M:%S"),f" // Orden compra: {orderC} fue cancelada")
                 elif str(valor[5]).lower() == 'v': 
                     hb.orders.cancel_order(int(os.environ.get('account_id')),orderV)
                     shtTest.range('U'+str(int(valor[0]+1))).value = ''
-                    print(time.strftime("%H:%M:%S")," // Orden venta fue cancelada")
+                    print(time.strftime("%H:%M:%S"),f" // Orden venta: // {orderV} fue cancelada")
                 elif str(valor[5]).lower() == 'x': 
                     hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
                     shtTest.range('U'+str(int(valor[0]+1))+':'+'X'+str(int(valor[0]+1))).value = ''
