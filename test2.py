@@ -139,16 +139,19 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     global orderC, orderV
     symbol = str(shtTest.range(str(symbol)).value).split()
     precio = shtTest.range(str(price)).value
-    menosRecompra = float(shtTest.range('T1').value)
     if not shtTest.range('V'+str(int(celda+1))).value: shtTest.range('V'+str(int(celda+1))+':'+'X'+str(int(celda+1))).value = 0
     if tipo.lower() == 'buy': 
         try: 
             if len(symbol) < 2:
                 if str(shtTest.range('Q1').value) == 'REC': 
+                    variacion = shtTest.range('G'+str(int(celda+1))).value
+                    if not variacion: variacion = 0
+                    if variacion >= 0: menosRecompra = 1
+                    else: menosRecompra = float(shtTest.range('T1').value)
                     if not menosRecompra: 
-                        precio -= 1
-                        shtTest.range('T1').value = 1
-                    else:  precio -= menosRecompra / 10
+                        precio += 1
+                        shtTest.range('T1').value = -1
+                    else:  precio += menosRecompra / 10
                     shtTest.range('Q1').value = ''
                     print(f'{time.strftime("%H:%M:%S")} RECOMPRA ',end=' || ')
                 #orderC = hb.orders.send_buy_order(symbol[0],'24hs', float(precio), int(size))
@@ -159,9 +162,13 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                 print(f'Buy  {symbol[0]} 24hs // precio: {precio} // + {int(size)}')
             else:
                 if str(shtTest.range('Q1').value) == 'REC': 
+                    variacion = shtTest.range('G'+str(int(celda+1))).value
+                    if not variacion: variacion = 0
+                    if variacion >= 0: menosRecompra = 1
+                    else: menosRecompra = float(shtTest.range('T1').value)
                     if not menosRecompra: 
-                        precio -= 100
-                        shtTest.range('T1').value = 1
+                        precio += 100
+                        shtTest.range('T1').value = -1
                     else:  precio -= menosRecompra * 10
                     shtTest.range('Q1').value = ''
                     print(f'{time.strftime("%H:%M:%S")} RECOMPRA ',end=' || ')
@@ -215,11 +222,11 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
         if cantidad > bid_size : cantidad = bid_size
 
         if len(nombre) < 2: #TRAILING sobre opciones financieras
-            if bid * 100 > costo * (1 + (ganancia*25)): # Precio sube activo trailing y sube % ganancia 
+            if bid * 100 > costo * (1 + (ganancia*20)): # Precio sube activo trailing y sube % ganancia 
                 shtTest.range('W'+str(int(nroCelda+1))).value = 'TRAILING'
                 shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
             if not shtTest.range('S1').value:
-                if last * 100 < costo * (1 - (ganancia*15)): # Precio baja activo stop y envia orden venta
+                if last * 100 < costo * (1 - (ganancia*10)): # Precio baja activo stop y envia orden venta
                     if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP' and bid>last*(1-(ganancia*10)):
                         print(f'{time.strftime("%H:%M:%S")} STOP     ',end=' || ')
                         shtTest.range('Q1').value = 'REC'
