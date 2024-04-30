@@ -146,12 +146,13 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                 if str(shtTest.range('Q1').value) == 'REC': 
                     variacion = shtTest.range('G'+str(int(celda+1))).value
                     if not variacion: variacion = 0
-                    if variacion >= 0: menosRecompra = 1
-                    else: menosRecompra = float(shtTest.range('T1').value)
-                    if not menosRecompra: 
+                    if variacion <= -10: recompro = -10
+                    if variacion >= 0: recompro = 1
+                    else: recompro = float(shtTest.range('T1').value)
+                    if not recompro: 
                         precio += 1
                         shtTest.range('T1').value = -1
-                    else:  precio += menosRecompra / 10
+                    else:  precio += recompro / 10
                     shtTest.range('Q1').value = ''
                     print(f'{time.strftime("%H:%M:%S")} RECOMPRA ',end=' || ')
                 #orderC = hb.orders.send_buy_order(symbol[0],'24hs', float(precio), int(size))
@@ -164,12 +165,12 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                 if str(shtTest.range('Q1').value) == 'REC': 
                     variacion = shtTest.range('G'+str(int(celda+1))).value
                     if not variacion: variacion = 0
-                    if variacion >= 0: menosRecompra = 1
-                    else: menosRecompra = float(shtTest.range('T1').value)
-                    if not menosRecompra: 
+                    if variacion >= 0: recompro = 1
+                    else: recompro = float(shtTest.range('T1').value)
+                    if not recompro: 
                         precio += 100
                         shtTest.range('T1').value = -1
-                    else:  precio -= menosRecompra * 10
+                    else:  precio -= recompro * 10
                     shtTest.range('Q1').value = ''
                     print(f'{time.strftime("%H:%M:%S")} RECOMPRA ',end=' || ')
                 #orderC = hb.orders.send_buy_order(symbol[0],symbol[2], float(precio), int(size))
@@ -226,8 +227,8 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                 shtTest.range('W'+str(int(nroCelda+1))).value = 'TRAILING'
                 shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
             if not shtTest.range('S1').value:
-                if last * 100 < costo * (1 - (ganancia*10)): # Precio baja activo stop y envia orden venta
-                    if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP' and bid>last*(1-(ganancia*10)):
+                if last * 100 < costo * (1 - (ganancia*50)): # Precio baja activo stop y envia orden venta
+                    if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP' and bid>last*(1-(ganancia*15)):
                         print(f'{time.strftime("%H:%M:%S")} STOP     ',end=' || ')
                         shtTest.range('Q1').value = 'REC'
                         shtTest.range('W'+str(int(nroCelda+1))).value = ''
@@ -257,12 +258,9 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                     else: shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP' 
     except: pass
 ########################################### CARGA BUCLE EN EXCEL ##########################################
-while True:
 
-    if str(shtTest.range('A1').value) != 'symbol': ilRulo()
-    
-
-    for valor in shtTest.range(str(rangoDesde) + ':' + str(rangoHasta)).value:
+def recorrer(inicio,fin):
+    for valor in shtTest.range(str(inicio) + ':' + str(fin)).value:
         if valor[1]: # COMPRAR precio BID _________________________________________________________________
             try:   enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0])
             except: 
@@ -324,6 +322,13 @@ while True:
             except: 
                 winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
                 print(time.strftime("%H:%M:%S"), 'Error RECOMPRA Automatica.')
+    pass
+
+while True:
+
+    if str(shtTest.range('A1').value) != 'symbol': ilRulo()
+
+    recorrer(rangoDesde,rangoHasta)
 
     time.sleep(2)
     
