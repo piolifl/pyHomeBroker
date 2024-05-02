@@ -15,6 +15,7 @@ shtTickers = wb.sheets('Tickers')
 shtTest.range('Q1').value = 'PRC'
 shtTest.range('R1').value ='TRAIL'
 shtTest.range('S1').value ='STOP'
+shtTest.range('W1').value ='OPCIONES'
 shtTest.range('T1').value = -1
 shtTest.range('U1').value = 0.001
 shtTest.range('V1').value = 0
@@ -97,9 +98,9 @@ def getTodos():
     hb.online.subscribe_securities('government_bonds', '48hs')  # Bonos - 48hs
     # hb.online.subscribe_securities('government_bonds', '24hs') # Bonos - 24hs
     hb.online.subscribe_securities('government_bonds', 'SPOT')  # Bonos - spot
-    hb.online.subscribe_securities('cedears', '48hs')      # CEDEARS - 48hs
+    #hb.online.subscribe_securities('cedears', '48hs')      # CEDEARS - 48hs
     # hb.online.subscribe_securities('cedears', '24hs')      # CEDEARS - 24hs
-    hb.online.subscribe_securities('cedears', 'SPOT')      # CEDEARS - spot
+    #hb.online.subscribe_securities('cedears', 'SPOT')      # CEDEARS - spot
     # hb.online.subscribe_securities('general_board', '48hs') # Acciones del Panel general - 48hs
     # hb.online.subscribe_securities('general_board', '24hs') # Acciones del Panel general - 24hs
     # hb.online.subscribe_securities('general_board', 'SPOT') # Acciones del Panel general - spot
@@ -125,7 +126,7 @@ os.system('cls')
 
 #--------------------------------------------------------------------------------------------------------------------------------
 print(time.strftime("%H:%M:%S"),f"Logueo correcto: {os.environ.get('name')} cuenta: {int(os.environ.get('account_id'))}")
-
+#--------------------------------------------------------------------------------------------------------------------------------
 def namesArs(nombre,plazo): 
     if nombre[:2] == 'BA': return 'BA37D'+plazo
     elif nombre[:2] == 'BP': return 'BPOA7'+plazo
@@ -133,6 +134,7 @@ def namesArs(nombre,plazo):
     elif nombre[:2] == 'GOGL': return 'GOOGL'+plazo
     elif (nombre[:1] == 'X' or nombre[:1] == 'S') and (nombre[3:4] == 'D' or nombre[3:4] == 'C'):
         if (nombre[1:2] == 'F' or nombre[1:2] == 'Y'): return nombre[:1]+'20'+nombre[1:3]+plazo
+        if (nombre[1:2] == 'E'): return nombre[:1]+'31'+nombre[1:3]+plazo
         else: return nombre[:1]+'18'+nombre[1:3]+plazo
     elif (nombre[:2] == 'MR' or nombre[:2] == 'CL') and (nombre[4:5] == 'D' or nombre[4:5] == 'C'):
         return nombre[:4]+'O'+plazo 
@@ -426,14 +428,16 @@ def buscoOperaciones(inicio,fin):
                 winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
                 print(time.strftime("%H:%M:%S"), 'Error RECOMPRA Automatica.')
 ########################################### CARGA BUCLE EN EXCEL ##########################################
+
 while True:
     if time.strftime("%H:%M:%S") > '17:01:00': break 
     if str(shtTest.range('A1').value) != 'symbol': ilRulo()
     try:
         if not shtTest.range('Q1').value:
-            shtTest.range('A30').options(index=True,header=False).value=options
             shtTest.range('A'+str(listLength)).options(index=True,header=False).value = everything
             shtTest.range('AE2').options(index=True, header=False).value = cauciones
+        if not shtTest.range('W1').value:
+            shtTest.range('A30').options(index=True,header=False).value=options
        #shtTest.range('A26').options(index=True, header=False).value = everything
        #shtTest.range('A' + str(listLength)).options(index=True, header=False).value = options
     except: 
@@ -450,6 +454,7 @@ print(time.strftime("%H:%M:%S"), 'Mercado cerrado. ')
 shtTest.range('Q1').value = 'PRC'
 shtTest.range('R1').value ='TRAIL'
 shtTest.range('S1').value ='STOP'
+shtTest.range('W1').value ='OPCIONES'
 
 
   
