@@ -6,6 +6,7 @@ import time
 import winsound
 import os
 import environ
+import requests
 
 env = environ.Env()
 environ.Env.read_env()
@@ -123,6 +124,24 @@ login()
 getTodos()
     
 os.system('cls')
+
+def get_current_portfolio(hb, comitente):
+    
+    payload = {'comitente': str(comitente),
+     'consolida': '0',
+     'proceso': '22',
+     'fechaDesde': None,
+     'fechaHasta': None,
+     'tipo': None,
+     'especie': None,
+     'comitenteMana': None}
+    
+    portfolio = requests.post("https://cocoscap.com/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
+    
+    portfolio = portfolio["Result"]["Activos"][1]["Subtotal"]
+    portfolio = [( x["NERE"], float(x["PCIO"]), float(x["CANT"]) ) for x in portfolio]
+
+    return portfolio
 
 #--------------------------------------------------------------------------------------------------------------------------------
 print(time.strftime("%H:%M:%S"),f"Logueo correcto: {os.environ.get('name')} cuenta: {int(os.environ.get('account_id'))}")
@@ -438,6 +457,11 @@ while True:
             shtTest.range('AE2').options(index=True, header=False).value = cauciones
         if not shtTest.range('W1').value:
             shtTest.range('A30').options(index=True,header=False).value=options
+
+        if not shtTest.range('M1').value: 
+            print(get_current_portfolio(hb, os.environ.get('account_id')))
+            shtTest.range('M1').value = 'volume'
+
        #shtTest.range('A26').options(index=True, header=False).value = everything
        #shtTest.range('A' + str(listLength)).options(index=True, header=False).value = options
     except: 
@@ -457,5 +481,104 @@ shtTest.range('S1').value ='STOP'
 shtTest.range('W1').value ='OPCIONES'
 
 
+'''
+portfolio = portfolio["Result"]["Activos"][1]["Subtotal"]
+portfolio = [( x["NERE"], float(x["PCIO"]), float(x["CANT"]) ) for x in portfolio]
+
+
+
+{'Success': True, 'Error': {'Codigo': 0, 'Descripcion': None}, 'Result': {'Totales': {'TotalPosicion': '90579.19', 'Detalle': [{'DETA': 'Cuenta Corriente $', 'IMPO': '90579.19', 'TIPO': '10', 'Hora': 'Pesos', 'CANT': None, 'TCAM': '1'}]}, 'Activos': [{'GTOS': '0', 'IMPO': '90579.19', 'ESPE': 'Subtotal Cuenta Corriente', 'TIPO': '11', 'Hora': '', 'Subtotal': [{'IMPO': '90579.19', 'ESPE': '', 'APERTURA': [{'DETA': 'Vencido', 'IMPO': '54184.6', 'GTIA': None, 'ACUM': '54184.6'}, {'DETA': '24 Hs. 06/05/24', 'IMPO': '36394.59', 'GTIA': None, 'ACUM': '90579.19'}, {'DETA': '48 Hs. 07/05/24', 'IMPO': None, 'GTIA': None, 'ACUM': '90579.19'}, {'DETA': '72 Hs. 08/05/24', 'IMPO': None, 'GTIA': None, 'ACUM': '90579.19'}, {'DETA': '+ de 72 Hs.', 'IMPO': None, 'GTIA': None, 'ACUM': '90579.19'}, {'DETA': 'Gtia.Opciones', 'IMPO': None, 'GTIA': None, 'ACUM': '90579.19'}], 'Detalle': [{'DETA': 'Disponible', 'IMPO': '54184.6', 'CANT': None, 'PCIO': '1'}, {'DETA': 'A Liq', 'IMPO': '36394.59', 'CANT': None, 'PCIO': '1'}], 'TESP': '0', 'NERE': 'Pesos', 'GTOS': '0', 'DETA': 'Total', 'TIPO': '11', 'Hora': 'Pesos', 'AMPL': '', 'DIVI': '100', 'TICK': 'Pesos', 'CANT': None, 'PCIO': '1', 'CAN3': '0', 'CAN2': '0', 'CAN0': '0'}], 'CANT': None, 'TCAM': '1', 'CAN2': '100'}, {'GTOS': '0', 'IMPO': None, 'ESPE': 'Subtotal Letras', 'TIPO': '6', 'Hora': '', 'Subtotal': [], 'CANT': None, 'TCAM': '1', 'CAN2': '0'}, {'GTOS': '0', 'IMPO': None, 'ESPE': 'Subtotal Opciones', 'TIPO': '10', 'Hora': '', 'Subtotal': [{'IMPO': None, 'ESPE': '8118B', 'Detalle': [{'DETA': 'Disponible', 'IMPO': '32400', 'CANT': '4', 'PCIO': '81'}, {'DETA': 'A Liq.', 'IMPO': '-32400', 'CANT': '-4', 'PCIO': '81'}], 'TESP': '4', 'NERE': 'GFGC4200JU', 'GTOS': '0', 'DETA': 'Total', 'TIPO': '10', 'Hora': '15:56:35', 'AMPL': 'GFG(C) 4200.000 JUNIO', 'DIVI': '100', 'TICK': 'GFGC4200JU', 'CANT': None, 'PCIO': '81', 'CAN3': '-100.5635775', 'CAN2': '0', 'CAN0': '-14372.47'}], 'CANT': None, 'TCAM': '1', 'CAN2': '0'}]}}
+[]
+
+
+
+
+{'Success': True, 'Error': {'Codigo': 0, 'Descripcion': None}, 
+'Result': 
+{'Totales': 
+    {'TotalPosicion': '87566.99', 
+        'Detalle': [
+            {'DETA': 'Tenencia a Liquidar','IMPO': '1893.61','TIPO': '10','Hora': 'Pesos','CANT': None,'TCAM': '1'}, 
+            {'DETA': 'Cuenta Corriente $','IMPO': '85673.38','TIPO': '10','Hora': 'Pesos','CANT': None,'TCAM': '1'}]}, 
+'Activos': [
+
+    {'GTOS': '0', 'IMPO': '85673.38', 'ESPE': 'Subtotal Cuenta Corriente','TIPO': '11', 'Hora': '', 
+        'Subtotal': [
+            {'IMPO': '85673.38', 'ESPE': '', 'APERTURA': [
+                {'DETA': 'Vencido', 'IMPO': '52297.43', 'GTIA': None,'ACUM': '52297.43'}, 
+                {'DETA': '24 Hs. 06/05/24', 'IMPO': '33375.95', 'GTIA': None, 'ACUM': '85673.38'}, 
+                {'DETA': '48 Hs. 07/05/24', 'IMPO': None, 'GTIA': None, 'ACUM': '85673.38'}, 
+                {'DETA': '72 Hs. 08/05/24','IMPO': None, 'GTIA': None, 'ACUM': '85673.38'}, 
+                {'DETA': '+ de 72 Hs.', 'IMPO': None, 'GTIA': None,'ACUM': '85673.38'}, 
+                {'DETA': 'Gtia.Opciones', 'IMPO': None, 'GTIA': None, 'ACUM': '85673.38'}   ], 
+            'Detalle': [
+                {'DETA': 'Disponible', 'IMPO': '52297.43', 'CANT': None, 'PCIO': '1'}, 
+                {'DETA': 'A Liq', 'IMPO': '33375.95', 'CANT': None, 'PCIO': '1'}    ], 
+                'TESP': '0', 'NERE': 'Pesos', 'GTOS': '0', 
+                'DETA': 'Total', 'TIPO': '11', 'Hora': 'Pesos', 'AMPL': '', 'DIVI': '100', 'TICK': 'Pesos', 'CANT': None, 'PCIO': '1', 
+                'CAN3': '0', 'CAN2': '0', 'CAN0': '0'}    ], 
+        'CANT': None, 'TCAM': '1', 'CAN2': '97.8375299'}, 
+        {'GTOS': '0', 
+        'IMPO': '1893.61', 
+        'ESPE': 'Subtotal Letras', 
+        'TIPO': '6', 
+        'Hora': '', 
+        'Subtotal': [
+            {'IMPO': '1893.61','ESPE': '09239','TESP': '1','NERE': 'X20Y4','GTOS': '0','DETA': 'A Liq','TIPO': '6', 
+            'Hora': '14:02:33','AMPL': 'LT REP ARG AJ CER A DESC V20/05/24','DIVI': '.01', 'TICK': 'X20Y4','CANT': '1000', 
+            'PCIO': '189.361','CAN3': '0','CAN2': '0','CAN0': '0'}    ], 
+            'CANT': None, 'TCAM': '1', 'CAN2': '2.1624701'}, 
+        
+    {'GTOS': '0', 'IMPO': None, 'ESPE': 'Subtotal Opciones', 'TIPO': '10', 'Hora': '', 
+        'Subtotal': [
+            {'IMPO': None, 'ESPE': '8118B', 
+            'Detalle': [
+                {'DETA': 'Disponible', 'IMPO': '32080', 'CANT': '4', 'PCIO': '80.2'}, 
+                {'DETA': 'A Liq.', 'IMPO': '-32080', 'CANT': '-4', 'PCIO': '80.2'} ], 
+                'TESP': '4', 'NERE': 'GFGC4200JU', 'GTOS': '0', 'DETA': 'Total', 'TIPO': '10', 'Hora': '14:02:21', 
+                'AMPL': 'GFG(C) 4200.000 JUNIO', 'DIVI': '100', 'TICK': 'GFGC4200JU', 'CANT': None, 'PCIO': '80.2', 
+                'CAN3': '-100.7063696', 'CAN2': '0', 'CAN0': '-11353.83'}], 'CANT': None, 'TCAM': '1', 'CAN2': '0'}]}}
+                
+[('X20Y4', 189.361, 1000.0)]
+
+
+
+
+
+{'Success': True, 'Error': {'Codigo': 0, 'Descripcion': None}, 
+'Result': {'Totales': {'TotalPosicion': '87559.39', 'Detalle': [{'DETA': 'Cuenta Corriente $', 'IMPO': '87559.39', 'TIPO': '10', 'Hora': 'Pesos', 'CANT': None, 'TCAM': '1'}]}, 
+'Activos': [
+    {'GTOS': '0', 'IMPO': '87559.39', 'ESPE': 'Subtotal Cuenta Corriente', 'TIPO': '11', 'Hora': '', 
+'Subtotal': [
+    {'IMPO': '87559.39', 
+    'ESPE': '', 
+    'APERTURA': [
+        {'DETA': 'Vencido', 'IMPO': '54183.44', 'GTIA': None, 'ACUM': '54183.44'}, 
+        {'DETA': '24 Hs. 06/05/24', 'IMPO': '33375.95', 'GTIA': None, 'ACUM': '87559.39'}, 
+        {'DETA': '48 Hs. 07/05/24', 'IMPO': None, 'GTIA': None, 'ACUM': '87559.39'}, 
+        {'DETA': '72 Hs. 08/05/24', 'IMPO': None, 'GTIA': None, 'ACUM': '87559.39'}, 
+        {'DETA': '+ de 72 Hs.', 'IMPO': None, 'GTIA': None, 'ACUM': '87559.39'}, 
+        {'DETA': 'Gtia.Opciones', 'IMPO': None, 'GTIA': None, 'ACUM': '87559.39'}], 
+'Detalle': [
+    {'DETA': 'Disponible', 
+    'IMPO': '54183.44', 
+    'CANT': None, 
+    'PCIO': '1'}, 
+    {'DETA': 'A Liq', 
+    'IMPO': '33375.95', 
+    'CANT': None, 'PCIO': '1'}], 
+'TESP': '0', 
+'NERE': 'Pesos', 
+'GTOS': '0', '
+DETA': 'Total', 
+'TIPO': '11', 
+'Hora': 'Pesos', 'AMPL': '', 'DIVI': '100', 'TICK': 'Pesos', 'CANT': None, 'PCIO': '1', 'CAN3': '0', 'CAN2': '0', 
+'CAN0': '0'}], 'CANT': None, 'TCAM': '1', 'CAN2': '100'}, {'GTOS': '0', 'IMPO': None, 'ESPE': 'Subtotal Opciones', 
+'TIPO': '10', 'Hora': '', 'Subtotal': [{'IMPO': None, 'ESPE': '8118B', 'Detalle': [{'DETA': 'Disponible', 
+'IMPO': '29240', 'CANT': '4', 'PCIO': '73.1'}, {'DETA': 'A Liq.', 'IMPO': '-29240', 'CANT': '-4', 'PCIO': '73.1'}], 
+'TESP': '4', 'NERE': 'GFGC4200JU', 'GTOS': '0', 'DETA': 'Total', 'TIPO': '10', 'Hora': '13:22:06', 'AMPL': 
+'GFG(C) 4200.000 JUNIO', 'DIVI': '100', 'TICK': 'GFGC4200JU', 'CANT': None, 'PCIO': '73.1', 'CAN3': '-100.6438356', 
+'CAN2': '0', 'CAN0': '-11353.83'}], 'CANT': None, 'TCAM': '1', 'CAN2': '0'}]}}
+'''
   
 #[ ]><   \n
