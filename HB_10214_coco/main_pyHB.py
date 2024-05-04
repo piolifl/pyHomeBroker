@@ -6,12 +6,14 @@ import time
 import winsound
 import os
 import environ
+import requests
 
 env = environ.Env()
 environ.Env.read_env()
 wb = xw.Book('..\\epgb_pyHB.xlsx')
 shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
+shtTest.range('M1').value = ''
 shtTest.range('Q1').value = 'PRC'
 shtTest.range('R1').value ='TRAIL'
 shtTest.range('S1').value ='STOP'
@@ -122,7 +124,24 @@ hb = HomeBroker(int(os.environ.get('broker')), on_options=on_options, on_securit
 login()
 getTodos()
     
-os.system('cls')
+def getPortfolio(hb, comitente):
+    payload = {'comitente': str(comitente),
+     'consolida': '0',
+     'proceso': '22',
+     'fechaDesde': None,
+     'fechaHasta': None,
+     'tipo': None,
+     'especie': None,
+     'comitenteMana': None}
+    
+    portfolio = requests.post("https://cocoscap.com/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
+
+    for valor in portfolio["Result"]["Activos"][0:]:
+        tipo = valor['ESPE']
+        for i in valor['Subtotal']:
+            if i['IMPO'] != None: print(tipo,':',i['NERE'],'/ cantidad:',i['CANT'],'/ importe:',i['IMPO'],'/',i['Hora'])
+    
+    shtTest.range('M1').value = 'volume'
 
 #--------------------------------------------------------------------------------------------------------------------------------
 print(time.strftime("%H:%M:%S"),f"Logueo correcto: {os.environ.get('name')} cuenta: {int(os.environ.get('account_id'))}")
@@ -438,6 +457,7 @@ while True:
             shtTest.range('AE2').options(index=True, header=False).value = cauciones
         if not shtTest.range('W1').value:
             shtTest.range('A30').options(index=True,header=False).value=options
+        if not shtTest.range('M1').value: getPortfolio(hb, os.environ.get('account_id'))
        #shtTest.range('A26').options(index=True, header=False).value = everything
        #shtTest.range('A' + str(listLength)).options(index=True, header=False).value = options
     except: 
@@ -445,7 +465,6 @@ while True:
         print("______ error al cargar datos en Excel ______ ",time.strftime("%H:%M:%S")) 
 
     buscoOperaciones(rangoDesde,rangoHasta)
-
     time.sleep(2)
     
 try: hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
@@ -457,5 +476,4 @@ shtTest.range('S1').value ='STOP'
 shtTest.range('W1').value ='OPCIONES'
 
 
-  
 #[ ]><   \n
