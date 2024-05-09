@@ -141,8 +141,8 @@ def getPortfolio(hb, comitente):
             if i[0]['NERE'] == 'Pesos': subtotal = [ (x['NERE'],x['IMPO']) for x in i[0:]]
             else: subtotal = [ (x['NERE'],x['CANT'],x['PCIO'],x['IMPO'],x['Hora']) for x in i[0:]]
             print(subtotal)
-        print()
-    except: print('Datos no disponibles')
+
+    except: print('Datos del portfolio no disponibles')
     
     shtTest.range('M1').value = 'volume'
 
@@ -453,23 +453,36 @@ def buscoOperaciones(inicio,fin):
 ########################################### CARGA BUCLE EN EXCEL ##########################################
 
 while True:
-    if not shtTest.range('M1').value: getPortfolio(hb, os.environ.get('account_id'))
+    try: 
+        if not shtTest.range('M1').value: getPortfolio(hb, os.environ.get('account_id'))
+    except: 
+        winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
+        print("______ error al traer portfolio ______ ",time.strftime("%H:%M:%S"))
+        shtTest.range('M1').value = 'volume'
+
     if time.strftime("%H:%M:%S") > '17:01:00': break 
     if str(shtTest.range('A1').value) != 'symbol': ilRulo()
-    try:
+
+    try: 
         if not shtTest.range('Q1').value:
             shtTest.range('A'+str(listLength)).options(index=True,header=False).value = everything
-            shtTest.range('AE2').options(index=True, header=False).value = cauciones
+            try: shtTest.range('AE2').options(index=True, header=False).value = cauciones
+            except: print("______ error al cargar cauciones en Excel ______ ",time.strftime("%H:%M:%S")) 
+    except: 
+        winsound.PlaySound("SystemHand", winsound.SND_ALIAS) 
+        print("______ error al cargar Bonos/Letras en Excel ______ ",time.strftime("%H:%M:%S")) 
+        shtTest.range('Q1').value = 'BONOS'
+
+    try:
         if not shtTest.range('S1').value: 
-            shtTest.range('A30').options(index=True,header=False).value=options
-        
+            shtTest.range('A30').options(index=True,header=False).value=options  
        #shtTest.range('A26').options(index=True, header=False).value = everything
        #shtTest.range('A' + str(listLength)).options(index=True, header=False).value = options
     except: 
         winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
-        print("______ error al cargar datos en Excel ______ ",time.strftime("%H:%M:%S")) 
-        shtTest.range('M1').value = 'volume'
-
+        print("______ error al cargar OPCIONES en Excel ______ ",time.strftime("%H:%M:%S")) 
+        shtTest.range('S1').value = 'OPCIONES'
+        
     buscoOperaciones(rangoDesde,rangoHasta)
     time.sleep(2)
     
