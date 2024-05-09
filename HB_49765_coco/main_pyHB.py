@@ -14,9 +14,9 @@ wb = xw.Book('..\\epgb_pyHB.xlsx')
 shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
 shtTest.range('Q1').value = 'BONOS'
-shtTest.range('S1').value ='OPCIONES'
-shtTest.range('W1').value ='TRAILING'
-shtTest.range('X1').value ='STOP'
+shtTest.range('S1').value = 'OPCIONES'
+shtTest.range('W1').value = 'TRAILING'
+shtTest.range('X1').value = 'STOP'
 shtTest.range('Y1').value = -5
 shtTest.range('Z1').value = 0.0005
 shtTest.range('AA1').value = 0
@@ -134,12 +134,15 @@ def getPortfolio(hb, comitente):
      'comitenteMana': None}
     
     portfolio = requests.post("https://cocoscap.com/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
-
-    for valor in portfolio["Result"]["Activos"][0:]:
-        tipo = valor['ESPE']
-        for i in valor['Subtotal']:
-            if tipo == 'Subtotal Cuenta Corriente': print(tipo,i['NERE'],'/ importe:',i['IMPO'])
-            elif i['IMPO'] != None: print(tipo,i['NERE'],'/ cantidad:',i['CANT'],'/ importe:',i['IMPO'],'/',i['Hora'])
+    try:
+        print()
+        subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
+        for i in subtotal[0:]:
+            if i[0]['NERE'] == 'Pesos': subtotal = [ (x['NERE'],x['IMPO']) for x in i[0:]]
+            else: subtotal = [ (x['NERE'],x['CANT'],x['PCIO'],x['IMPO'],x['Hora']) for x in i[0:]]
+            print(subtotal)
+        print()
+    except: print('Datos del portfolio no disponibles')
     
     shtTest.range('M1').value = 'volume'
 
@@ -284,7 +287,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                 except: shtTest.range('V'+str(int(celda+1))).value = int(size)
                 try: shtTest.range('W'+str(int(celda+1))).value += int(size) * precio*100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio*100
-                print(f'Buy  {symbol[0]} 24hs // precio: {precio} // + {int(size)} // orden: {orderC}')
+                print(f'BUY  {symbol[0]} 24hs // precio: {precio} // + {int(size)} // orden: {orderC}')
             else:
                 if str(shtTest.range('X1').value) == 'REC': 
                     variacion = shtTest.range('G'+str(int(celda+1))).value
@@ -302,7 +305,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                 except: shtTest.range('V'+str(int(celda+1))).value = int(size)
                 try: shtTest.range('W'+str(int(celda+1))).value += int(size) * precio/100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio/100
-                print(f'Buy  {symbol[0]} {symbol[2]} // precio {round(precio/100,4)} // + {int(size)} // orden: {orderC}')
+                print(f'BUY  {symbol[0]} {symbol[2]} // precio {round(precio/100,4)} // + {int(size)} // orden: {orderC}')
         except: 
             winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
             shtTest.range('Q'+str(int(celda+1))+':'+'U'+str(int(celda+1))).value = ''
@@ -315,18 +318,19 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                 except: shtTest.range('V'+str(int(celda+1))).value = int(size)
                 try: shtTest.range('W'+str(int(celda+1))).value -= int(size) * precio*100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio*100
-                print(f'Sell {symbol[0]} 24hs // precio: {precio} // - {int(size)} // orden: {orderV}')
+                print(f'SELL {symbol[0]} 24hs // precio: {precio} // - {int(size)} // orden: {orderV}')
             else:
                 orderV = hb.orders.send_sell_order(symbol[0],symbol[2], float(precio), int(size))
                 try: shtTest.range('V'+str(int(celda+1))).value -= int(size)
                 except: shtTest.range('V'+str(int(celda+1))).value = int(size)
                 try: shtTest.range('W'+str(int(celda+1))).value -= int(size) * precio/100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio/100
-                print(f'Sell {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // - {int(size)} // orden: {orderV}')
+                print(f'SELL {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // - {int(size)} // orden: {orderV}')
         except:
             winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
             shtTest.range('Q'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
             print('Error en VENTA.')
+            
     try: shtTest.range('X'+str(int(celda+1))).value=shtTest.range('W'+str(int(celda+1))).value / shtTest.range('V'+str(int(celda+1))).value
     except: pass
     shtTest.range('Q'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
@@ -410,15 +414,15 @@ def buscoOperaciones(inicio,fin):
                 if str(valor[5]).lower() == 'c':
                     hb.orders.cancel_order(int(os.environ.get('account_id')),orderC)
                     shtTest.range('U'+str(int(valor[0]+1))).value = ''
-                    print(time.strftime("%H:%M:%S"),f" // Orden compra: {orderC} fue cancelada")
+                    print(f" // Orden compra: {orderC} fue cancelada - ",time.strftime("%H:%M:%S"))
                 elif str(valor[5]).lower() == 'v': 
                     hb.orders.cancel_order(int(os.environ.get('account_id')),orderV)
                     shtTest.range('U'+str(int(valor[0]+1))).value = ''
-                    print(time.strftime("%H:%M:%S"),f" // Orden venta: // {orderV} fue cancelada")
+                    print(f" // Orden venta: // {orderV} fue cancelada - ",time.strftime("%H:%M:%S"))
                 elif str(valor[5]).lower() == 'x': 
                     hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
                     shtTest.range('U'+str(int(valor[0]+1))+':'+'X'+str(int(valor[0]+1))).value = ''
-                    print(time.strftime("%H:%M:%S")," // Todas las ordenes activas canceladas")
+                    print(" // Todas las ordenes activas canceladas - ",time.strftime("%H:%M:%S") )
             except: 
                 winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
                 shtTest.range('U'+str(int(valor[0]+1))).value = ''
@@ -449,6 +453,7 @@ def buscoOperaciones(inicio,fin):
 ########################################### CARGA BUCLE EN EXCEL ##########################################
 
 while True:
+    if not shtTest.range('M1').value: getPortfolio(hb, os.environ.get('account_id'))
     if time.strftime("%H:%M:%S") > '17:01:00': break 
     if str(shtTest.range('A1').value) != 'symbol': ilRulo()
     try:
@@ -457,8 +462,7 @@ while True:
             shtTest.range('AE2').options(index=True, header=False).value = cauciones
         if not shtTest.range('S1').value: 
             shtTest.range('A30').options(index=True,header=False).value=options
-        if not shtTest.range('M1').value: 
-            getPortfolio(hb, os.environ.get('account_id'))
+        
        #shtTest.range('A26').options(index=True, header=False).value = everything
        #shtTest.range('A' + str(listLength)).options(index=True, header=False).value = options
     except: 
@@ -473,9 +477,9 @@ try: hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
 except: pass
 print(time.strftime("%H:%M:%S"), 'Mercado cerrado. ')
 shtTest.range('Q1').value = 'BONOS'
-shtTest.range('S1').value ='OPCIONES'
-shtTest.range('W1').value ='TRAILING'
-shtTest.range('X1').value ='STOP'
+shtTest.range('S1').value = 'OPCIONES'
+shtTest.range('W1').value = 'TRAILING'
+shtTest.range('X1').value = 'STOP'
 
 
 
