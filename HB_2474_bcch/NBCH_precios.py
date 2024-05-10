@@ -28,6 +28,7 @@ def getOptionsList():
     allOptions = pd.DataFrame({'symbol': oOpciones},columns=["symbol", "bid_size", "bid", "ask", "ask_size", "last","change", "open", "high", "low", "previous_close", "turnover", "volume",'operations', 'datetime'])
     allOptions = allOptions.set_index('symbol')
     allOptions['datetime'] = pd.to_datetime(allOptions['datetime'])
+    print()
     return allOptions
 
 def getBonosList():

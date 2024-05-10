@@ -135,15 +135,13 @@ def getPortfolio(hb, comitente):
     
     portfolio = requests.post("https://cocoscap.com/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
     try:
-        print()
         subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
         for i in subtotal[0:]:
-            if i[0]['NERE'] == 'Pesos': subtotal = [ (x['NERE'],x['IMPO']) for x in i[0:]]
+            if i[0]['NERE'] == 'Pesos': 
+                subtotal = [ (x['DETA'],x['IMPO']) for x in i[0]['APERTURA'] if x['IMPO'] != None ]
             else: subtotal = [ (x['NERE'],x['CANT'],x['PCIO'],x['IMPO'],x['Hora']) for x in i[0:]]
             print(subtotal)
-
     except: print('Datos del portfolio no disponibles')
-    
     shtTest.range('M1').value = 'volume'
 
 #--------------------------------------------------------------------------------------------------------------------------------
@@ -453,6 +451,8 @@ def buscoOperaciones(inicio,fin):
 ########################################### CARGA BUCLE EN EXCEL ##########################################
 
 while True:
+
+
     try: 
         if not shtTest.range('M1').value: getPortfolio(hb, os.environ.get('account_id'))
     except: 
