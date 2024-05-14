@@ -47,14 +47,16 @@ print()
 subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
 for i in subtotal[0:]:
     if i[0]['NERE'] == 'Pesos': 
-        subtotal = [ (x['DETA'],x['IMPO'],x['ACUM']) for x in i[0]['APERTURA'] if x['IMPO'] != None]
-    else: subtotal = [ (x['NERE'],x['CAN0'],x['CANT'],x['PCIO'],x['GTOS']) for x in i[0:]]
-    print(subtotal)
-print()
+        try: subtotal = [ (x['DETA'],x['IMPO']) for x in i[0]['Detalle']]
+        except: subtotal = [ (x['DETA'],x['IMPO'],x['ACUM']) for x in i[0]['APERTURA'] if x['IMPO'] != None]
+        print(subtotal)
+    else: subtotal = [ (x['NERE'],x['CAN0'],x['CANT'],x['PCIO'],x['IMPO'],x['GTOS']) for x in i[0:] if x['CANT'] != None]
 
-'''subtotal = [ i[0]['NERE'] for i in subtotal[0:] ]
-print(subtotal)
-print()'''
+for x in subtotal: 
+    print(x)
+
+
+    
 
 
 

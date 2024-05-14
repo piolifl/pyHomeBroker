@@ -122,7 +122,8 @@ def login():
 hb = HomeBroker(int(os.environ.get('broker')), on_options=on_options, on_securities=on_securities, on_repos=on_repos)
 login()
 getTodos()
-    
+
+
 def getPortfolio(hb, comitente):
     payload = {'comitente': str(comitente),
      'consolida': '0',
@@ -135,16 +136,18 @@ def getPortfolio(hb, comitente):
     
     portfolio = requests.post("https://cocoscap.com/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
     
-    try:
-        subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
-        for i in subtotal[0:]:
-            if i[0]['NERE'] == 'Pesos': 
-                subtotal = [ (x['DETA'],x['IMPO'],x['ACUM']) for x in i[0]['APERTURA'] if x['IMPO'] != None]
-            else: subtotal = [ (x['NERE'],x['CAN0'],x['CANT'],x['PCIO'],x['GTOS']) for x in i[0:]]
+
+    subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
+    for i in subtotal[0:]:
+        if i[0]['NERE'] == 'Pesos': 
+            try: subtotal = [ (x['DETA'],x['IMPO']) for x in i[0]['Detalle']]
+            except: subtotal = [ (x['DETA'],x['IMPO'],x['ACUM']) for x in i[0]['APERTURA'] if x['IMPO'] != None]
             print(subtotal)
-    except: print('Datos del portfolio no disponibles')
-    
+        else: subtotal = [ (x['NERE'],x['CAN0'],x['CANT'],x['PCIO'],x['IMPO'],x['GTOS']) for x in i[0:] if x['CANT'] != None]
+    for x in subtotal: print(x)
+
     shtTest.range('M1').value = 'volume'
+
 
 #--------------------------------------------------------------------------------------------------------------------------------
 print(time.strftime("%H:%M:%S"),f"Logueo correcto: {os.environ.get('name')} cuenta: {int(os.environ.get('account_id'))}")
@@ -273,33 +276,30 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                 if str(shtTest.range('X1').value) == 'REC': 
                     variacion = shtTest.range('G'+str(int(celda+1))).value
                     if not variacion: variacion = 0
-                    if variacion <= -10: recompro = -10
+                    if variacion <= -10: recompro *= 2
                     if variacion >= 0: recompro /= -1
-                    else: recompro = float(shtTest.range('Y1').value)
-                    if not recompro: 
-                        precio += 1
-                        shtTest.range('Y1').value = -1
+                    if not recompro: shtTest.range('Y1').value = -1
                     else:  precio += recompro / 10
                     shtTest.range('X1').value = ''
                     print(f'{time.strftime("%H:%M:%S")} RECOMPRA ',end=' || ')
+
                 orderC = hb.orders.send_buy_order(symbol[0],'24hs', float(precio), int(size))
                 try: shtTest.range('V'+str(int(celda+1))).value += int(size)
                 except: shtTest.range('V'+str(int(celda+1))).value = int(size)
                 try: shtTest.range('W'+str(int(celda+1))).value += int(size) * precio*100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio*100
                 print(f'BUY  {symbol[0]} 24hs // precio: {precio} // + {int(size)} // orden: {orderC}')
+
             else:
                 if str(shtTest.range('X1').value) == 'REC': 
                     variacion = shtTest.range('G'+str(int(celda+1))).value
                     if not variacion: variacion = 0
                     if variacion >= 0: recompro /= -1
-                    else: recompro = float(shtTest.range('Y1').value)
-                    if not recompro: 
-                        precio += 100
-                        shtTest.range('Y1').value = -1
+                    if not recompro: shtTest.range('Y1').value = -1
                     else:  precio += recompro * 10
                     shtTest.range('X1').value = ''
                     print(f'{time.strftime("%H:%M:%S")} RECOMPRA ',end=' || ')
+
                 orderC = hb.orders.send_buy_order(symbol[0],symbol[2], float(precio), int(size))
                 try: shtTest.range('V'+str(int(celda+1))).value += int(size)
                 except: shtTest.range('V'+str(int(celda+1))).value = int(size)
@@ -355,7 +355,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                 shtTest.range('W'+str(int(nroCelda+1))).value = 'TRAILING'
                 shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
             if not shtTest.range('X1').value:
-                if last * 100 < costo * (1 - (ganancia*50)): # Precio baja activo stop y envia orden venta
+                if last * 100 < costo * (1 - (ganancia*75)): # Precio baja activo stop y envia orden venta
                     if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP' and bid>last*(1-(ganancia*15)):
                         print(f'{time.strftime("%H:%M:%S")} STOP     ',end=' || ')
                         shtTest.range('X1').value = 'REC'
@@ -385,7 +385,9 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                         shtTest.range('X'+str(int(nroCelda+1))).value = round(bid / 100,5)
                         enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),cantidad,nroCelda)
                     else: shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP' 
-    except: pass
+    except: 
+        print("______ error haciendo TRAILING ______ ",time.strftime("%H:%M:%S"))
+        pass
 ############################################ BUSCA OPERACIONES ###############################################
 def buscoOperaciones(inicio,fin):
     for valor in shtTest.range(str(inicio) + ':' + str(fin)).value:
@@ -451,10 +453,7 @@ def buscoOperaciones(inicio,fin):
                 winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
                 print(time.strftime("%H:%M:%S"), 'Error RECOMPRA Automatica.')
 ########################################### CARGA BUCLE EN EXCEL ##########################################
-
 while True:
-
-
     try: 
         if not shtTest.range('M1').value: getPortfolio(hb, os.environ.get('account_id'))
     except: 
@@ -473,7 +472,6 @@ while True:
     except: 
         winsound.PlaySound("SystemHand", winsound.SND_ALIAS) 
         print("______ error al cargar Bonos/Letras en Excel ______ ",time.strftime("%H:%M:%S")) 
-        shtTest.range('Q1').value = 'BONOS'
 
     try:
         if not shtTest.range('S1').value: 
@@ -483,7 +481,6 @@ while True:
     except: 
         winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
         print("______ error al cargar OPCIONES en Excel ______ ",time.strftime("%H:%M:%S")) 
-        shtTest.range('S1').value = 'OPCIONES'
         
     buscoOperaciones(rangoDesde,rangoHasta)
     time.sleep(2)
