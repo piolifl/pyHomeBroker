@@ -277,31 +277,27 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                     if not recompro: shtTest.range('Y1').value = -1
                     else:  precio += recompro / 10
                     shtTest.range('X1').value = ''
-
                     print(f'{time.strftime("%H:%M:%S")} RECOMPRA ',end=' || ')
-
                 orderC = hb.orders.send_buy_order(symbol[0],'24hs', float(precio), int(size))
                 try: shtTest.range('V'+str(int(celda+1))).value += int(size)
                 except: shtTest.range('V'+str(int(celda+1))).value = int(size)
                 try: shtTest.range('W'+str(int(celda+1))).value += int(size) * precio*100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio*100
-                print(f'BUY  {symbol[0]} 24hs // precio: {precio} // + {int(size)} // orden: {orderC}')
-
+                try: print(f'BUY  {symbol[0]} 24hs // precio: {precio} // + {int(size)} // orden: {orderC}')
+                except: print(f'BUY  {symbol[0]} 24hs // precio: {precio} // + {int(size)}')
             else:
                 if str(shtTest.range('X1').value) == 'REC': 
-
                     if not recompro: shtTest.range('Y1').value = -1
                     else:  precio += recompro * 10
                     shtTest.range('X1').value = ''
-
                     print(f'{time.strftime("%H:%M:%S")} RECOMPRA ',end=' || ')
-
                 orderC = hb.orders.send_buy_order(symbol[0],symbol[2], float(precio), int(size))
                 try: shtTest.range('V'+str(int(celda+1))).value += int(size)
                 except: shtTest.range('V'+str(int(celda+1))).value = int(size)
                 try: shtTest.range('W'+str(int(celda+1))).value += int(size) * precio/100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio/100
-                print(f'BUY  {symbol[0]} {symbol[2]} // precio {round(precio/100,4)} // + {int(size)} // orden: {orderC}')
+                try: print(f'BUY  {symbol[0]} {symbol[2]} // precio {round(precio/100,4)} // + {int(size)} // orden: {orderC}')
+                except:  print(f'BUY  {symbol[0]} {symbol[2]} // precio {round(precio/100,4)} // + {int(size)}')
         except: 
             winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
             shtTest.range('Q'+str(int(celda+1))+':'+'U'+str(int(celda+1))).value = ''
@@ -314,14 +310,16 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                 except: shtTest.range('V'+str(int(celda+1))).value = int(size)
                 try: shtTest.range('W'+str(int(celda+1))).value -= int(size) * precio*100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio*100
-                print(f'SELL {symbol[0]} 24hs // precio: {precio} // - {int(size)} // orden: {orderV}')
+                try: print(f'SELL {symbol[0]} 24hs // precio: {precio} // - {int(size)} // orden: {orderV}')
+                except: print(f'SELL {symbol[0]} 24hs // precio: {precio} // - {int(size)}')
             else:
                 orderV = hb.orders.send_sell_order(symbol[0],symbol[2], float(precio), int(size))
                 try: shtTest.range('V'+str(int(celda+1))).value -= int(size)
                 except: shtTest.range('V'+str(int(celda+1))).value = int(size)
                 try: shtTest.range('W'+str(int(celda+1))).value -= int(size) * precio/100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio/100
-                print(f'SELL {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // - {int(size)} // orden: {orderV}')
+                try: print(f'SELL {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // - {int(size)} // orden: {orderV}')
+                except: print(f'SELL {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // - {int(size)}')
         except:
             winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
             shtTest.range('Q'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
