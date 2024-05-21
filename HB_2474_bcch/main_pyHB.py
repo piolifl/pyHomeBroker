@@ -138,15 +138,15 @@ def getPortfolio(hb, comitente):
     subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
     for i in subtotal[0:]:
         if i[0]['NERE'] == 'Pesos': 
-            try: subtotal = [ (x['DETA'],x['IMPO']) for x in i[0]['Detalle']]
-            except: subtotal = [ (x['DETA'],x['IMPO'],x['ACUM']) for x in i[0]['APERTURA'] if x['IMPO'] != None]
-            print(subtotal)
+            try: subtotal = [ (x['DETA'],x['IMPO'],x['ACUM']) for x in i[0]['APERTURA'] if x['IMPO'] != None]
+            except: subtotal = [ (x['DETA'],x['IMPO'],x['ACUM']) for x in i[0] if x['IMPO'] != None]
+            for x in subtotal: print(x)
         else: 
-            subtotal = [ (x['NERE'],x['CAN0'],x['CANT'],x['PCIO'],x['IMPO'],x['GTOS']) for x in i[0:] if x['CANT'] != None ]
+            subtotal = [ (x['CANT'], x['NERE'],x['CAN0'],' || ',x['PCIO'],x['GTOS']) for x in i[0:] if x['CANT'] != None]
             for x in subtotal: print(x)
 
 #--------------------------------------------------------------------------------------------------------------------------------
-print(time.strftime("%H:%M:%S"),f"Logueo correcto: {os.environ.get('name')} cuenta: {int(os.environ.get('account_id'))}")
+print(time.strftime("%H:%M:%S"),f"Logueo correcto en: {os.environ.get('name')} cuenta: {int(os.environ.get('account_id'))}")
 #--------------------------------------------------------------------------------------------------------------------------------
 def namesArs(nombre,plazo): 
     if nombre[:2] == 'BA': return 'BA37D'+plazo
@@ -262,6 +262,7 @@ def ilRulo():
 ############################################ ENVIAR ORDENES ################################################    
 def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     global orderC, orderV
+    orderC, orderV = None, None
     symbol = str(shtTest.range(str(symbol)).value).split()
     precio = shtTest.range(str(price)).value
     recompro = float(shtTest.range('Y1').value)
@@ -283,8 +284,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                 except: shtTest.range('V'+str(int(celda+1))).value = int(size)
                 try: shtTest.range('W'+str(int(celda+1))).value += int(size) * precio*100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio*100
-                try: print(f'BUY  {symbol[0]} 24hs // precio: {precio} // + {int(size)} // orden: {orderC}')
-                except: print(f'BUY  {symbol[0]} 24hs // precio: {precio} // + {int(size)}')
+                print(f'BUY  {symbol[0]} 24hs // precio: {precio} // + {int(size)} // orden: {orderC}')
             else:
                 if str(shtTest.range('X1').value) == 'REC': 
                     if not recompro: shtTest.range('Y1').value = -1
@@ -296,8 +296,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                 except: shtTest.range('V'+str(int(celda+1))).value = int(size)
                 try: shtTest.range('W'+str(int(celda+1))).value += int(size) * precio/100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio/100
-                try: print(f'BUY  {symbol[0]} {symbol[2]} // precio {round(precio/100,4)} // + {int(size)} // orden: {orderC}')
-                except:  print(f'BUY  {symbol[0]} {symbol[2]} // precio {round(precio/100,4)} // + {int(size)}')
+                print(f'BUY  {symbol[0]} {symbol[2]} // precio {round(precio/100,4)} // + {int(size)} // orden: {orderC}')
         except: 
             winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
             shtTest.range('Q'+str(int(celda+1))+':'+'U'+str(int(celda+1))).value = ''
@@ -310,16 +309,14 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                 except: shtTest.range('V'+str(int(celda+1))).value = int(size)
                 try: shtTest.range('W'+str(int(celda+1))).value -= int(size) * precio*100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio*100
-                try: print(f'SELL {symbol[0]} 24hs // precio: {precio} // - {int(size)} // orden: {orderV}')
-                except: print(f'SELL {symbol[0]} 24hs // precio: {precio} // - {int(size)}')
+                print(f'SELL {symbol[0]} 24hs // precio: {precio} // - {int(size)} // orden: {orderV}')
             else:
                 orderV = hb.orders.send_sell_order(symbol[0],symbol[2], float(precio), int(size))
                 try: shtTest.range('V'+str(int(celda+1))).value -= int(size)
                 except: shtTest.range('V'+str(int(celda+1))).value = int(size)
                 try: shtTest.range('W'+str(int(celda+1))).value -= int(size) * precio/100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio/100
-                try: print(f'SELL {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // - {int(size)} // orden: {orderV}')
-                except: print(f'SELL {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // - {int(size)}')
+                print(f'SELL {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // - {int(size)} // orden: {orderV}')
         except:
             winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
             shtTest.range('Q'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
@@ -425,8 +422,8 @@ def buscoOperaciones(inicio,fin):
                 print(time.strftime("%H:%M:%S"),'Error al cancelar orden.')
 
             if valor[5] == '-' or valor[5] == '+': # buy//sell usando puntas _________________________________________________
-                cantidad = int(shtTest.range('Y'+str(int(valor[0]+1))).value)
-                if cantidad == 'NoneType': cantidad = 1
+                cantidad = shtTest.range('Y'+str(int(valor[0]+1))).value
+                if cantidad == 'None': cantidad = 1
                 if valor[5] == '-':enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
                 else: enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
                 shtTest.range('U'+str(int(valor[0]+1))).value = ''

@@ -3,79 +3,69 @@ portfolio = {
     'Success': True, 
     'Error': {'Codigo': 0, 'Descripcion': None}, 
     'Result': {'Totales': 
-               {'TotalPosicion': '129590.89', 
-                'Detalle': [{'DETA': 'Tenencia Opciones', 'IMPO': '8700', 'TIPO': '1', 'Hora': 'Pesos', 'CANT': None, 'TCAM': '1'}, 
-                            {'DETA': 'Tenencia a Liquidar', 'IMPO': '30875', 'TIPO': '1', 'Hora': 'Pesos', 'CANT': None, 'TCAM': '1'}, 
-                            {'DETA': 'Cuenta Corriente $', 'IMPO': '90015.89', 'TIPO': '1', 'Hora': 'Pesos', 'CANT': None, 'TCAM': '1'}]}, 
-                'Activos': [
-                    {'GTOS': '0', 'IMPO': '90015.89', 'ESPE': 'Subtotal Cuenta Corriente', 'TIPO': '11', 'Hora': '', 
-                     'Subtotal': [{'IMPO': '90015.89', 'ESPE': '', 
-                                   'APERTURA': [
-                                       {'DETA': 'Vencido', 'IMPO': '38664.03', 'GTIA': None, 'ACUM': '38664.03'}, 
-                                       {'DETA': '24 Hs. 15/05/24', 'IMPO': '51351.86', 'GTIA': None, 'ACUM': '90015.89'}, 
-                                       {'DETA': '48 Hs. 16/05/24', 'IMPO': None, 'GTIA': None, 'ACUM': '90015.89'}, 
-                                       {'DETA': '72 Hs. 17/05/24', 'IMPO': None, 'GTIA': None, 'ACUM': '90015.89'}, 
-                                       {'DETA': '+ de 72 Hs.', 'IMPO': None, 'GTIA': None, 'ACUM': '90015.89'}, 
-                                       {'DETA': 'Gtia.Opciones', 'IMPO': None, 'GTIA': None, 'ACUM': '90015.89'}], 
-                                       'Detalle': [
-                                           {'DETA': 'Disponible', 'IMPO': '38664.03', 'CANT': None, 'PCIO': '1'}, 
-                                           {'DETA': 'A Liq', 'IMPO': '51351.86', 'CANT': None, 'PCIO': '1'}], 
-                                        'TESP': '0', 'NERE': 'Pesos', 'GTOS': '0', 'DETA': 'Total', 'TIPO': '11', 'Hora': 'Pesos', 'AMPL': '', 
-                                        'DIVI': '100', 'TICK': 'Pesos', 'CANT': None, 'PCIO': '1', 'CAN3': '0', 'CAN2': '0', 'CAN0': '0'}], 
-                                        'CANT': None, 'TCAM': '1', 'CAN2': '69.4615879'}, 
-                    {'GTOS': '0', 'IMPO': '8700', 'ESPE': 'Subtotal Opciones', 'TIPO': '10', 'Hora': '', 
-                     'Subtotal': [{'IMPO': '8700', 'ESPE': '8139B', 
-                                   'Detalle': [
-                                       {'DETA': 'Disponible', 'IMPO': '35000', 'CANT': '1', 'PCIO': '350'}, 
-                                       {'DETA': 'A Liq.', 'IMPO': '-35000', 'CANT': '-1', 'PCIO': '350'}], 
-                                'TESP': '4', 'NERE': 'GFGC37059J', 'GTOS': '0', 'DETA': 'Total', 'TIPO': '10', 'Hora': '16:54:21', 
-                                'AMPL': 'GFG(C) 3,705.900 JUNIO', 'DIVI': '100', 'TICK': 'GFGC37059J', 'CANT': '1', 'PCIO': '350', 
-                                'CAN3': '-111.7018894', 'CAN2': '0', 'CAN0': '-2990.97'}, {'IMPO': None, 'ESPE': '8129B', 
-                                    'Detalle': [
-                                        {'DETA': 'Disponible', 'IMPO': '27000', 'CANT': '1', 'PCIO': '270'}, 
-                                        {'DETA': 'A Liq.', 'IMPO': '-27000', 'CANT': '-1', 'PCIO': '270'}], 
-                                'TESP': '4', 'NERE': 'GFGC38559J', 'GTOS': '0', 'DETA': 'Total', 'TIPO': '10', 'Hora': '16:54:53', 
-                                'AMPL': 'GFG(C) 3,855.900 JUNIO', 'DIVI': '100', 'TICK': 'GFGC38559J', 'CANT': None, 'PCIO': '270', 'CAN3': '-104.8716589', 'CAN2': '0', 'CAN0': '-5542.26'}, 
-                                {'IMPO': None, 'ESPE': '8143B', 'Detalle': [{'DETA': 'Disponible', 'IMPO': '79.7', 'CANT': '1', 'PCIO': '.797'}, 
-                                                                            {'DETA': 'A Liq.', 'IMPO': '-79.7', 'CANT': '-1', 'PCIO': '.797'}], 
-                                        'TESP': '4', 'NERE': 'GFGV23559J', 'GTOS': '0', 'DETA': 'Total', 'TIPO': '10', 
-                                        'Hora': '16:54:14', 'AMPL': 'GFG(V) 2,355.900 JUNIO', 'DIVI': '100', 
-                                        'TICK': 'GFGV23559J', 'CANT': None, 'PCIO': '.797', 'CAN3': '-106.8709858', 
-                                        'CAN2': '0', 'CAN0': '-11.5995'}, 
-                                        {'IMPO': '8700', 'ESPE': '8130B', 'TESP': '4','NERE': 'GFGV34059J', 'GTOS': '0', 
-                                         'DETA': 'A Liq', 'TIPO': '10', 'Hora': '16:54:42', 'AMPL': 'GFG(V) 3,405.900 JUNIO', 
-                                         'DIVI': '100', 'TICK': 'GFGV34059J', 'CANT': '3', 'PCIO': '29', 'CAN3': '0', 'CAN2': '0', 
-                                         'CAN0': '0'}], 'CANT': None, 'TCAM': '1', 'CAN2': '6.7134349'}, 
-
-                    {'GTOS': '0', 'IMPO': '30875', 'ESPE': 'Subtotal Titulos Publicos DOLAR MEP', 'TIPO': '1', 'Hora': '', 
-                     'Subtotal': [{'IMPO': '30875', 'ESPE': '05921', 'TESP': '1', 'NERE': 'AL30', 'GTOS': '0', 'DETA': 'A Liq', 
-                                   'TIPO': '1', 'Hora': '16:54:48', 'AMPL': 'BONO REP. ARGENTINA USD STEP UP 2030', 'DIVI': '.01', 
-                                   'TICK': 'AL30', 'CANT': '50', 'PCIO': '61750', 'CAN3': '0', 'CAN2': '0', 'CAN0': '0'}], 
-                                   'CANT': None, 'TCAM': '1', 
-                     'CAN2': '23.8249772' }
-                       ] } }
+               {'TotalPosicion': '80527.73', 
+                'Detalle': [{'DETA': 'Tenencia Opciones', 'IMPO': '79869.2', 'TIPO': '10', 'Hora': 'Pesos', 'CANT': None, 'TCAM': '1'}, 
+                            {'DETA': 'Cuenta Corriente $', 'IMPO': '658.53', 'TIPO': '10', 'Hora': 'Pesos', 'CANT': None, 'TCAM': '1'}]}, 
+                'Activos': [{'GTOS': '0', 'IMPO': '658.53', 'ESPE': 'Subtotal Cuenta Corriente', 'TIPO': '11', 'Hora': '', 
+                             'Subtotal': [{'IMPO': '658.53', 'ESPE': '', 
+                                           'APERTURA': [{'DETA': 'Vencido', 'IMPO': '75386.8', 'GTIA': None, 'ACUM': '75386.8'}, 
+                                                        {'DETA': '24 Hs. 20/05/24', 'IMPO': '-74728.27', 'GTIA': None, 'ACUM': '658.53'}, 
+                                                        {'DETA': '48 Hs. 21/05/24', 'IMPO': None, 'GTIA': None, 'ACUM': '658.53'}, 
+                                                        {'DETA': '72 Hs. 22/05/24', 'IMPO': None, 'GTIA': None, 'ACUM': '658.53'}, 
+                                                        {'DETA': '+ de 72 Hs.', 'IMPO': None, 'GTIA': None, 'ACUM': '658.53'}, 
+                                                        {'DETA': 'Gtia.Opciones', 'IMPO': None, 'GTIA': None, 'ACUM': '658.53'}], 
+                                            'Detalle': [{'DETA': 'Disponible', 'IMPO': '75386.8', 'CANT': None, 'PCIO': '1'}, 
+                                                        {'DETA': 'A Liq', 'IMPO': '-74728.27', 'CANT': None, 'PCIO': '1'}], 
+                                            'TESP': '0', 'NERE': 'Pesos', 'GTOS': '0', 'DETA': 'Total', 'TIPO': '11', 'Hora': 'Pesos', 
+                                            'AMPL': '', 'DIVI': '100', 'TICK': 'Pesos', 'CANT': None, 'PCIO': '1', 'CAN3': '0', 'CAN2': '0', 
+                                            'CAN0': '0'}], 'CANT': None, 'TCAM': '1', 'CAN2': '.817768'}, 
+                                            {'GTOS': '1464.34', 'IMPO': '79869.2', 'ESPE': 'Subtotal Opciones', 'TIPO': '10', 'Hora': '', 
+                                             'Subtotal': [{'IMPO': '79869.2', 'ESPE': '8118B', 'TESP': '4', 'NERE': 'GFGC41559J', 
+                                                           'GTOS': '1464.34', 'DETA': 'A Liq', 'TIPO': '10', 'Hora': 'ANTERIOR', 
+                                                           'AMPL': 'GFG(C) 4,155.900 JUNIO', 'DIVI': '100', 'TICK': 'GFGC41559J', 'CANT': '4', 
+                                                           'PCIO': '199.673', 'CAN3': '1.8676648', 'CAN2': '99.182232', 'CAN0': '196.01215'}, 
+                                                           {'IMPO': None, 'ESPE': '8174B', 
+                                                            'Detalle': [{'DETA': 'Disponible', 'IMPO': '7227.1', 'CANT': '1', 'PCIO': '72.271'}, 
+                                                                        {'DETA': 'A Liq.', 'IMPO': '-7227.1', 'CANT': '-1', 'PCIO': '72.271'}], 
+                                                                        'TESP': '4', 'NERE': 'GFGC45559J', 'GTOS': '0', 'DETA': 'Total', 
+                                                                        'TIPO': '10', 'Hora': 'ANTERIOR', 'AMPL': 'GFG(C) 4,555.900 JUNIO', 
+                                                                        'DIVI': '100', 'TICK': 'GFGC45559J', 'CANT': None, 'PCIO': '72.271', 
+                                                                        'CAN3': '0', 'CAN2': '0', 'CAN0': '0'}, 
+                                                            {'IMPO': None, 'ESPE': '8192B', 
+                                                             'Detalle': [{'DETA': 'Disponible', 'IMPO': '3658.6', 'CANT': '2', 'PCIO': '18.293'},
+                                                                         {'DETA': 'A Liq.', 'IMPO': '-3658.6', 'CANT': '-2', 'PCIO': '18.293'}], 
+                                                                         'TESP': '4', 'NERE': 'GFGC51559J', 'GTOS': '0', 'DETA': 'Total', 
+                                                                         'TIPO': '10', 'Hora': 'ANTERIOR', 'AMPL': 'GFG(C) 5,155.900 JUNIO', 
+                                                                         'DIVI': '100', 'TICK': 'GFGC51559J', 'CANT': None, 'PCIO': '18.293', 
+                                                                         'CAN3': '0', 'CAN2': '0', 'CAN0': '0'}, 
+                                                            {'IMPO': None, 'ESPE': '8194B',
+                                                             'Detalle': [{'DETA': 'Disponible', 'IMPO': '1237.2', 'CANT': '1', 'PCIO': '12.372'}, 
+                                                                         {'DETA': 'A Liq.', 'IMPO': '-1237.2', 'CANT': '-1', 'PCIO': '12.372'}], 
+                                                                         'TESP': '4', 'NERE': 'GFGC53559J', 'GTOS': '0', 'DETA': 'Total', 
+                                                                         'TIPO': '10', 'Hora': 'ANTERIOR', 'AMPL': 'GFG(C) 5,355.900 JUNIO', 
+                                                                         'DIVI': '100', 'TICK': 'GFGC53559J', 'CANT': None, 'PCIO': '12.372', 
+                                                                         'CAN3': '0', 'CAN2': '0', 'CAN0': '0'}], 
+                                                                         'CANT': None, 'TCAM': '1', 'CAN2': '99.182232'}]}}
 #portfolio = portfolio["Result"]["Activos"][0:]
 #portfolio = [ (x['NERE']) for x in portfolio[1]['Subtotal'][0]]
 #portfolio = portfolio["Result"]["Activos"][1]["Subtotal"]
 os.system('cls')
 
 print()
-subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
 
-for i in subtotal[0:]:
+def buscando():
+    subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
+    for i in subtotal[0:]:
 
-    if i[0]['NERE'] == 'Pesos': 
-        try: subtotal = [ (x['DETA'],x['IMPO']) for x in i[0]['Detalle']]
-        except: subtotal = [ (x['DETA'],x['IMPO'],x['ACUM']) for x in i[0] if x['IMPO'] != None]
-        print(subtotal)
-    else: 
-        subtotal = [ (x['NERE'],x['CAN0'],x['CANT'],x['PCIO'],x['IMPO'],x['GTOS']) for x in i[0:] if x['CANT'] != None]
-        for x in subtotal: print(x)
-
-
-    
-
-
+        if i[0]['NERE'] == 'Pesos': 
+            try: subtotal = [ (x['DETA'],x['IMPO'],x['ACUM']) for x in i[0]['APERTURA'] if x['IMPO'] != None]
+            except: subtotal = [ (x['DETA'],x['IMPO'],x['ACUM']) for x in i[0] if x['IMPO'] != None]
+            for x in subtotal: print(x)
+        else: 
+            subtotal = [ (x['CANT'], x['NERE'],x['CAN0'],' || ',x['PCIO'],x['GTOS']) for x in i[0:] if x['CANT'] != None]
+            for x in subtotal: print(x)
+            
+buscando()
 
 
 
