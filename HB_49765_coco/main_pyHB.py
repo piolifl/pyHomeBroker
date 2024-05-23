@@ -17,7 +17,7 @@ shtTest.range('Q1').value = 'BONOS'
 shtTest.range('S1').value = 'OPCIONES'
 shtTest.range('W1').value = 'TRAILING'
 shtTest.range('X1').value = 'STOP'
-shtTest.range('Y1').value = 1
+shtTest.range('Y1').value = -10
 shtTest.range('Z1').value = 0.0005
 shtTest.range('AA1').value = 0
 rangoDesde = 'P26'
@@ -134,15 +134,13 @@ def getPortfolio(hb, comitente):
      'comitenteMana': None}
     
     portfolio = requests.post("https://cocoscap.com/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
-
+    print()
+    subtotal = [ (i['DETA'],i['IMPO']) for i in portfolio["Result"]["Totales"]["Detalle"] ]
+    print(subtotal)
     subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
     for i in subtotal[0:]:
-        if i[0]['NERE'] == 'Pesos': 
-            try: subtotal = [ (x['DETA'],x['IMPO'],x['ACUM']) for x in i[0]['APERTURA'] if x['IMPO'] != None]
-            except: subtotal = [ (x['DETA'],x['IMPO'],x['ACUM']) for x in i[0] if x['IMPO'] != None]
-            for x in subtotal: print(x)
-        else: 
-            subtotal = [ (x['CANT'], x['NERE'],x['CAN0'],' || ',x['PCIO'],x['GTOS']) for x in i[0:] if x['CANT'] != None]
+        if i[0]['NERE'] != 'Pesos':  
+            subtotal = [ ( x['NERE'],x['CAN0'],x['CANT'],' || ',x['PCIO'],x['GTOS']) for x in i[0:] if x['CANT'] != None]
             for x in subtotal: print(x)
 
 #--------------------------------------------------------------------------------------------------------------------------------
@@ -271,10 +269,6 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
         try: 
             if len(symbol) < 2:
                 if str(shtTest.range('X1').value) == 'REC': 
-                    variacion = shtTest.range('G'+str(int(celda+1))).value
-                    if not variacion: variacion = 0
-                    if variacion <= -10: recompro *= 2
-                    if variacion >= 0: recompro /= -1
                     if not recompro: shtTest.range('Y1').value = -1
                     else:  precio += recompro / 10
                     shtTest.range('X1').value = ''
@@ -336,8 +330,8 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
         costo = float(shtTest.range('X'+str(int(nroCelda+1))).value) 
         ganancia = shtTest.range('Z1').value
         if not ganancia: 
-            ganancia = 0.001
-            shtTest.range('Z1').value = 0.001
+            ganancia = 0.0005
+            shtTest.range('Z1').value = 0.0005
         if cantidad > stock : cantidad = stock
         if cantidad > bid_size : cantidad = bid_size
 
@@ -352,7 +346,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                     else:
                         if str(queTiene) == 'STOP' and bid>last*(1-(ganancia*15)):
                             print(f'{time.strftime("%H:%M:%S")} STOP     ',end=' || ')
-                            shtTest.range('X1').value = 'REC'
+                            #shtTest.range('X1').value = 'REC'
                             shtTest.range('W'+str(int(nroCelda+1))).value = ''
                             shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
                             enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),cantidad,nroCelda)
@@ -363,7 +357,6 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                 shtTest.range('W'+str(int(nroCelda+1))).value = "CLOSED"
                 pass
             if time.strftime("%H:%M:%S") > '16:56:50' and str(nombre[2]).lower() == '48hs': 
-                shtTest.range('V'+str(int(nroCelda+1))).value = ""
                 shtTest.range('W'+str(int(nroCelda+1))).value = "CLOSED"
                 pass
             if bid / 100 > costo * (1 + ganancia): # Precio sube activo trailing y sube % ganancia               
@@ -460,7 +453,9 @@ while True:
                 print("______ error al traer portfolio ______ ",time.strftime("%H:%M:%S"))
     shtTest.range('M1').value = 'volume'
     
-    if time.strftime("%H:%M:%S") > '17:01:00': break 
+    if time.strftime("%H:%M:%S") > '17:01:00': 
+        getPortfolio(hb, os.environ.get('account_id'))
+        break 
     if str(shtTest.range('A1').value) != 'symbol': ilRulo()
 
     try: 

@@ -134,16 +134,21 @@ def getPortfolio(hb, comitente):
      'comitenteMana': None}
     
     portfolio = requests.post("https://cocoscap.com/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
-
+    print()
+    subtotal = [ (i['DETA'],i['IMPO']) for i in portfolio["Result"]["Totales"]["Detalle"] ]
+    print(subtotal)
     subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
     for i in subtotal[0:]:
-        if i[0]['NERE'] == 'Pesos': 
+        if i[0]['NERE'] != 'Pesos':  
+            subtotal = [ ( x['NERE'],x['CAN0'],x['CANT'],' || ',x['PCIO'],x['GTOS']) for x in i[0:] if x['CANT'] != None]
+            for x in subtotal: print(x)
+        '''if i[0]['NERE'] == 'Pesos': 
             try: subtotal = [ (x['DETA'],x['IMPO'],x['ACUM']) for x in i[0]['APERTURA'] if x['IMPO'] != None]
             except: subtotal = [ (x['DETA'],x['IMPO'],x['ACUM']) for x in i[0] if x['IMPO'] != None]
             for x in subtotal: print(x)
         else: 
-            subtotal = [ (x['CANT'], x['NERE'],x['CAN0'],' || ',x['PCIO'],x['GTOS']) for x in i[0:] if x['CANT'] != None]
-            for x in subtotal: print(x)
+            subtotal = [ ( x['NERE'],x['CAN0'],x['CANT'],' || ',x['PCIO'],x['GTOS']) for x in i[0:] if x['CANT'] != None]
+            for x in subtotal: print(x)'''
 
 #--------------------------------------------------------------------------------------------------------------------------------
 print(time.strftime("%H:%M:%S"),f"Logueo correcto en: {os.environ.get('name')} cuenta: {int(os.environ.get('account_id'))}")
@@ -352,7 +357,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                     else:
                         if str(queTiene) == 'STOP' and bid>last*(1-(ganancia*15)):
                             print(f'{time.strftime("%H:%M:%S")} STOP     ',end=' || ')
-                            shtTest.range('X1').value = 'REC'
+                            #shtTest.range('X1').value = 'REC'
                             shtTest.range('W'+str(int(nroCelda+1))).value = ''
                             shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
                             enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),cantidad,nroCelda)
@@ -460,7 +465,9 @@ while True:
                 print("______ error al traer portfolio ______ ",time.strftime("%H:%M:%S"))
     shtTest.range('M1').value = 'volume'
     
-    if time.strftime("%H:%M:%S") > '17:01:00': break 
+    if time.strftime("%H:%M:%S") > '17:01:00': 
+        getPortfolio(hb, os.environ.get('account_id'))
+        break 
     if str(shtTest.range('A1').value) != 'symbol': ilRulo()
 
     try: 
