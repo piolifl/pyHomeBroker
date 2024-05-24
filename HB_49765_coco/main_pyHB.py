@@ -93,22 +93,22 @@ def on_repos(online, quotes):
 def getTodos():
     hb.online.connect()
     hb.online.subscribe_options()
-    hb.online.subscribe_securities('bluechips', '48hs')    # Acciones del Panel lider - 48hs
-    # hb.online.subscribe_securities('bluechips', '24hs')   # Acciones del Panel lider - 24hs
+    #hb.online.subscribe_securities('bluechips', '24hs')    # Acciones del Panel lider - 24hs
+    hb.online.subscribe_securities('bluechips', '24hs')   # Acciones del Panel lider - 24hs
     hb.online.subscribe_securities('bluechips', 'SPOT')    # Acciones del Panel lider - spot
-    hb.online.subscribe_securities('government_bonds', '48hs')  # Bonos - 48hs
-    # hb.online.subscribe_securities('government_bonds', '24hs') # Bonos - 24hs
+    #hb.online.subscribe_securities('government_bonds', '24hs')  # Bonos - 24hs
+    hb.online.subscribe_securities('government_bonds', '24hs') # Bonos - 24hs
     hb.online.subscribe_securities('government_bonds', 'SPOT')  # Bonos - spot
-    #hb.online.subscribe_securities('cedears', '48hs')      # CEDEARS - 48hs
+    #hb.online.subscribe_securities('cedears', '24hs')      # CEDEARS - 24hs
     # hb.online.subscribe_securities('cedears', '24hs')      # CEDEARS - 24hs
     #hb.online.subscribe_securities('cedears', 'SPOT')      # CEDEARS - spot
-    # hb.online.subscribe_securities('general_board', '48hs') # Acciones del Panel general - 48hs
+    # hb.online.subscribe_securities('general_board', '24hs') # Acciones del Panel general - 24hs
     # hb.online.subscribe_securities('general_board', '24hs') # Acciones del Panel general - 24hs
     # hb.online.subscribe_securities('general_board', 'SPOT') # Acciones del Panel general - spot
-    hb.online.subscribe_securities('short_term_government_bonds', '48hs')   # LETRAS - 48hs
-    #hb.online.subscribe_securities('short_term_government_bonds', '24hs')  # LETRAS - 24hs
+    #hb.online.subscribe_securities('short_term_government_bonds', '24hs')   # LETRAS - 24hs
+    hb.online.subscribe_securities('short_term_government_bonds', '24hs')  # LETRAS - 24hs
     hb.online.subscribe_securities('short_term_government_bonds', 'SPOT')   # LETRAS - spot
-    #hb.online.subscribe_securities('corporate_bonds', '48hs')  # Obligaciones Negociables - 48hs
+    #hb.online.subscribe_securities('corporate_bonds', '24hs')  # Obligaciones Negociables - 24hs
     # hb.online.subscribe_securities('corporate_bonds', '24hs')  # Obligaciones Negociables - 24hs
     #hb.online.subscribe_securities('corporate_bonds', 'SPOT')  # Obligaciones Negociables - spot
     hb.online.subscribe_repos()
@@ -187,37 +187,37 @@ def cargoXplazo(dicc):
     shtTest.range('A4').value = 'AL30 - spot'
     shtTest.range('A5').value = namesArs(dicc['mepCI'][0],' - spot')
 
-    mejorMep = dicc['mep48'][0]
-    if mejorMep == 'AL30D - 48hs': shtTest.range('A6').value = ''
+    mejorMep = dicc['mep24'][0]
+    if mejorMep == 'AL30D - 24hs': shtTest.range('A6').value = ''
     else: shtTest.range('A6').value = mejorMep
-    shtTest.range('A7').value = 'AL30D - 48hs'
-    shtTest.range('A8').value = 'AL30 - 48hs'
-    shtTest.range('A9').value = namesArs(dicc['mep48'][0],' - 48hs')
+    shtTest.range('A7').value = 'AL30D - 24hs'
+    shtTest.range('A8').value = 'AL30 - 24hs'
+    shtTest.range('A9').value = namesArs(dicc['mep24'][0],' - 24hs')
     
     shtTest.range('A10').value = dicc['mepCI'][0]
     shtTest.range('A11').value = namesMep(dicc['arsCImep'][0],' - spot')
     shtTest.range('A12').value = dicc['arsCImep'][0]
     shtTest.range('A13').value = namesArs(dicc['mepCI'][0],' - spot')
-    shtTest.range('A14').value = dicc['mep48'][0]
-    shtTest.range('A15').value = namesMep(dicc['ars48mep'][0],' - 48hs')
-    shtTest.range('A16').value = dicc['ars48mep'][0]
-    shtTest.range('A17').value = namesArs(dicc['mep48'][0],' - 48hs')
+    shtTest.range('A14').value = dicc['mep24'][0]
+    shtTest.range('A15').value = namesMep(dicc['ars24mep'][0],' - 24hs')
+    shtTest.range('A16').value = dicc['ars24mep'][0]
+    shtTest.range('A17').value = namesArs(dicc['mep24'][0],' - 24hs')
 
     shtTest.range('A18').value = dicc['mepCI'][0]
     shtTest.range('A19').value = namesMep(dicc['cclCI'][0],' - spot')
     shtTest.range('A20').value = dicc['cclCI'][0]
     shtTest.range('A21').value = namesCcl(dicc['mepCI'][0],' - spot')
-    shtTest.range('A22').value = dicc['mep48'][0]
-    shtTest.range('A23').value = namesMep(dicc['ccl48'][0],' - 48hs')
-    shtTest.range('A24').value = dicc['ccl48'][0]
-    shtTest.range('A25').value = namesCcl(dicc['mep48'][0],' - 48hs')
+    shtTest.range('A22').value = dicc['mep24'][0]
+    shtTest.range('A23').value = namesMep(dicc['ccl24'][0],' - 24hs')
+    shtTest.range('A24').value = dicc['ccl24'][0]
+    shtTest.range('A25').value = namesCcl(dicc['mep24'][0],' - 24hs')
 
     shtTest.range('A1').value = 'symbol'
     winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
 
 def ilRulo():
     celda,pesos,dolar = 64,1000,0.01
-    tikers = {'cclCI':['',dolar],'ccl48':['',dolar],'mepCI':['',dolar],'mep48':['',dolar],'arsCIccl':['',pesos],'ars48ccl':['',pesos],'arsCImep':['',pesos],'ars48mep':['',pesos]}
+    tikers = {'cclCI':['',dolar],'ccl24':['',dolar],'mepCI':['',dolar],'mep24':['',dolar],'arsCIccl':['',pesos],'ars24ccl':['',pesos],'arsCImep':['',pesos],'ars24mep':['',pesos]}
     
     for valor in shtTest.range('A64:A201').value:
         if not valor: continue
@@ -240,22 +240,22 @@ def ilRulo():
                 if not mep: mep = 0.01
                 if mep > tikers['mepCI'][1]: tikers['mepCI'] = [valor,mep]
 
-        if str(name[2]) == '48hs':
+        if str(name[2]) == '24hs':
             if str(name[0][-1:]).upper()=='C':
                 arsC = shtTest.range('AA'+str(celda)).value
                 if not arsC: arsC = 1000
-                if arsC > tikers['ars48ccl'][1]: tikers['ars48ccl'] = [namesArs(name[0],' - 48hs'),arsC]
+                if arsC > tikers['ars24ccl'][1]: tikers['ars24ccl'] = [namesArs(name[0],' - 24hs'),arsC]
                 ccl = shtTest.range('Z'+str(celda)).value
                 if not ccl: ccl = 0.01
-                if ccl > tikers['ccl48'][1]: tikers['ccl48'] = [valor,ccl]
+                if ccl > tikers['ccl24'][1]: tikers['ccl24'] = [valor,ccl]
 
             if str(name[0][-1:]).upper()=='D': 
                 arsM = shtTest.range('AA'+str(celda)).value
                 if not arsM: arsM = 1000
-                if arsM > tikers['ars48mep'][1]: tikers['ars48mep'] = [namesArs(name[0],' - 48hs'),arsM]
+                if arsM > tikers['ars24mep'][1]: tikers['ars24mep'] = [namesArs(name[0],' - 24hs'),arsM]
                 mep = shtTest.range('Z'+str(celda)).value
                 if not mep: mep = 0.01
-                if mep > tikers['mep48'][1]: tikers['mep48'] = [valor,mep]
+                if mep > tikers['mep24'][1]: tikers['mep24'] = [valor,mep]
         celda +=1
     cargoXplazo(tikers)
 
@@ -373,7 +373,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
             if time.strftime("%H:%M:%S") > '16:24:50' and str(nombre[2]).lower() == 'spot': 
                 shtTest.range('W'+str(int(nroCelda+1))).value = "CLOSED"
                 pass
-            if time.strftime("%H:%M:%S") > '16:56:50' and str(nombre[2]).lower() == '48hs': 
+            if time.strftime("%H:%M:%S") > '16:56:50' and str(nombre[2]).lower() == '24hs': 
                 shtTest.range('W'+str(int(nroCelda+1))).value = "CLOSED"
                 pass
             if bid / 100 > costo * (1 + ganancia): # Precio sube activo trailing y sube % ganancia               
@@ -485,7 +485,7 @@ while True:
     
     if time.strftime("%H:%M:%S") > '17:01:00': 
         getPortfolio(hb, os.environ.get('account_id'))
-        break 
+        break
     if str(shtTest.range('A1').value) != 'symbol': ilRulo()
 
     try: 
