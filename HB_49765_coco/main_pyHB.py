@@ -17,7 +17,7 @@ shtTest.range('Q1').value = 'BONOS'
 shtTest.range('S1').value = 'OPCIONES'
 shtTest.range('W1').value = 'TRAILING'
 shtTest.range('X1').value = 'STOP'
-shtTest.range('Y1').value = -10
+shtTest.range('Y1').value = -20
 shtTest.range('Z1').value = 0.0005
 shtTest.range('AA1').value = 0
 rangoDesde = '26'
@@ -153,6 +153,8 @@ def namesArs(nombre,plazo):
     elif nombre[:2] == 'GOGL': return 'GOOGL'+plazo
     elif (nombre[:1] == 'X' or nombre[:1] == 'S') and (nombre[3:4] == 'D' or nombre[3:4] == 'C'):
         if (nombre[1:2] == 'F' or nombre[1:2] == 'Y'): return nombre[:1]+'20'+nombre[1:3]+plazo
+        if (nombre[1:2] == 'J'): return nombre[:1]+'14'+nombre[1:3]+plazo
+        if (nombre[1:2] == 'L'): return nombre[:1]+'26'+nombre[1:3]+plazo
         if (nombre[1:2] == 'E'): return nombre[:1]+'31'+nombre[1:3]+plazo
         else: return nombre[:1]+'18'+nombre[1:3]+plazo
     elif (nombre[:2] == 'MR' or nombre[:2] == 'CL') and (nombre[4:5] == 'D' or nombre[4:5] == 'C'):
@@ -484,7 +486,7 @@ while True:
     try: 
         if not shtTest.range('Q1').value:
             shtTest.range('A'+str(listLength)).options(index=True,header=False).value = everything
-            try: shtTest.range('AE2').options(index=True, header=False).value = cauciones
+            try: shtTest.range('AH2').options(index=True, header=False).value = cauciones
             except: print("______ error al cargar cauciones en Excel ______ ",time.strftime("%H:%M:%S")) 
     except: 
         winsound.PlaySound("SystemHand", winsound.SND_ALIAS) 
