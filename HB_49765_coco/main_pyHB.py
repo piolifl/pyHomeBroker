@@ -269,9 +269,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                     shtTest.range('X1').value = ''
                     print(f'{time.strftime("%H:%M:%S")} RECOMPRA ',end=' || ')
                 orderC = hb.orders.send_buy_order(symbol[0],'24hs', float(precio), int(size))
-                shtTest.range('AE'+str(int(celda+1))).value = float(precio)
-                try: shtTest.range('V'+str(int(celda+1))).value += int(size)
-                except: shtTest.range('V'+str(int(celda+1))).value = int(size)
+                shtTest.range('AD'+str(int(celda+1))).value = float(precio)
                 try: shtTest.range('W'+str(int(celda+1))).value += int(size) * precio*100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio*100
                 print(f'BUY  {symbol[0]} 24hs // precio: {precio} // + {int(size)} // orden: {orderC}')
@@ -282,15 +280,15 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                     shtTest.range('X1').value = ''
                     print(f'{time.strftime("%H:%M:%S")} RECOMPRA ',end=' || ')
                 orderC = hb.orders.send_buy_order(symbol[0],symbol[2], float(precio), int(size))
-                shtTest.range('AE'+str(int(celda+1))).value = float(precio/100)
-                try: shtTest.range('V'+str(int(celda+1))).value += int(size)
-                except: shtTest.range('V'+str(int(celda+1))).value = int(size)
+                shtTest.range('AD'+str(int(celda+1))).value = float(precio/100)
                 try: shtTest.range('W'+str(int(celda+1))).value += int(size) * precio/100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio/100
                 print(f'BUY  {symbol[0]} {symbol[2]} // precio {round(precio/100,4)} // + {int(size)} // orden: {orderC}')
+            try: shtTest.range('V'+str(int(celda+1))).value += int(size)
+            except: shtTest.range('V'+str(int(celda+1))).value = int(size)
             shtTest.range('AB'+str(int(celda+1))).value = orderC
-            shtTest.range('AD'+str(int(celda+1))).value = int(size)
-            shtTest.range('AF'+str(int(celda+1))).value = str(time.strftime("%H:%M:%S"))
+            shtTest.range('AC'+str(int(celda+1))).value = int(size)
+            shtTest.range('AH'+str(int(celda+1))).value = str(time.strftime("%H:%M:%S"))
         except: 
             winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
             shtTest.range('Q'+str(int(celda+1))+':'+'U'+str(int(celda+1))).value = ''
@@ -299,30 +297,30 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
         try:
             if len(symbol) < 2:
                 orderV = hb.orders.send_sell_order(symbol[0],'24hs', float(precio), int(size))
-                shtTest.range('AE'+str(int(celda+1))).value = float(precio)
-                try: shtTest.range('V'+str(int(celda+1))).value -= int(size)
-                except: shtTest.range('V'+str(int(celda+1))).value = int(size)
+                shtTest.range('AG'+str(int(celda+1))).value = float(precio)
                 try: shtTest.range('W'+str(int(celda+1))).value -= int(size) * precio*100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio*100
                 print(f'SELL {symbol[0]} 24hs // precio: {precio} // - {int(size)} // orden: {orderV}')
             else:
                 orderV = hb.orders.send_sell_order(symbol[0],symbol[2], float(precio), int(size))
-                shtTest.range('AE'+str(int(celda+1))).value = float(precio/100)
-                try: shtTest.range('V'+str(int(celda+1))).value -= int(size)
-                except: shtTest.range('V'+str(int(celda+1))).value = int(size)
+                shtTest.range('AG'+str(int(celda+1))).value = float(precio/100)
                 try: shtTest.range('W'+str(int(celda+1))).value -= int(size) * precio/100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio/100
                 print(f'SELL {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // - {int(size)} // orden: {orderV}')
-            shtTest.range('AC'+str(int(celda+1))).value = orderV
-            shtTest.range('AD'+str(int(celda+1))).value = int(size)
-            shtTest.range('AF'+str(int(celda+1))).value = str(time.strftime("%H:%M:%S"))
+            try: shtTest.range('V'+str(int(celda+1))).value -= int(size)
+            except: shtTest.range('V'+str(int(celda+1))).value = int(size)
+            shtTest.range('AE'+str(int(celda+1))).value = orderV
+            shtTest.range('AF'+str(int(celda+1))).value = int(size)
+            shtTest.range('AH'+str(int(celda+1))).value = str(time.strftime("%H:%M:%S"))
         except:
             winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
             shtTest.range('Q'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
             print('Error en VENTA.')
-            
-    try: shtTest.range('X'+str(int(celda+1))).value=shtTest.range('W'+str(int(celda+1))).value / shtTest.range('V'+str(int(celda+1))).value
-    except: pass
+    try: 
+        shtTest.range('X'+str(int(celda+1))).value = shtTest.range('W'+str(int(celda+1))).value / shtTest.range('V'+str(int(celda+1))).value
+    except: 
+        shtTest.range('W'+str(int(celda+1))).value = ''
+        shtTest.range('X'+str(int(celda+1))).value = 0
     shtTest.range('Q'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
 ############################################ TRAILING STOP ################################################
 def trailingStop(nombre=str,cantidad=int,nroCelda=int):
@@ -405,32 +403,33 @@ def buscoOperaciones(inicio,fin):
         if valor[5]: # CANCELAR todas las ordenes ______________________________________________________________________________
             try: 
                 stock = shtTest.range('V'+str(int(valor[0]+1))).value
-                cancela = shtTest.range('AD'+str(int(valor[0]+1))).value
-                if cancela == None: cancela = 1
+                cancelaC = shtTest.range('AC'+str(int(valor[0]+1))).value
+                cancelaV = shtTest.range('AF'+str(int(valor[0]+1))).value
+                if cancelaC == None: cancelaC = 1
                 if str(valor[5]).lower() == 'c':
                     orderC = shtTest.range('AB'+str(int(valor[0]+1))).value
-                    if orderC == None: orderC = '0000'
+                    if orderC == None: orderC = 0
                     hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderC))
                     shtTest.range('U'+str(int(valor[0]+1))).value = ''
-                    if stock != None: shtTest.range('V'+str(int(valor[0]+1))).value -= shtTest.range('AD'+str(int(valor[0]+1))).value
+                    if stock != None: shtTest.range('V'+str(int(valor[0]+1))).value -= shtTest.range('AC'+str(int(valor[0]+1))).value
                     shtTest.range('X'+str(int(valor[0]+1))).value = 0
-                    shtTest.range('AB'+str(int(valor[0]+1))).value = ''
-                    print(f" // Orden compra: {orderC} fue cancelada {cancela} // ",time.strftime("%H:%M:%S"))
+                    shtTest.range('AB'+str(int(valor[0]+1))+':'+'AD'+str(int(valor[0]+1))).value = ''
+                    print(f" // Orden compra: {int(orderC)} fue cancelada {int(cancelaC)} // ",time.strftime("%H:%M:%S"))
 
                 elif str(valor[5]).lower() == 'v': 
-                    orderV = shtTest.range('AC'+str(int(valor[0]+1))).value
-                    if orderV == None : orderV = '0000'
+                    orderV = shtTest.range('AE'+str(int(valor[0]+1))).value
+                    if orderV == None : orderV = 0
                     hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderV))
                     shtTest.range('U'+str(int(valor[0]+1))).value = ''
-                    if stock != None: shtTest.range('V'+str(int(valor[0]+1))).value += shtTest.range('AD'+str(int(valor[0]+1))).value
+                    if stock != None: shtTest.range('V'+str(int(valor[0]+1))).value += shtTest.range('AF'+str(int(valor[0]+1))).value
                     shtTest.range('X'+str(int(valor[0]+1))).value = 0
-                    shtTest.range('AC'+str(int(valor[0]+1))).value = ''
-                    print(f" // Orden venta : {orderV} fue cancelada {cancela} // ",time.strftime("%H:%M:%S"))
+                    shtTest.range('AE'+str(int(valor[0]+1))+':'+'AG'+str(int(valor[0]+1))).value = ''
+                    print(f" // Orden venta : {int(orderV)} fue cancelada {int(cancelaV)} // ",time.strftime("%H:%M:%S"))
 
                 elif str(valor[5]).lower() == 'x': 
                     hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
-                    shtTest.range('U'+str(int(valor[0]+1))+':'+'X'+str(int(valor[0]+1))).value = ''
-                    shtTest.range('AB'+str(inicio)+':'+'AF'+str(fin)).value = ''
+                    shtTest.range('U'+str(int(valor[0]+1))).value = ''
+                    shtTest.range('AB'+str(inicio)+':'+'AH'+str(fin)).value = ''
                     print(" // Todas las ordenes activas canceladas - ",time.strftime("%H:%M:%S") )
             except: 
                 winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
@@ -479,7 +478,7 @@ while True:
     try: 
         if not shtTest.range('Q1').value:
             shtTest.range('A'+str(listLength)).options(index=True,header=False).value = everything
-            try: shtTest.range('AH2').options(index=True, header=False).value = cauciones
+            try: shtTest.range('AJ2').options(index=True, header=False).value = cauciones
             except: print("______ error al cargar cauciones en Excel ______ ",time.strftime("%H:%M:%S")) 
     except: 
         winsound.PlaySound("SystemHand", winsound.SND_ALIAS) 
