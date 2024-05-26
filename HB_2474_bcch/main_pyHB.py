@@ -92,23 +92,17 @@ def on_repos(online, quotes):
 def getTodos():
     hb.online.connect()
     hb.online.subscribe_options()
-    #hb.online.subscribe_securities('bluechips', '24hs')    # Acciones del Panel lider - 24hs
     hb.online.subscribe_securities('bluechips', '24hs')   # Acciones del Panel lider - 24hs
     hb.online.subscribe_securities('bluechips', 'SPOT')    # Acciones del Panel lider - spot
-    #hb.online.subscribe_securities('government_bonds', '24hs')  # Bonos - 24hs
     hb.online.subscribe_securities('government_bonds', '24hs') # Bonos - 24hs
     hb.online.subscribe_securities('government_bonds', 'SPOT')  # Bonos - spot
     #hb.online.subscribe_securities('cedears', '24hs')      # CEDEARS - 24hs
-    # hb.online.subscribe_securities('cedears', '24hs')      # CEDEARS - 24hs
     #hb.online.subscribe_securities('cedears', 'SPOT')      # CEDEARS - spot
-    # hb.online.subscribe_securities('general_board', '24hs') # Acciones del Panel general - 24hs
-    # hb.online.subscribe_securities('general_board', '24hs') # Acciones del Panel general - 24hs
-    # hb.online.subscribe_securities('general_board', 'SPOT') # Acciones del Panel general - spot
-    #hb.online.subscribe_securities('short_term_government_bonds', '24hs')   # LETRAS - 24hs
+    #hb.online.subscribe_securities('general_board', '24hs') # Acciones del Panel general - 24hs
+    #hb.online.subscribe_securities('general_board', 'SPOT') # Acciones del Panel general - spot
     hb.online.subscribe_securities('short_term_government_bonds', '24hs')  # LETRAS - 24hs
     hb.online.subscribe_securities('short_term_government_bonds', 'SPOT')   # LETRAS - spot
     #hb.online.subscribe_securities('corporate_bonds', '24hs')  # Obligaciones Negociables - 24hs
-    # hb.online.subscribe_securities('corporate_bonds', '24hs')  # Obligaciones Negociables - 24hs
     #hb.online.subscribe_securities('corporate_bonds', 'SPOT')  # Obligaciones Negociables - spot
     hb.online.subscribe_repos()
 
@@ -421,7 +415,7 @@ def buscoOperaciones(inicio,fin):
                     if stock != None: shtTest.range('V'+str(int(valor[0]+1))).value -= shtTest.range('AD'+str(int(valor[0]+1))).value
                     shtTest.range('X'+str(int(valor[0]+1))).value = 0
                     shtTest.range('AB'+str(int(valor[0]+1))).value = ''
-                    print(f" // Orden compra: {orderC} fue cancelada x {cancela} // ",time.strftime("%H:%M:%S"))
+                    print(f" // Orden compra: {orderC} fue cancelada {cancela} // ",time.strftime("%H:%M:%S"))
 
                 elif str(valor[5]).lower() == 'v': 
                     orderV = shtTest.range('AC'+str(int(valor[0]+1))).value
@@ -431,7 +425,7 @@ def buscoOperaciones(inicio,fin):
                     if stock != None: shtTest.range('V'+str(int(valor[0]+1))).value += shtTest.range('AD'+str(int(valor[0]+1))).value
                     shtTest.range('X'+str(int(valor[0]+1))).value = 0
                     shtTest.range('AC'+str(int(valor[0]+1))).value = ''
-                    print(f" // Orden venta : {orderV} fue cancelada x {cancela} // ",time.strftime("%H:%M:%S"))
+                    print(f" // Orden venta : {orderV} fue cancelada {cancela} // ",time.strftime("%H:%M:%S"))
 
                 elif str(valor[5]).lower() == 'x': 
                     hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
