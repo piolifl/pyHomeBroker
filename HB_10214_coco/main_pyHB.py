@@ -96,8 +96,8 @@ def getTodos():
     hb.online.subscribe_securities('bluechips', 'SPOT')    # Acciones del Panel lider - spot
     hb.online.subscribe_securities('government_bonds', '24hs') # Bonos - 24hs
     hb.online.subscribe_securities('government_bonds', 'SPOT')  # Bonos - spot
-    #hb.online.subscribe_securities('cedears', '24hs')      # CEDEARS - 24hs
-    #hb.online.subscribe_securities('cedears', 'SPOT')      # CEDEARS - spot
+    hb.online.subscribe_securities('cedears', '24hs')      # CEDEARS - 24hs
+    hb.online.subscribe_securities('cedears', 'SPOT')      # CEDEARS - spot
     #hb.online.subscribe_securities('general_board', '24hs') # Acciones del Panel general - 24hs
     #hb.online.subscribe_securities('general_board', 'SPOT') # Acciones del Panel general - spot
     hb.online.subscribe_securities('short_term_government_bonds', '24hs')  # LETRAS - 24hs
@@ -440,6 +440,10 @@ def buscoOperaciones(inicio,fin):
                 if valor[5] == '-':enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
                 else: enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
                 shtTest.range('U'+str(int(valor[0]+1))).value = ''
+            if str(valor[5]).upper() == 'B' or str(valor[5]).upper() == 'A': # buy//sell usando puntas ______________________________________________________
+                if valor[5] == '-':enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
+                else: enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
+                shtTest.range('U'+str(int(valor[0]+1))).value = ''
 
             if str(valor[5]).upper() == 'P': # PRORTFOLIO  ________________________________________________________________________
                 try: getPortfolio(hb, os.environ.get('account_id'))
@@ -471,7 +475,8 @@ while True:
         shtTest.range('M1').value = 'volume'
     
     if time.strftime("%H:%M:%S") > '17:01:00': 
-        getPortfolio(hb, os.environ.get('account_id'))
+        try: getPortfolio(hb, os.environ.get('account_id'))
+        except: pass
         break
     if str(shtTest.range('A1').value) != 'symbol': ilRulo()
 
