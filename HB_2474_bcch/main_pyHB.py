@@ -17,7 +17,7 @@ shtTest.range('Q1').value = 'BONOS'
 shtTest.range('S1').value = 'OPCIONES'
 shtTest.range('W1').value = 'TRAILING'
 shtTest.range('X1').value = 'STOP'
-shtTest.range('Y1').value = -50
+shtTest.range('Y1').value = 1
 shtTest.range('Z1').value = 0.0005
 shtTest.range('AB1').value = 0.0001
 rangoDesde = '26'
@@ -96,8 +96,8 @@ def getTodos():
     hb.online.subscribe_securities('bluechips', 'SPOT')    # Acciones del Panel lider - spot
     hb.online.subscribe_securities('government_bonds', '24hs') # Bonos - 24hs
     hb.online.subscribe_securities('government_bonds', 'SPOT')  # Bonos - spot
-    hb.online.subscribe_securities('cedears', '24hs')      # CEDEARS - 24hs
-    hb.online.subscribe_securities('cedears', 'SPOT')      # CEDEARS - spot
+    #hb.online.subscribe_securities('cedears', '24hs')      # CEDEARS - 24hs
+    #hb.online.subscribe_securities('cedears', 'SPOT')      # CEDEARS - spot
     #hb.online.subscribe_securities('general_board', '24hs') # Acciones del Panel general - 24hs
     #hb.online.subscribe_securities('general_board', 'SPOT') # Acciones del Panel general - spot
     hb.online.subscribe_securities('short_term_government_bonds', '24hs')  # LETRAS - 24hs
@@ -296,6 +296,9 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     else: 
         try:
             if len(symbol) < 2:
+                if str(shtTest.range('X1').value) == 'BULL':
+                    shtTest.range('X1').value = ''
+                    print(f'{time.strftime("%H:%M:%S")} BULL CALL ',end=' || ')
                 orderV = hb.orders.send_sell_order(symbol[0],'24hs', float(precio), int(size))
                 shtTest.range('AG'+str(int(celda+1))).value = float(precio)
                 try: shtTest.range('W'+str(int(celda+1))).value -= int(size) * precio*100
@@ -348,11 +351,10 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                     if str(queTiene) == "CLOSED" : pass
                     else:
                         if str(queTiene) == 'STOP' and bid>last*(1-(ganancia*15)):
-                            print(f'{time.strftime("%H:%M:%S")} STOP     ',end=' || ')
-                            if shtTest.range('Y'+str(int(nroCelda+1))).value : shtTest.range('X1').value = 'REC'
-                            shtTest.range('W'+str(int(nroCelda+1))).value = ''
-                            shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
-                            enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),cantidad,nroCelda)
+                            if shtTest.range('Y'+str(int(nroCelda+1))).value : 
+                                shtTest.range('X1').value = 'BULL'
+                                shtTest.range('W'+str(int(nroCelda+1))).value = ''
+                                shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
                         else: shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'  
 
         else: # BONOS / LETRAS / ON / CEDEARS _______________________________________________________________________________
@@ -400,6 +402,7 @@ def buscoOperaciones(inicio,fin):
             except: 
                 shtTest.range('T'+str(int(valor[0]+1))).value = ''
                 winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
+
         if valor[5]: # CANCELAR todas las ordenes ______________________________________________________________________________
             try: 
                 stock = shtTest.range('V'+str(int(valor[0]+1))).value
@@ -464,6 +467,12 @@ def buscoOperaciones(inicio,fin):
             except: 
                 winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
                 print(time.strftime("%H:%M:%S"), 'Error RECOMPRA Automatica.')
+
+        if str(shtTest.range('X1').value).upper() == 'BULL': # Activa RECOMPRA AUTOMATICA _____________________________________
+            try:  enviarOrden('sell','A'+str((int(valor[0])+2)),'C'+str((int(valor[0])+2)),cantidad,valor[0]+1)
+            except: 
+                winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
+                print(time.strftime("%H:%M:%S"), 'Error en la venta del BULL CALL.')
 ########################################### CARGA BUCLE EN EXCEL ##########################################
 while True:
 
