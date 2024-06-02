@@ -263,11 +263,6 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     if tipo.lower() == 'buy': 
         try: 
             if len(symbol) < 2:
-                if str(shtTest.range('X1').value) == 'REC': 
-                    if not recompro: shtTest.range('Y1').value = -1
-                    else:  precio += recompro / 10
-                    shtTest.range('X1').value = ''
-                    print(f'{time.strftime("%H:%M:%S")} Compra RECOMPRA ',end=' || ')
                 orderC = hb.orders.send_buy_order(symbol[0],'24hs', float(precio), int(size))
                 shtTest.range('AD'+str(int(celda+1))).value = float(precio)
                 try: shtTest.range('W'+str(int(celda+1))).value += int(size) * precio*100
@@ -296,10 +291,14 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     else: 
         try:
             if len(symbol) < 2:
-                if str(shtTest.range('X1').value) == 'BULL':
+                if str(shtTest.range('X1').value) == 'VCALL':
                     shtTest.range('X1').value = ''
                     shtTest.range('X'+str(int(celda+1))).value = 0
-                    print(f'{time.strftime("%H:%M:%S")} Venta BULL CALL ',end=' || ')
+                    print(f'{time.strftime("%H:%M:%S")} Venta de CALL para armar BULL ',end=' || ')
+                elif str(shtTest.range('X1').value) == 'VPUT':
+                    shtTest.range('X1').value = ''
+                    shtTest.range('X'+str(int(celda+1))).value = 0
+                    print(f'{time.strftime("%H:%M:%S")} Venta de PUT para armar BULL ',end=' || ')
                 orderV = hb.orders.send_sell_order(symbol[0],'24hs', float(precio), int(size))
                 shtTest.range('AG'+str(int(celda+1))).value = float(precio)
                 try: shtTest.range('W'+str(int(celda+1))).value -= int(size) * precio*100
@@ -335,8 +334,10 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
         nombre = str(shtTest.range(str(nombre)).value).split()
         bid = float(shtTest.range('C'+str(int(nroCelda+1))).value)
         bid_size = shtTest.range('B'+str(int(nroCelda+1))).value
+        stock0 = shtTest.range('V'+str(int(nroCelda))).value
         stock = shtTest.range('V'+str(int(nroCelda+1))).value
         stock2 = shtTest.range('V'+str(int(nroCelda+2))).value
+        if not stock0 : stock0 = 0
         if not stock2 : stock2 = 0
         last = float(shtTest.range('F'+str(int(nroCelda+1))).value)
         costo = float(shtTest.range('X'+str(int(nroCelda+1))).value) 
@@ -357,14 +358,23 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                     if str(queTiene) == "CLOSED" : pass
                     else:
                         if str(queTiene) == 'STOP' and bid>last*(1-(ganancia*15)):  # Verifica cuanto pagan antes de vender x stop
-                            if shtTest.range('Y'+str(int(nroCelda+1))).value and stock > abs(stock2):# Verifica si hay disponible para vender 
-                                bid = shtTest.range('C'+str(int(nroCelda+2))).value
-                                last = shtTest.range('F'+str(int(nroCelda+2))).value
-                                if bid > last * (1-(ganancia*15)): # Verifica cuanto pagan antes de VENDER para activar el BULL call
-                                    shtTest.range('X1').value = 'BULL'
-                                    shtTest.range('W'+str(int(nroCelda+1))).value = ''
-                                    shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
-                                else: pass
+                            if shtTest.range('Y'+str(int(nroCelda+1))).value:# Verifica Y para autorizar la estrategia BULL
+                                if nombre[0][3:4] == 'C' and stock > abs(stock2):
+                                    bid = shtTest.range('C'+str(int(nroCelda+2))).value
+                                    last = shtTest.range('F'+str(int(nroCelda+2))).value
+                                    if bid > last * (1-(ganancia*15)): # Verifica cuanto pagan antes de VENDER el CALL
+                                        shtTest.range('X1').value = 'VCALL'
+                                        shtTest.range('W'+str(int(nroCelda+1))).value = ''
+                                        shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
+                                    else: pass
+                                elif nombre[0][3:4] == 'V' and stock > abs(stock0):
+                                    bid = shtTest.range('C'+str(int(nroCelda))).value
+                                    last = shtTest.range('F'+str(int(nroCelda))).value
+                                    if bid > last * (1-(ganancia*15)): # Verifica cuanto pagan antes de VENDER el PUT
+                                        shtTest.range('X1').value = 'VPUT'
+                                        shtTest.range('W'+str(int(nroCelda))).value = ''
+                                        shtTest.range('X'+str(int(nroCelda))).value = bid * 100
+                                    else: pass
                         else: shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'  
 
         else: # Ingresa si son BONOS / LETRAS / ON / CEDEARS //////////////////////////////////////////////////////////////////////
@@ -373,11 +383,12 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                 pass
             if time.strftime("%H:%M:%S") > '16:56:50' and str(nombre[2]).lower() == '24hs': 
                 shtTest.range('W'+str(int(nroCelda+1))).value = "CLOSED"
+                pass
             else:
                 if bid / 100 > costo * (1 + ganancia): # Precio sube activo trailing y sube % ganancia               
                     shtTest.range('W'+str(int(nroCelda+1))).value = 'TRAILING'
                     shtTest.range('X'+str(int(nroCelda+1))).value = round(bid / 100,5)
-                if not shtTest.range('X1').value: # Habilita la venta en 24hs
+                if not shtTest.range('X1').value: # Habilita la venta del stock en 24hs
                     if last / 100 < costo * (1 - ganancia): # Precio baja activo stop y envia orden venta
 
                         # Rutina para ganar TASA, vende stock en 24hs
@@ -475,22 +486,22 @@ def buscoOperaciones(inicio,fin):
                 shtTest.range('U'+str(int(valor[0]+1))).value = ''
                 print(time.strftime("%H:%M:%S"),'Error al cancelar orden.')
 
-            if valor[5] == '-' or valor[5] == '+': # Compra Bid // Venta Ask "RAPIDA" sin poner cantidad
-                if valor[5] == '-':enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
-                else: enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
-                shtTest.range('U'+str(int(valor[0]+1))).value = ''
+        elif valor[5] == '-' or valor[5] == '+': # Compra Bid // Venta Ask "RAPIDA" sin poner cantidad
+            if valor[5] == '-':enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
+            else: enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
+            shtTest.range('U'+str(int(valor[0]+1))).value = ''
 
-            if str(valor[5]).upper() == 'B' or str(valor[5]).upper() == 'A': # Compra Ask // Venta Bid "RAPIDA" sin poner cantidad
-                if valor[5] == '-':enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
-                else: enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
-                shtTest.range('U'+str(int(valor[0]+1))).value = ''
+        elif str(valor[5]).upper() == 'B' or str(valor[5]).upper() == 'A': # Compra Ask // Venta Bid "RAPIDA" sin poner cantidad
+            if valor[5] == '-':enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
+            else: enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
+            shtTest.range('U'+str(int(valor[0]+1))).value = ''
 
-            if str(valor[5]).upper() == 'P': # Trae los datos del PORTFOLIO
-                try: getPortfolio(hb, os.environ.get('account_id'))
-                except: 
-                    winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
-                    print("______ error al traer portfolio ______ ",time.strftime("%H:%M:%S"))
-                shtTest.range('U'+str(int(valor[0]+1))).value = ''
+        elif str(valor[5]).upper() == 'P': # Trae los datos del PORTFOLIO
+            try: getPortfolio(hb, os.environ.get('account_id'))
+            except: 
+                winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
+                print("______ error al traer portfolio ______ ",time.strftime("%H:%M:%S"))
+            shtTest.range('U'+str(int(valor[0]+1))).value = ''
 
 
         if not shtTest.range('W1').value: # Activa TRAILING  ///////////////////////////////////////////////////////////////////
@@ -507,9 +518,14 @@ def buscoOperaciones(inicio,fin):
                 winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
                 print(time.strftime("%H:%M:%S"), 'Error RECOMPRA Automatica.')
 
-
-        if str(shtTest.range('X1').value).upper() == 'BULL': # Activa VENTA al Bid para activar el BULL CALL //////////////////
+        elif str(shtTest.range('X1').value).upper() == 'VCALL': # Activa VENTA al Bid para activar el BULL CALL //////////////////
             try:  enviarOrden('sell','A'+str((int(valor[0])+2)),'C'+str((int(valor[0])+2)),cantidad,valor[0]+1)
+            except: 
+                winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
+                print(time.strftime("%H:%M:%S"), 'Error en la venta del BULL CALL.')
+
+        elif str(shtTest.range('X1').value).upper() == 'VPUT': # Activa VENTA al Bid para activar el BULL PUT //////////////////
+            try:  enviarOrden('sell','A'+str((int(valor[0]))),'C'+str((int(valor[0]))),cantidad,valor[0]-1)
             except: 
                 winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
                 print(time.strftime("%H:%M:%S"), 'Error en la venta del BULL CALL.')
@@ -523,10 +539,20 @@ while True:
             print("______ error al traer portfolio ______ ",time.strftime("%H:%M:%S"))
         shtTest.range('M1').value = 'volume'
     
+    if  '16:30:00' < time.strftime("%H:%M:%S") > '16:31:00': 
+        try:
+            hb.online.unsubscribe_repos()
+            hb.online.unsubscribe_securities('bluechips', 'SPOT')
+            hb.online.unsubscribe_securities('government_bonds', 'SPOT')
+            hb.online.unsubscribe_securities('short_term_government_bonds', 'SPOT')
+            hb.online.unsubscribe_securities('corporate_bonds', 'SPOT')
+        except: pass
+
     if time.strftime("%H:%M:%S") > '17:01:00': 
         try: getPortfolio(hb, os.environ.get('account_id'))
         except: pass
         break
+    
     if str(shtTest.range('A1').value) != 'symbol': ilRulo()
 
     try: 
@@ -550,7 +576,9 @@ while True:
     buscoOperaciones(rangoDesde,rangoHasta)
     time.sleep(2)
     
-try: hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
+try: 
+    hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
+    hb.online.disconnect()
 except: pass
 print(time.strftime("%H:%M:%S"), 'Mercado cerrado. ')
 shtTest.range('Q1').value = 'BONOS'
