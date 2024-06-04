@@ -10,7 +10,7 @@ import requests
 
 env = environ.Env()
 environ.Env.read_env()
-wb = xw.Book('.\\epgb_pyHB.xlsx')
+wb = xw.Book('..\\epgb_pyHB.xlsx')
 shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
 shtTest.range('Q1').value = 'BONOS'
@@ -135,6 +135,7 @@ def getPortfolio(hb, comitente):
         if i[0]['NERE'] != 'Pesos':  
             subtotal = [ ( x['NERE'],x['CAN0'],x['CANT'],' || ',x['PCIO'],x['GTOS']) for x in i[0:] if x['CANT'] != None]
             for x in subtotal: print(x)
+    print()
 
 #--------------------------------------------------------------------------------------------------------------------------------
 print(time.strftime("%H:%M:%S"),f"Logueo correcto en: {os.environ.get('name')} cuenta: {int(os.environ.get('account_id'))}")
@@ -486,22 +487,22 @@ def buscoOperaciones(inicio,fin):
                 shtTest.range('U'+str(int(valor[0]+1))).value = ''
                 print(time.strftime("%H:%M:%S"),'Error al cancelar orden.')
 
-        elif valor[5] == '-' or valor[5] == '+': # Compra Bid // Venta Ask "RAPIDA" sin poner cantidad
-            if valor[5] == '-':enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
-            else: enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
-            shtTest.range('U'+str(int(valor[0]+1))).value = ''
+            if valor[5] == '-' or valor[5] == '+': # Compra Bid // Venta Ask "RAPIDA" sin poner cantidad
+                if valor[5] == '-':enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
+                else: enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
+                shtTest.range('U'+str(int(valor[0]+1))).value = ''
 
-        elif str(valor[5]).upper() == 'B' or str(valor[5]).upper() == 'A': # Compra Ask // Venta Bid "RAPIDA" sin poner cantidad
-            if valor[5] == '-':enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
-            else: enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
-            shtTest.range('U'+str(int(valor[0]+1))).value = ''
+            if str(valor[5]).upper() == 'B' or str(valor[5]).upper() == 'A': # Compra Ask // Venta Bid "RAPIDA" sin poner cantidad
+                if valor[5] == '-':enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
+                else: enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
+                shtTest.range('U'+str(int(valor[0]+1))).value = ''
 
-        elif str(valor[5]).upper() == 'P': # Trae los datos del PORTFOLIO
-            try: getPortfolio(hb, os.environ.get('account_id'))
-            except: 
-                winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
-                print("______ error al traer portfolio ______ ",time.strftime("%H:%M:%S"))
-            shtTest.range('U'+str(int(valor[0]+1))).value = ''
+            if str(valor[5]).upper() == 'P': # Trae los datos del PORTFOLIO
+                try: getPortfolio(hb, os.environ.get('account_id'))
+                except: 
+                    winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
+                    print("______ error al traer portfolio ______ ",time.strftime("%H:%M:%S"))
+                shtTest.range('U'+str(int(valor[0]+1))).value = ''
 
 
         if not shtTest.range('W1').value: # Activa TRAILING  ///////////////////////////////////////////////////////////////////
@@ -532,14 +533,12 @@ def buscoOperaciones(inicio,fin):
 ############################################################### CARGA BUCLE EN EXCEL ##############################################
 while True:
 
-    if not shtTest.range('M1').value:
+    if time.strftime("%H:%M:%S") > '17:01:00': 
         try: getPortfolio(hb, os.environ.get('account_id'))
-        except: 
-            winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
-            print("______ error al traer portfolio ______ ",time.strftime("%H:%M:%S"))
-        shtTest.range('M1').value = 'volume'
+        except: pass
+        break
     
-    if  '16:30:00' < time.strftime("%H:%M:%S") > '16:31:00': 
+    if '16:30:00' < time.strftime("%H:%M:%S") > '16:31:00': 
         try:
             hb.online.unsubscribe_repos()
             hb.online.unsubscribe_securities('bluechips', 'SPOT')
@@ -548,12 +547,8 @@ while True:
             hb.online.unsubscribe_securities('corporate_bonds', 'SPOT')
         except: pass
 
-    if time.strftime("%H:%M:%S") > '17:01:00': 
-        try: getPortfolio(hb, os.environ.get('account_id'))
-        except: pass
-        break
-    
-    if str(shtTest.range('A1').value) != 'symbol': ilRulo()
+    buscoOperaciones(rangoDesde,rangoHasta)
+    time.sleep(2)
 
     try: 
         if not shtTest.range('Q1').value:
@@ -573,8 +568,9 @@ while True:
         winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
         print("______ error al cargar OPCIONES en Excel ______ ",time.strftime("%H:%M:%S")) 
         
-    buscoOperaciones(rangoDesde,rangoHasta)
-    time.sleep(2)
+
+    if str(shtTest.range('A1').value) != 'symbol': ilRulo()
+    
     
 try: 
     hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
