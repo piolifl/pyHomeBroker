@@ -537,15 +537,6 @@ while True:
         try: getPortfolio(hb, os.environ.get('account_id'))
         except: pass
         break
-    
-    if '16:30:00' < time.strftime("%H:%M:%S") > '16:31:00': 
-        try:
-            hb.online.unsubscribe_repos()
-            hb.online.unsubscribe_securities('bluechips', 'SPOT')
-            hb.online.unsubscribe_securities('government_bonds', 'SPOT')
-            hb.online.unsubscribe_securities('short_term_government_bonds', 'SPOT')
-            hb.online.unsubscribe_securities('corporate_bonds', 'SPOT')
-        except: pass
 
     buscoOperaciones(rangoDesde,rangoHasta)
     time.sleep(2)
@@ -568,9 +559,7 @@ while True:
         winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
         print("______ error al cargar OPCIONES en Excel ______ ",time.strftime("%H:%M:%S")) 
         
-
     if str(shtTest.range('A1').value) != 'symbol': ilRulo()
-    
     
 try: 
     hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
