@@ -17,8 +17,8 @@ shtTest.range('Q1').value = 'BONOS'
 shtTest.range('S1').value = 'OPCIONES'
 shtTest.range('W1').value = 'TRAILING'
 shtTest.range('X1').value = 'STOP'
-shtTest.range('Y1').value = 1
-shtTest.range('Z1').value = 0.0005
+shtTest.range('Y1').value = 50
+shtTest.range('Z1').value = 0.0008
 shtTest.range('AB1').value = 0.0001
 rangoDesde = '26'
 rangoHasta = '59'
@@ -376,7 +376,12 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                                         shtTest.range('W'+str(int(nroCelda))).value = ''
                                         shtTest.range('X'+str(int(nroCelda))).value = bid * 100
                                     else: pass
-                        else: shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'  
+                        else:
+                            if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP': pass
+                            else:
+                                winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
+                                shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'
+
 
         else: # Ingresa si son BONOS / LETRAS / ON / CEDEARS //////////////////////////////////////////////////////////////////////
             if time.strftime("%H:%M:%S") > '16:24:50' and str(nombre[2]).lower() == 'spot': 
@@ -397,17 +402,23 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                             nombre2 = str(shtTest.range('A'+str(int(nroCelda+2))).value).split()
                             if nombre[0] == nombre2[0]:
                                 shtTest.range('V'+str(int(nroCelda+1))).value -= cantidad
-                                print(f'{time.strftime("%H:%M:%S")} STOP cargando stock +{cantidad} 24hs ///')
+                                print(f'{time.strftime("%H:%M:%S")} STOP cargando stock +{cantidad} para salir en 24hs ///')
                                 if not shtTest.range('V'+str(int(nroCelda+2))).value: shtTest.range('V'+str(int(nroCelda+2))).value = cantidad
                                 else: shtTest.range('V'+str(int(nroCelda+2))).value += cantidad
                                 shtTest.range('X'+str(int(nroCelda+2))).value = 0
                         else:
+                            
                             if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='STOP' and (bid/100)>(last/100)*(1-ganancia):
                                 print(f'{time.strftime("%H:%M:%S")} STOP     ',end=' || ')
                                 if shtTest.range('Y'+str(int(nroCelda+1))).value : shtTest.range('X1').value = 'TASA'
                                 shtTest.range('W'+str(int(nroCelda+1))).value = ''
                                 shtTest.range('X'+str(int(nroCelda+1))).value = round(bid / 100,5)
                                 enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),cantidad,nroCelda)
+                            else: 
+                                if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP': pass
+                                else:
+                                    winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
+                                    shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'
 
                         # Rutina preparada para recomprar el mismo activo
                         '''if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='STOP' and (bid/100)>(last/100)*(1-ganancia):
@@ -416,12 +427,11 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                             shtTest.range('W'+str(int(nroCelda+1))).value = ''
                             shtTest.range('X'+str(int(nroCelda+1))).value = round(bid / 100,5)
                             enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),cantidad,nroCelda)'''
-                    else: shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'
-                        
     except: pass
 ################################################################# BUSCA OPERACIONES ###############################################
 def buscoOperaciones(inicio,fin):
     for valor in shtTest.range('P'+str(inicio)+':'+'V'+str(fin)).value:
+
         cantidad = shtTest.range('Y'+str(int(valor[0]+1))).value
         if cantidad == None: cantidad = 1
 
