@@ -276,7 +276,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio/100
                 print(f'++++++ BUY  {symbol[0]} {symbol[2]} // precio {round(precio/100,4)} // + {int(size)} // orden: {orderC}')
             try: shtTest.range('V'+str(int(celda+1))).value += int(size)
-            except: shtTest.range('V'+str(int(celda+1))).value = int(size)/-1
+            except: shtTest.range('V'+str(int(celda+1))).value = int(size)
             shtTest.range('AB'+str(int(celda+1))).value = orderC
             shtTest.range('AC'+str(int(celda+1))).value = int(size)
             shtTest.range('AH'+str(int(celda+1))).value = str(time.strftime("%H:%M:%S"))
@@ -342,7 +342,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                 if last * 100 < costo * (1 - (ganancia*75)): # Precio baja activo stop y envia orden venta
                     if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP' and bid > last * (1-(ganancia*15)):
                         shtTest.range('W'+str(int(nroCelda+1))).value = ''
-                        shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
+                        shtTest.range('X'+str(int(nroCelda+1))).value = 0
                         if shtTest.range('Y'+str(int(nroCelda+1))).value : 
                             enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),cantidad,nroCelda)
                     else:
@@ -374,14 +374,12 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                             bid2 = shtTest.range('C'+str(int(nroCelda+2))).value
                             last2 = shtTest.range('F'+str(int(nroCelda+2))).value
                             if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='STOP' and (bid2/100)>(last2/100)*(1-ganancia):
-                                print(f'{time.strftime("%H:%M:%S")} STOP vendo    ',end=' || ')
                                 shtTest.range('W'+str(int(nroCelda+1))).value = ''
-                                shtTest.range('X'+str(int(nroCelda+1))).value = round(bid / 100,5)
+                                shtTest.range('X'+str(int(nroCelda+1))).value = 0
                                 try: shtTest.range('V'+str(int(nroCelda+1))).value -= cantidad
                                 except: shtTest.range('V'+str(int(nroCelda+1))).value = cantidad/-1
+                                print(f'{time.strftime("%H:%M:%S")} STOP vendo    ',end=' || ')
                                 if shtTest.range('Y'+str(int(nroCelda+1))).value : 
-                                    try: shtTest.range('V'+str(int(nroCelda+2))).value -= cantidad
-                                    except: shtTest.range('V'+str(int(nroCelda+2))).value = cantidad/-1
                                     enviarOrden('sell','A'+str((int(nroCelda)+2)),'C'+str((int(nroCelda)+2)),cantidad,nroCelda+1)
                             else: 
                                 if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP': pass
@@ -391,9 +389,9 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
 
                         else:
                             if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='STOP' and (bid/100)>(last/100)*(1-ganancia):
-                                print(f'{time.strftime("%H:%M:%S")} STOP vendo    ',end=' || ')
                                 shtTest.range('W'+str(int(nroCelda+1))).value = ''
-                                shtTest.range('X'+str(int(nroCelda+1))).value = round(bid / 100,5)
+                                shtTest.range('X'+str(int(nroCelda+1))).value = 0
+                                print(f'{time.strftime("%H:%M:%S")} STOP vendo    ',end=' || ')
                                 if shtTest.range('Y'+str(int(nroCelda+1))).value : 
                                     enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),cantidad,nroCelda)
                             else: 
