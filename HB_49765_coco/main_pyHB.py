@@ -136,6 +136,11 @@ def getPortfolio(hb, comitente):
             subtotal = [ ( x['NERE'],x['CAN0'],x['CANT'],' || ',x['PCIO'],x['GTOS']) for x in i[0:] if x['CANT'] != None]
             for x in subtotal: print(x)
     print()
+    '''
+    [('Tenencia Disponible', '35832.6'), ('Tenencia Opciones', '144300'), ('Cuenta Corriente $', '224276.38')]
+    ('GFGC36108J', '763.92325', '2', ' || ', '721.5', '-8484.65')
+    ('AL30', '70493.71333', '51', ' || ', '70260', '-119.1937983')
+    '''
 
 #--------------------------------------------------------------------------------------------------------------------------------
 print(time.strftime("%H:%M:%S"),f"Logueo correcto en: {os.environ.get('name')} cuenta: {int(os.environ.get('account_id'))}")
@@ -207,7 +212,6 @@ def cargoXplazo(dicc):
     shtTest.range('A25').value = namesCcl(dicc['mep24'][0],' - 24hs')
 
     shtTest.range('A1').value = 'symbol'
-    winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
 
 def ilRulo():
     celda,pesos,dolar = 64,1000,0.01
@@ -216,8 +220,8 @@ def ilRulo():
     for valor in shtTest.range('A64:A201').value:
         if not valor: continue
         name = str(valor).split()
+        
         if str(name[2]).lower() == 'spot':
-
             if str(name[0][-1:]).upper()=='C':
                 arsC = shtTest.range('AA'+str(celda)).value
                 if not arsC: arsC = 1000
@@ -254,7 +258,7 @@ def ilRulo():
     cargoXplazo(tikers)
 
 
-################################################################### ENVIAR ORDENES ################################################    
+################################################################## ENVIAR ORDENES ################################################    
 def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     global orderC, orderV
     orderC, orderV = 0,0
@@ -268,47 +272,47 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                 shtTest.range('AD'+str(int(celda+1))).value = float(precio)
                 try: shtTest.range('W'+str(int(celda+1))).value += int(size) * precio*100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio*100
-                print(f'++++++ BUY  {symbol[0]} 24hs // precio: {precio} // + {int(size)} // orden: {orderC}')
+                print(f'______ BUY  opcion {symbol[0]} 24hs // precio: {precio} // + {int(size)} // orden: {orderC}') 
             else:
                 orderC = hb.orders.send_buy_order(symbol[0],symbol[2], float(precio), int(size))
                 shtTest.range('AD'+str(int(celda+1))).value = float(precio/100)
                 try: shtTest.range('W'+str(int(celda+1))).value += int(size) * precio/100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio/100
-                print(f'++++++ BUY  {symbol[0]} {symbol[2]} // precio {round(precio/100,4)} // + {int(size)} // orden: {orderC}')
+                print(f'______ BUY  {symbol[0]} {symbol[2]} // precio {round(precio/100,4)} // + {int(size)} // orden: {orderC}')
+            # ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            shtTest.range('Q'+str(int(celda+1))+':'+'R'+str(int(celda+1))).value = ''
             try: shtTest.range('V'+str(int(celda+1))).value += int(size)
             except: shtTest.range('V'+str(int(celda+1))).value = int(size)
             shtTest.range('AB'+str(int(celda+1))).value = orderC
             shtTest.range('AC'+str(int(celda+1))).value = int(size)
             shtTest.range('AH'+str(int(celda+1))).value = str(time.strftime("%H:%M:%S"))
         except: 
-            winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
             shtTest.range('Q'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
-            print('Error en COMPRA.')
+            print(f'______ ERROR en COMPRA. {symbol[0]} // precio: {precio} // + {int(size)}')
     else: 
         try:
             if len(symbol) < 2:
-                # Rutina venta para OPCIONES //////////////////////////////////////////////////////////////
                 orderV = hb.orders.send_sell_order(symbol[0],'24hs', float(precio), int(size))
                 shtTest.range('AG'+str(int(celda+1))).value = float(precio)
                 try: shtTest.range('W'+str(int(celda+1))).value -= int(size) * precio*100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio*100
-                print(f'------ SELL {symbol[0]} 24hs // precio: {precio} // - {int(size)} // orden: {orderV}')
+                print(f'______ SELL opcion {symbol[0]} 24hs // precio: {precio} // - {int(size)} // orden: {orderV}')
             else:
-                # Rutina venta BONOS / LETRAS / ///////////////////////////////////////////////////////////
                 orderV = hb.orders.send_sell_order(symbol[0],symbol[2], float(precio), int(size))
                 shtTest.range('AG'+str(int(celda+1))).value = float(precio/100)
                 try: shtTest.range('W'+str(int(celda+1))).value -= int(size) * precio/100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio/100
-                print(f'------ SELL {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // - {int(size)} // orden: {orderV}')
+                print(f'______ SELL {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // - {int(size)} // orden: {orderV}')
+            # ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            shtTest.range('S'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
             try: shtTest.range('V'+str(int(celda+1))).value -= int(size)
             except: shtTest.range('V'+str(int(celda+1))).value = int(size)/-1
             shtTest.range('AE'+str(int(celda+1))).value = orderV
             shtTest.range('AF'+str(int(celda+1))).value = int(size)
             shtTest.range('AH'+str(int(celda+1))).value = str(time.strftime("%H:%M:%S"))
         except:
-            winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
             shtTest.range('Q'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
-            print('Error en VENTA.')
+            print(f'______ ERROR en VENTA. {symbol[0]} // precio: {precio} // {int(size)/-1}')
     try: 
         tieneW = shtTest.range('W'+str(int(celda+1))).value
         tieneV = shtTest.range('V'+str(int(celda+1))).value
@@ -320,8 +324,8 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     except: 
         shtTest.range('W'+str(int(celda+1))).value = ''
         shtTest.range('X'+str(int(celda+1))).value = 0
-    shtTest.range('Q'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
-################################################################### TRAILING STOP #################################################
+    
+################################################################# TRAILING STOP #################################################
 def trailingStop(nombre=str,cantidad=int,nroCelda=int):
     try:
         nombre = str(shtTest.range(str(nombre)).value).split()
@@ -333,7 +337,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
         if not ganancia: ganancia = 0.0005
         if cantidad > stock : cantidad = int(stock)
 
-        if len(nombre) < 2: # Ingresa si son OPCIONES /////////////////////////////////////////////////////////////////////////////
+        if len(nombre) < 2: # Ingresa si son OPCIONES ///////////////////////////////////////////////////////////////////////////
             if bid * 100 > costo * (1 + (ganancia*10)):
                 if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'TRAILING': pass
                 else: shtTest.range('W'+str(int(nroCelda+1))).value = 'TRAILING'
@@ -351,14 +355,13 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                             shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'
                             winsound.PlaySound("SystemHand", winsound.SND_ALIAS)      
 
-        else: # Ingresa si son BONOS / LETRAS / ON / CEDEARS //////////////////////////////////////////////////////////////////////
+        else: # Ingresa si son BONOS / LETRAS / ON / CEDEARS ////////////////////////////////////////////////////////////////////
             if time.strftime("%H:%M:%S") > '16:24:50' and str(nombre[2]).lower() == 'spot': 
                 shtTest.range('W'+str(int(nroCelda+1))).value = "CLOSED"
                 pass
             if time.strftime("%H:%M:%S") > '16:56:50' and str(nombre[2]).lower() == '24hs': 
                 shtTest.range('W'+str(int(nroCelda+1))).value = "CLOSED"
                 pass
-
             else:
                 # Rutina, si el precio BID sube modifica precio promedio de compra //////////////////////////////////////////////
                 if bid / 100 > costo * (1 + ganancia):             
@@ -386,7 +389,6 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                                 else:
                                     winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
                                     shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'
-
                         else:
                             if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='STOP' and (bid/100)>(last/100)*(1-ganancia):
                                 shtTest.range('W'+str(int(nroCelda+1))).value = ''
@@ -400,7 +402,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                                     winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
                                     shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'
     except: pass
-################################################################# BUSCA OPERACIONES ###############################################
+################################################################ BUSCA OPERACIONES ###############################################
 def buscoOperaciones(inicio,fin):
     for valor in shtTest.range('P'+str(inicio)+':'+'V'+str(fin)).value:
 
@@ -414,14 +416,8 @@ def buscoOperaciones(inicio,fin):
                     if valor[6] > 0: trailingStop('A'+str((int(valor[0])+1)),cantidad,int(valor[0]))
                 except: pass
 
-        if valor[5]: # Columna V en el excel /////////////////////////////////////////////////////////////////////////////////////
+        if valor[5]: # Columna V en el excel ////////////////////////////////////////////////////////////////////////////////////
             try: 
-                stock = shtTest.range('V'+str(int(valor[0]+1))).value
-                cancelaC = shtTest.range('AC'+str(int(valor[0]+1))).value
-                cancelaV = shtTest.range('AF'+str(int(valor[0]+1))).value
-                if not cancelaC: cancelaC = 1
-                if not cancelaV: cancelaV = 1
-
                 if str(valor[5]).lower() == 'c': # Cancela orden de Compra
                     orderC = shtTest.range('AB'+str(int(valor[0]+1))).value
                     if not orderC: orderC = 0
@@ -429,7 +425,7 @@ def buscoOperaciones(inicio,fin):
                     shtTest.range('V'+str(int(valor[0]+1))).value -= shtTest.range('AC'+str(int(valor[0]+1))).value
                     shtTest.range('X'+str(int(valor[0]+1))).value = 0
                     shtTest.range('AB'+str(int(valor[0]+1))+':'+'AD'+str(int(valor[0]+1))).value = ''
-                    print(f" // Orden compra: {int(orderC)} fue cancelada {int(cancelaC)} // ",time.strftime("%H:%M:%S"))
+                    print(f" /// Cancela Compra nro: {int(orderC)} ",time.strftime("%H:%M:%S"))
 
                 elif str(valor[5]).lower() == 'v': # Cancela orden de Venta
                     orderV = shtTest.range('AE'+str(int(valor[0]+1))).value
@@ -438,15 +434,13 @@ def buscoOperaciones(inicio,fin):
                     shtTest.range('V'+str(int(valor[0]+1))).value += shtTest.range('AF'+str(int(valor[0]+1))).value
                     shtTest.range('X'+str(int(valor[0]+1))).value = 0
                     shtTest.range('AE'+str(int(valor[0]+1))+':'+'AG'+str(int(valor[0]+1))).value = ''
-                    print(f" // Orden venta : {int(orderV)} fue cancelada {int(cancelaV)} // ",time.strftime("%H:%M:%S"))
+                    print(f" /// Cancela Venta nro : {int(orderV)} ",time.strftime("%H:%M:%S"))
 
                 elif str(valor[5]).lower() == 'x':  # Cancela todas las ordenes activas
                     hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
                     shtTest.range('AB'+str(inicio)+':'+'AH'+str(fin)).value = ''
-                    print(" // Todas las ordenes activas canceladas - ",time.strftime("%H:%M:%S") )
-            except: 
-                winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
-                print(time.strftime("%H:%M:%S"),'Error al cancelar orden.')
+                    print(" /// Todas las ordenes activas canceladas ",time.strftime("%H:%M:%S"))
+            except: print(time.strftime("%H:%M:%S"),'______ ERROR al cancelar orden.')
 
             if valor[5] == '-' or valor[5] == '+': # Compra Bid // Venta Ask "RAPIDA" sin poner cantidad
                 if valor[5] == '-':enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
@@ -458,42 +452,33 @@ def buscoOperaciones(inicio,fin):
 
             if str(valor[5]).upper() == 'P': # Trae los datos del PORTFOLIO
                 try: getPortfolio(hb, os.environ.get('account_id'))
-                except: 
-                    winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
-                    print("______ error al traer portfolio ______ ",time.strftime("%H:%M:%S"))
+                except: print("______ ERROR al traer portfolio ______ ",time.strftime("%H:%M:%S"))
             shtTest.range('U'+str(int(valor[0]+1))).value = ''
 
-
-        if valor[1]: # # Columna Q en el excel ///////////////////////////////////////////////////////////////////////////////////
+        if valor[1]: # # Columna Q en el excel //////////////////////////////////////////////////////////////////////////////////
             try:   enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0]) # Compra Bid
-            except: 
-                shtTest.range('Q'+str(int(valor[0]+1))).value = ''
-                winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
+            except: shtTest.range('Q'+str(int(valor[0]+1))).value = ''
 
-        if valor[2]: #  Columna R en el excel ////////////////////////////////////////////////////////////////////////////////////
+        if valor[2]: #  Columna R en el excel ///////////////////////////////////////////////////////////////////////////////////
             try:  enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[2],valor[0]) # Compra Ask
-            except: 
-                shtTest.range('R'+str(int(valor[0]+1))).value = ''
-                winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
+            except: shtTest.range('R'+str(int(valor[0]+1))).value = ''
 
-        if valor[3]: # Columna S en el excel /////////////////////////////////////////////////////////////////////////////////////
+        if valor[3]: # Columna S en el excel ///////////////////////////////////////////////////////////////////////////////////
             try:  enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[3],valor[0]) # Vendo Bid
-            except: 
-                shtTest.range('S'+str(int(valor[0]+1))).value = ''
-                winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
+            except: shtTest.range('S'+str(int(valor[0]+1))).value = ''
 
-        if valor[4]: # Columna T en el excel /////////////////////////////////////////////////////////////////////////////////////
+        if valor[4]: # Columna T en el excel ///////////////////////////////////////////////////////////////////////////////////
             try:  enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[4],valor[0]) # Vendo Ask
-            except: 
-                shtTest.range('T'+str(int(valor[0]+1))).value = ''
-                winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
-############################################################### CARGA BUCLE EN EXCEL ##############################################
+            except: shtTest.range('T'+str(int(valor[0]+1))).value = ''
+############################################################ CARGA BUCLE EN EXCEL ##############################################
 while True:
 
     if time.strftime("%H:%M:%S") > '17:01:00': 
-        try: getPortfolio(hb, os.environ.get('account_id'))
-        except: pass
-        break
+        if time.strftime("%H:%M:%S") > '17:30:00': pass
+        else:
+            try: getPortfolio(hb, os.environ.get('account_id'))
+            except: pass
+            break
 
     buscoOperaciones(rangoDesde,rangoHasta)
     time.sleep(2)
@@ -502,19 +487,15 @@ while True:
         if not shtTest.range('Q1').value:
             shtTest.range('A'+str(listLength)).options(index=True,header=False).value = everything
             try: shtTest.range('AJ2').options(index=True, header=False).value = cauciones
-            except: print("______ error al cargar cauciones en Excel ______ ",time.strftime("%H:%M:%S")) 
-    except: 
-        winsound.PlaySound("SystemHand", winsound.SND_ALIAS) 
-        print("______ error al cargar Bonos/Letras en Excel ______ ",time.strftime("%H:%M:%S")) 
+            except: print("______ ERROR al cargar cauciones en Excel ______ ",time.strftime("%H:%M:%S")) 
+    except: print("______ ERROR al cargar Bonos/Letras en Excel ______ ",time.strftime("%H:%M:%S")) 
 
     try:
         if not shtTest.range('S1').value: 
             shtTest.range('A30').options(index=True,header=False).value=options  
        #shtTest.range('A26').options(index=True, header=False).value = everything
        #shtTest.range('A' + str(listLength)).options(index=True, header=False).value = options
-    except: 
-        winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
-        print("______ error al cargar OPCIONES en Excel ______ ",time.strftime("%H:%M:%S")) 
+    except: print("______ ERROR al cargar OPCIONES en Excel ______ ",time.strftime("%H:%M:%S")) 
         
     if str(shtTest.range('A1').value) != 'symbol': ilRulo()
     
@@ -527,9 +508,6 @@ shtTest.range('Q1').value = 'BONOS'
 shtTest.range('S1').value = 'OPCIONES'
 shtTest.range('W1').value = 'TRAILING'
 shtTest.range('X1').value = 'STOP'
-
-
-
 
 #[ ]><   \n
 #print("\nimprimir en linea nueva")
