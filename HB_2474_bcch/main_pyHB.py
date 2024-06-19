@@ -116,26 +116,28 @@ hb = HomeBroker(int(os.environ.get('broker')), on_options=on_options, on_securit
 login()
 getTodos()
 
-def getPortfolio(hb, comitente):
-    payload = {'comitente': str(comitente),
-     'consolida': '0',
-     'proceso': '22',
-     'fechaDesde': None,
-     'fechaHasta': None,
-     'tipo': None,
-     'especie': None,
-     'comitenteMana': None}
-    
-    portfolio = requests.post("https://cocoscap.com/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
-    print()
-    subtotal = [ (i['DETA'],i['IMPO']) for i in portfolio["Result"]["Totales"]["Detalle"] ]
-    print(subtotal)
-    subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
-    for i in subtotal[0:]:
-        if i[0]['NERE'] != 'Pesos':  
-            subtotal = [ ( x['NERE'],x['CAN0'],x['CANT'],' || ',x['PCIO'],x['GTOS']) for x in i[0:] if x['CANT'] != None]
-            for x in subtotal: print(x)
-    print()
+def getPortfolio(hb, comitente,celda):
+    try:
+        payload = {'comitente': str(comitente),
+        'consolida': '0',
+        'proceso': '22',
+        'fechaDesde': None,
+        'fechaHasta': None,
+        'tipo': None,
+        'especie': None,
+        'comitenteMana': None}
+        
+        portfolio = requests.post("https://cocoscap.com/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
+        print()
+        subtotal = [ (i['DETA'],i['IMPO']) for i in portfolio["Result"]["Totales"]["Detalle"] ]
+        print(subtotal)
+        subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
+        for i in subtotal[0:]:
+            if i[0]['NERE'] != 'Pesos':  
+                subtotal = [ ( x['NERE'],x['CAN0'],x['CANT'],' || ',x['PCIO'],x['GTOS']) for x in i[0:] if x['CANT'] != None]
+                for x in subtotal: print(x)
+        print()
+    except: pass
     '''
     [('Tenencia Disponible', '35832.6'), ('Tenencia Opciones', '144300'), ('Cuenta Corriente $', '224276.38')]
     ('GFGC36108J', '763.92325', '2', ' || ', '721.5', '-8484.65')
@@ -257,6 +259,38 @@ def ilRulo():
         celda +=1
     cargoXplazo(tikers)
 
+def cancelaCompra(celda):
+    try:
+        orderC = shtTest.range('AB'+str(int(celda+1))).value
+        if not orderC: orderC = 0
+        shtTest.range('Q'+str(int(celda+1))+':'+'R'+str(int(celda+1))).value = ''
+        hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderC))
+        shtTest.range('V'+str(int(celda+1))).value -= shtTest.range('AC'+str(int(celda+1))).value
+        shtTest.range('X'+str(int(celda+1))).value = 0
+        shtTest.range('AB'+str(int(celda+1))+':'+'AD'+str(int(celda+1))).value = ''
+        print(f" /// Cancela Compra nro: {int(orderC)} ",time.strftime("%H:%M:%S"))
+    except: print(time.strftime("%H:%M:%S"),'______ ERROR al cancelar orden.')
+
+def cancelarVenta(celda):
+    try:
+        orderV = shtTest.range('AE'+str(int(celda+1))).value
+        if not orderV: orderV = 0
+        shtTest.range('S'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
+        hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderV))
+        shtTest.range('V'+str(int(celda+1))).value += shtTest.range('AF'+str(int(celda+1))).value
+        shtTest.range('X'+str(int(celda+1))).value = 0
+        shtTest.range('AE'+str(int(celda+1))+':'+'AG'+str(int(celda+1))).value = ''
+        print(f" /// Cancela Venta nro : {int(orderV)} ",time.strftime("%H:%M:%S"))
+    except: print(time.strftime("%H:%M:%S"),'______ ERROR al cancelar orden.')
+
+def cancelarTodo(celda,desde,hasta):
+    try:
+        hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
+        shtTest.range('AB'+str(desde)+':'+'AH'+str(hasta)).value = ''
+        print(" /// Todas las ordenes activas canceladas ",time.strftime("%H:%M:%S"))
+    except: print(time.strftime("%H:%M:%S"),'______ ERROR al cancelar orden.')
+
+
 
 ################################################################## ENVIAR ORDENES ################################################    
 def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
@@ -278,7 +312,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                 shtTest.range('AD'+str(int(celda+1))).value = float(precio/100)
                 try: shtTest.range('W'+str(int(celda+1))).value += int(size) * precio/100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio/100
-                print(f'______ BUY  {symbol[0]} {symbol[2]} // precio {round(precio/100,4)} // + {int(size)} // orden: {orderC}')
+                print(f'______ BUY  {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // + {int(size)} // orden: {orderC}')
             # ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             shtTest.range('Q'+str(int(celda+1))+':'+'R'+str(int(celda+1))).value = ''
             try: shtTest.range('V'+str(int(celda+1))).value += int(size)
@@ -324,7 +358,6 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     except: 
         shtTest.range('W'+str(int(celda+1))).value = ''
         shtTest.range('X'+str(int(celda+1))).value = 0
-    
 ################################################################# TRAILING STOP #################################################
 def trailingStop(nombre=str,cantidad=int,nroCelda=int):
     try:
@@ -416,60 +449,57 @@ def buscoOperaciones(inicio,fin):
                     if valor[6] > 0: trailingStop('A'+str((int(valor[0])+1)),cantidad,int(valor[0]))
                 except: pass
 
-        if valor[5]: # Columna V en el excel ////////////////////////////////////////////////////////////////////////////////////
-            try: 
-                if str(valor[5]).lower() == 'c': # Cancela orden de Compra
-                    orderC = shtTest.range('AB'+str(int(valor[0]+1))).value
-                    if not orderC: orderC = 0
-                    hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderC))
-                    shtTest.range('V'+str(int(valor[0]+1))).value -= shtTest.range('AC'+str(int(valor[0]+1))).value
-                    shtTest.range('X'+str(int(valor[0]+1))).value = 0
-                    shtTest.range('AB'+str(int(valor[0]+1))+':'+'AD'+str(int(valor[0]+1))).value = ''
-                    print(f" /// Cancela Compra nro: {int(orderC)} ",time.strftime("%H:%M:%S"))
-
-                elif str(valor[5]).lower() == 'v': # Cancela orden de Venta
-                    orderV = shtTest.range('AE'+str(int(valor[0]+1))).value
-                    if not orderV: orderV = 0
-                    hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderV))
-                    shtTest.range('V'+str(int(valor[0]+1))).value += shtTest.range('AF'+str(int(valor[0]+1))).value
-                    shtTest.range('X'+str(int(valor[0]+1))).value = 0
-                    shtTest.range('AE'+str(int(valor[0]+1))+':'+'AG'+str(int(valor[0]+1))).value = ''
-                    print(f" /// Cancela Venta nro : {int(orderV)} ",time.strftime("%H:%M:%S"))
-
-                elif str(valor[5]).lower() == 'x':  # Cancela todas las ordenes activas
-                    hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
-                    shtTest.range('AB'+str(inicio)+':'+'AH'+str(fin)).value = ''
-                    print(" /// Todas las ordenes activas canceladas ",time.strftime("%H:%M:%S"))
-            except: print(time.strftime("%H:%M:%S"),'______ ERROR al cancelar orden.')
-
-            if valor[5] == '-' or valor[5] == '+': # Compra Bid // Venta Ask "RAPIDA" sin poner cantidad
-                if valor[5] == '-':enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
-                else: enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
-
-            if str(valor[5]).upper() == 'B' or str(valor[5]).upper() == 'A': # Compra Ask // Venta Bid "RAPIDA" sin poner cantidad
-                if valor[5] == '-':enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
-                else: enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
-
-            if str(valor[5]).upper() == 'P': # Trae los datos del PORTFOLIO
-                try: getPortfolio(hb, os.environ.get('account_id'))
-                except: print("______ ERROR al traer portfolio ______ ",time.strftime("%H:%M:%S"))
-            shtTest.range('U'+str(int(valor[0]+1))).value = ''
-
         if valor[1]: # # Columna Q en el excel //////////////////////////////////////////////////////////////////////////////////
-            try:   enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0]) # Compra Bid
-            except: shtTest.range('Q'+str(int(valor[0]+1))).value = ''
+            if str(valor[1]).lower() == 'c': cancelaCompra(valor[0])
+            elif str(valor[1]).lower() == 'x': 
+                cancelarTodo(valor[0],inicio,fin)
+                shtTest.range('Q'+str(int(valor[0]+1))).value = ''
+            elif valor[1] == '+': enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
+            elif str(valor[1]).upper() == 'P': # Trae los datos del PORTFOLIO
+                getPortfolio(hb, os.environ.get('account_id'),valor[0])
+                shtTest.range('Q'+str(int(valor[0]+1))).value = ''
+            else:
+                try: enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0]) # Compra Bid
+                except: shtTest.range('Q'+str(int(valor[0]+1))).value = ''
 
         if valor[2]: #  Columna R en el excel ///////////////////////////////////////////////////////////////////////////////////
-            try:  enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[2],valor[0]) # Compra Ask
-            except: shtTest.range('R'+str(int(valor[0]+1))).value = ''
+            if str(valor[2]).lower() == 'c': cancelaCompra(valor[0])
+            elif str(valor[2]).lower() == 'x': 
+                cancelarTodo(valor[0],inicio,fin)
+                shtTest.range('R'+str(int(valor[0]+1))).value = ''
+            elif valor[2] == '+': enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
+            elif str(valor[2]).upper() == 'P': 
+                getPortfolio(hb, os.environ.get('account_id'),valor[0])
+                shtTest.range('R'+str(int(valor[0]+1))).value = ''
+            else:
+                try: enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[2],valor[0]) # Compra Ask
+                except: shtTest.range('R'+str(int(valor[0]+1))).value = ''
 
         if valor[3]: # Columna S en el excel ///////////////////////////////////////////////////////////////////////////////////
-            try:  enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[3],valor[0]) # Vendo Bid
-            except: shtTest.range('S'+str(int(valor[0]+1))).value = ''
+            if str(valor[3]).lower() == 'v': cancelarVenta(valor[0])
+            elif str(valor[3]).lower() == 'x': 
+                cancelarTodo(valor[0],inicio,fin)
+                shtTest.range('S'+str(int(valor[0]+1))).value = ''
+            elif valor[3] == '-': enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
+            elif str(valor[3]).upper() == 'P': 
+                getPortfolio(hb, os.environ.get('account_id'),valor[0])
+                shtTest.range('S'+str(int(valor[0]+1))).value = ''
+            else:
+                try: enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[3],valor[0]) # Vendo Bid
+                except: shtTest.range('S'+str(int(valor[0]+1))).value = ''
 
         if valor[4]: # Columna T en el excel ///////////////////////////////////////////////////////////////////////////////////
-            try:  enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[4],valor[0]) # Vendo Ask
-            except: shtTest.range('T'+str(int(valor[0]+1))).value = ''
+            if str(valor[4]).lower() == 'v': cancelarVenta(valor[0])
+            elif str(valor[4]).lower() == 'x': 
+                cancelarTodo(valor[0],inicio,fin)
+                shtTest.range('T'+str(int(valor[0]+1))).value = ''
+            elif valor[4] == '-': enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
+            elif str(valor[4]).upper() == 'P': 
+                getPortfolio(hb, os.environ.get('account_id'),valor[0])
+                shtTest.range('T'+str(int(valor[0]+1))).value = ''
+            else:
+                try: enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[4],valor[0]) # Vendo Ask
+                except: shtTest.range('T'+str(int(valor[0]+1))).value = ''
 ############################################################ CARGA BUCLE EN EXCEL ##############################################
 while True:
 
