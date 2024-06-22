@@ -20,7 +20,7 @@ shtTest.range('X1').value = 'STOP'
 shtTest.range('Y1').value = 50
 shtTest.range('Z1').value = 0.0008
 shtTest.range('AB1').value = 0.0001
-rangoDesde = '26'
+rangoDesde = '2'
 rangoHasta = '59'
 
 def getBonosList():
@@ -116,7 +116,7 @@ hb = HomeBroker(int(os.environ.get('broker')), on_options=on_options, on_securit
 login()
 getTodos()
 
-def getPortfolio(hb, comitente,celda):
+def getPortfolio(hb, comitente):
     try:
         payload = {'comitente': str(comitente),
         'consolida': '0',
@@ -127,22 +127,25 @@ def getPortfolio(hb, comitente,celda):
         'especie': None,
         'comitenteMana': None}
         
-        portfolio = requests.post("https://cocoscap.com/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
+        if os.environ.get('name') == 'COCOS.CAPITAL':
+            portfolio = requests.post("https://cocoscap.com/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
+        else: portfolio = requests.post("https://clientes.bcch.org.ar/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
         print()
         subtotal = [ (i['DETA'],i['IMPO']) for i in portfolio["Result"]["Totales"]["Detalle"] ]
         print(subtotal)
         subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
         for i in subtotal[0:]:
             if i[0]['NERE'] != 'Pesos':  
-                subtotal = [ ( x['NERE'],x['CAN0'],x['CANT'],' || ',x['PCIO'],x['GTOS']) for x in i[0:] if x['CANT'] != None]
-                for x in subtotal: print(x)
+                #subtotal = [ ( x['NERE'],x['CAN0'],x['CANT'],' || ',x['PCIO'],x['GTOS']) for x in i[0:] if x['CANT'] != None]
+                subtotal = [ ( x['NERE'],x['CAN0'],x['CANT']) for x in i[0:] if x['CANT'] != None]
+                for x in subtotal:
+                    for valor in shtTest.range('A'+str(rangoDesde)+':'+'P'+str(rangoHasta)).value:
+                        ticker = str(valor[0]).split()
+                        if x[0] == ticker[0]: 
+                            shtTest.range('U'+str(int(valor[15]+1))).value = x[2]
+                            shtTest.range('X'+str(int(valor[15]+1))).value = x[1]
         print()
     except: pass
-    '''
-    [('Tenencia Disponible', '35832.6'), ('Tenencia Opciones', '144300'), ('Cuenta Corriente $', '224276.38')]
-    ('GFGC36108J', '763.92325', '2', ' || ', '721.5', '-8484.65')
-    ('AL30', '70493.71333', '51', ' || ', '70260', '-119.1937983')
-    '''
 
 #--------------------------------------------------------------------------------------------------------------------------------
 print(time.strftime("%H:%M:%S"),f"Logueo correcto en: {os.environ.get('name')} cuenta: {int(os.environ.get('account_id'))}")
@@ -264,7 +267,7 @@ def cancelaCompra(celda):
         orderC = shtTest.range('AB'+str(int(celda+1))).value
         if not orderC: orderC = 0
         shtTest.range('Q'+str(int(celda+1))+':'+'R'+str(int(celda+1))).value = ''
-        hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderC))
+        #hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderC))
         shtTest.range('V'+str(int(celda+1))).value -= shtTest.range('AC'+str(int(celda+1))).value
         shtTest.range('X'+str(int(celda+1))).value = 0
         shtTest.range('AB'+str(int(celda+1))+':'+'AD'+str(int(celda+1))).value = ''
@@ -276,7 +279,7 @@ def cancelarVenta(celda):
         orderV = shtTest.range('AE'+str(int(celda+1))).value
         if not orderV: orderV = 0
         shtTest.range('S'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
-        hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderV))
+        #hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderV))
         shtTest.range('V'+str(int(celda+1))).value += shtTest.range('AF'+str(int(celda+1))).value
         shtTest.range('X'+str(int(celda+1))).value = 0
         shtTest.range('AE'+str(int(celda+1))+':'+'AG'+str(int(celda+1))).value = ''
@@ -285,7 +288,7 @@ def cancelarVenta(celda):
 
 def cancelarTodo(celda,desde,hasta):
     try:
-        hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
+        #hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
         shtTest.range('AB'+str(desde)+':'+'AH'+str(hasta)).value = ''
         print(" /// Todas las ordenes activas canceladas ",time.strftime("%H:%M:%S"))
     except: print(time.strftime("%H:%M:%S"),'______ ERROR al cancelar orden.')
@@ -302,13 +305,13 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     if tipo.lower() == 'buy': 
         try: 
             if len(symbol) < 2:
-                orderC = hb.orders.send_buy_order(symbol[0],'24hs', float(precio), int(size))
+                #orderC = hb.orders.send_buy_order(symbol[0],'24hs', float(precio), int(size))
                 shtTest.range('AD'+str(int(celda+1))).value = float(precio)
                 try: shtTest.range('W'+str(int(celda+1))).value += int(size) * precio*100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio*100
                 print(f'______ BUY  opcion {symbol[0]} 24hs // precio: {precio} // + {int(size)} // orden: {orderC}') 
             else:
-                orderC = hb.orders.send_buy_order(symbol[0],symbol[2], float(precio), int(size))
+                #orderC = hb.orders.send_buy_order(symbol[0],symbol[2], float(precio), int(size))
                 shtTest.range('AD'+str(int(celda+1))).value = float(precio/100)
                 try: shtTest.range('W'+str(int(celda+1))).value += int(size) * precio/100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio/100
@@ -326,13 +329,13 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     else: 
         try:
             if len(symbol) < 2:
-                orderV = hb.orders.send_sell_order(symbol[0],'24hs', float(precio), int(size))
+                #orderV = hb.orders.send_sell_order(symbol[0],'24hs', float(precio), int(size))
                 shtTest.range('AG'+str(int(celda+1))).value = float(precio)
                 try: shtTest.range('W'+str(int(celda+1))).value -= int(size) * precio*100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio*100
                 print(f'______ SELL opcion {symbol[0]} 24hs // precio: {precio} // - {int(size)} // orden: {orderV}')
             else:
-                orderV = hb.orders.send_sell_order(symbol[0],symbol[2], float(precio), int(size))
+                #orderV = hb.orders.send_sell_order(symbol[0],symbol[2], float(precio), int(size))
                 shtTest.range('AG'+str(int(celda+1))).value = float(precio/100)
                 try: shtTest.range('W'+str(int(celda+1))).value -= int(size) * precio/100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio/100
@@ -456,7 +459,7 @@ def buscoOperaciones(inicio,fin):
                 shtTest.range('Q'+str(int(valor[0]+1))).value = ''
             elif valor[1] == '+': enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
             elif str(valor[1]).upper() == 'P': # Trae los datos del PORTFOLIO
-                getPortfolio(hb, os.environ.get('account_id'),valor[0])
+                getPortfolio(hb, os.environ.get('account_id'))
                 shtTest.range('Q'+str(int(valor[0]+1))).value = ''
             else:
                 try: enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0]) # Compra Bid
@@ -469,7 +472,7 @@ def buscoOperaciones(inicio,fin):
                 shtTest.range('R'+str(int(valor[0]+1))).value = ''
             elif valor[2] == '+': enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
             elif str(valor[2]).upper() == 'P': 
-                getPortfolio(hb, os.environ.get('account_id'),valor[0])
+                getPortfolio(hb, os.environ.get('account_id'))
                 shtTest.range('R'+str(int(valor[0]+1))).value = ''
             else:
                 try: enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[2],valor[0]) # Compra Ask
@@ -482,7 +485,7 @@ def buscoOperaciones(inicio,fin):
                 shtTest.range('S'+str(int(valor[0]+1))).value = ''
             elif valor[3] == '-': enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
             elif str(valor[3]).upper() == 'P': 
-                getPortfolio(hb, os.environ.get('account_id'),valor[0])
+                getPortfolio(hb, os.environ.get('account_id'))
                 shtTest.range('S'+str(int(valor[0]+1))).value = ''
             else:
                 try: enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[3],valor[0]) # Vendo Bid
@@ -495,7 +498,7 @@ def buscoOperaciones(inicio,fin):
                 shtTest.range('T'+str(int(valor[0]+1))).value = ''
             elif valor[4] == '-': enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
             elif str(valor[4]).upper() == 'P': 
-                getPortfolio(hb, os.environ.get('account_id'),valor[0])
+                getPortfolio(hb, os.environ.get('account_id'))
                 shtTest.range('T'+str(int(valor[0]+1))).value = ''
             else:
                 try: enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[4],valor[0]) # Vendo Ask
