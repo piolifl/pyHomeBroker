@@ -267,7 +267,7 @@ def cancelaCompra(celda):
         orderC = shtTest.range('AB'+str(int(celda+1))).value
         if not orderC: orderC = 0
         shtTest.range('Q'+str(int(celda+1))+':'+'R'+str(int(celda+1))).value = ''
-        #hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderC))
+        hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderC))
         shtTest.range('V'+str(int(celda+1))).value -= shtTest.range('AC'+str(int(celda+1))).value
         shtTest.range('X'+str(int(celda+1))).value = 0
         shtTest.range('AB'+str(int(celda+1))+':'+'AD'+str(int(celda+1))).value = ''
@@ -279,7 +279,7 @@ def cancelarVenta(celda):
         orderV = shtTest.range('AE'+str(int(celda+1))).value
         if not orderV: orderV = 0
         shtTest.range('S'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
-        #hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderV))
+        hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderV))
         shtTest.range('V'+str(int(celda+1))).value += shtTest.range('AF'+str(int(celda+1))).value
         shtTest.range('X'+str(int(celda+1))).value = 0
         shtTest.range('AE'+str(int(celda+1))+':'+'AG'+str(int(celda+1))).value = ''
@@ -288,7 +288,7 @@ def cancelarVenta(celda):
 
 def cancelarTodo(celda,desde,hasta):
     try:
-        #hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
+        hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
         shtTest.range('AB'+str(desde)+':'+'AH'+str(hasta)).value = ''
         print(" /// Todas las ordenes activas canceladas ",time.strftime("%H:%M:%S"))
     except: print(time.strftime("%H:%M:%S"),'______ ERROR al cancelar orden.')
@@ -305,13 +305,13 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     if tipo.lower() == 'buy': 
         try: 
             if len(symbol) < 2:
-                #orderC = hb.orders.send_buy_order(symbol[0],'24hs', float(precio), int(size))
+                orderC = hb.orders.send_buy_order(symbol[0],'24hs', float(precio), int(size))
                 shtTest.range('AD'+str(int(celda+1))).value = float(precio)
                 try: shtTest.range('W'+str(int(celda+1))).value += int(size) * precio*100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio*100
                 print(f'______ BUY  opcion {symbol[0]} 24hs // precio: {precio} // + {int(size)} // orden: {orderC}') 
             else:
-                #orderC = hb.orders.send_buy_order(symbol[0],symbol[2], float(precio), int(size))
+                orderC = hb.orders.send_buy_order(symbol[0],symbol[2], float(precio), int(size))
                 shtTest.range('AD'+str(int(celda+1))).value = float(precio/100)
                 try: shtTest.range('W'+str(int(celda+1))).value += int(size) * precio/100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio/100
@@ -329,13 +329,13 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     else: 
         try:
             if len(symbol) < 2:
-                #orderV = hb.orders.send_sell_order(symbol[0],'24hs', float(precio), int(size))
+                orderV = hb.orders.send_sell_order(symbol[0],'24hs', float(precio), int(size))
                 shtTest.range('AG'+str(int(celda+1))).value = float(precio)
                 try: shtTest.range('W'+str(int(celda+1))).value -= int(size) * precio*100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio*100
                 print(f'______ SELL opcion {symbol[0]} 24hs // precio: {precio} // - {int(size)} // orden: {orderV}')
             else:
-                #orderV = hb.orders.send_sell_order(symbol[0],symbol[2], float(precio), int(size))
+                orderV = hb.orders.send_sell_order(symbol[0],symbol[2], float(precio), int(size))
                 shtTest.range('AG'+str(int(celda+1))).value = float(precio/100)
                 try: shtTest.range('W'+str(int(celda+1))).value -= int(size) * precio/100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio/100
