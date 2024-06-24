@@ -10,7 +10,7 @@ import requests
 
 env = environ.Env()
 environ.Env.read_env()
-wb = xw.Book('.\\epgb_pyHB.xlsx')
+wb = xw.Book('..\\epgb_pyHB.xlsx')
 shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
 shtTest.range('Q1').value = 'BONOS'
@@ -20,7 +20,7 @@ shtTest.range('X1').value = 'STOP'
 shtTest.range('Y1').value = 50
 shtTest.range('Z1').value = 0.0008
 shtTest.range('AB1').value = 0.0001
-rangoDesde = '2'
+rangoDesde = '26'
 rangoHasta = '59'
 
 def getBonosList():
@@ -118,6 +118,7 @@ getTodos()
 
 def getPortfolio(hb, comitente):
     try:
+        shtTest.range('U'+str(rangoDesde)+':'+'U'+str(rangoHasta)).value = ''
         payload = {'comitente': str(comitente),
         'consolida': '0',
         'proceso': '22',
@@ -143,7 +144,12 @@ def getPortfolio(hb, comitente):
                         ticker = str(valor[0]).split()
                         if x[0] == ticker[0]: 
                             shtTest.range('U'+str(int(valor[15]+1))).value = x[2]
-                            shtTest.range('X'+str(int(valor[15]+1))).value = x[1]
+                            if len(ticker) < 2: 
+                                shtTest.range('X'+str(int(valor[15]+1))).value = x[1]
+                            else:
+                                try: shtTest.range('X'+str(int(valor[15]+1))).value = x[1] /100
+                                except: shtTest.range('X'+str(int(valor[15]+1))).value = 0
+
         print()
     except: pass
 
