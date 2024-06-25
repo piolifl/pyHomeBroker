@@ -63,6 +63,7 @@ def on_options(online, quotes):
     thisData['datetime'] = pd.to_datetime(thisData['datetime'])
     thisData = thisData.rename(columns={"bid_size": "bidsize", "ask_size": "asksize"})
     options.update(thisData)
+    
 def on_securities(online, quotes):
     global ACC
     thisData = quotes
@@ -131,26 +132,24 @@ def getPortfolio(hb, comitente):
         if os.environ.get('name') == 'COCOS.CAPITAL':
             portfolio = requests.post("https://cocoscap.com/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
         else: portfolio = requests.post("https://clientes.bcch.org.ar/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
-        print()
         subtotal = [ (i['DETA'],i['IMPO']) for i in portfolio["Result"]["Totales"]["Detalle"] ]
         print(subtotal)
         subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
         for i in subtotal[0:]:
             if i[0]['NERE'] != 'Pesos':  
-                #subtotal = [ ( x['NERE'],x['CAN0'],x['CANT'],' || ',x['PCIO'],x['GTOS']) for x in i[0:] if x['CANT'] != None]
                 subtotal = [ ( x['NERE'],x['CAN0'],x['CANT']) for x in i[0:] if x['CANT'] != None]
                 for x in subtotal:
                     for valor in shtTest.range('A'+str(rangoDesde)+':'+'P'+str(rangoHasta)).value:
+                        if not valor[0]: continue
                         ticker = str(valor[0]).split()
                         if x[0] == ticker[0]: 
                             shtTest.range('U'+str(int(valor[15]+1))).value = x[2]
-                            if len(ticker) < 2: 
-                                shtTest.range('X'+str(int(valor[15]+1))).value = x[1]
-                            else:
-                                try: shtTest.range('X'+str(int(valor[15]+1))).value = x[1] /100
-                                except: shtTest.range('X'+str(int(valor[15]+1))).value = 0
-
-        print()
+                            if not shtTest.range('V'+str(int(valor[15]+1))).value:
+                                if len(ticker) < 2: 
+                                    shtTest.range('X'+str(int(valor[15]+1))).value = x[1]
+                                else:
+                                    try: shtTest.range('X'+str(int(valor[15]+1))).value = x[1] /100
+                                    except: shtTest.range('X'+str(int(valor[15]+1))).value = x[1]
     except: pass
 
 #--------------------------------------------------------------------------------------------------------------------------------
