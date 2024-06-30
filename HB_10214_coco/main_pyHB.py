@@ -18,7 +18,7 @@ shtTest.range('S1').value = 'OPCIONES'
 shtTest.range('W1').value = 'TRAILING'
 shtTest.range('X1').value = 'STOP'
 shtTest.range('Y1').value = 50
-shtTest.range('Z1').value = 0.0008
+shtTest.range('Z1').value = 0.001
 shtTest.range('AB1').value = 0.0001
 rangoDesde = '26'
 rangoHasta = '59'
@@ -271,7 +271,7 @@ def cancelaCompra(celda):
     try:
         orderC = shtTest.range('AB'+str(int(celda+1))).value
         if not orderC: orderC = 0
-        shtTest.range('Q'+str(int(celda+1))+':'+'R'+str(int(celda+1))).value = ''
+        #shtTest.range('Q'+str(int(celda+1))+':'+'R'+str(int(celda+1))).value = ''
         hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderC))
         shtTest.range('V'+str(int(celda+1))).value -= shtTest.range('AC'+str(int(celda+1))).value
         shtTest.range('X'+str(int(celda+1))).value = 0
@@ -283,7 +283,7 @@ def cancelarVenta(celda):
     try:
         orderV = shtTest.range('AE'+str(int(celda+1))).value
         if not orderV: orderV = 0
-        shtTest.range('S'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
+        #shtTest.range('S'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
         hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderV))
         shtTest.range('V'+str(int(celda+1))).value += shtTest.range('AF'+str(int(celda+1))).value
         shtTest.range('X'+str(int(celda+1))).value = 0

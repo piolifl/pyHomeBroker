@@ -139,7 +139,6 @@ def getPortfolio(hb, comitente):
             if i[0]['NERE'] != 'Pesos':  
                 subtotal = [ ( x['NERE'],x['CAN0'],x['CANT']) for x in i[0:] if x['CANT'] != None]
                 for x in subtotal:
-                    print(x)
                     for valor in shtTest.range('A'+str(rangoDesde)+':'+'P'+str(rangoHasta)).value:
                         if not valor[0]: continue
                         ticker = str(valor[0]).split()
