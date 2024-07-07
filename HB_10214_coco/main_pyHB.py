@@ -11,6 +11,7 @@ import requests
 env = environ.Env()
 environ.Env.read_env()
 wb = xw.Book('..\\epgb_pyHB.xlsx')
+#wb = xw.Book('..\\EPGB AG-OC.xlsb')
 shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
 shtTest.range('Q1').value = 'BONOS'
