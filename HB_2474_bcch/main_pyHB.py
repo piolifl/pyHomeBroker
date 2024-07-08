@@ -166,6 +166,7 @@ def namesArs(nombre,plazo):
         if (nombre[1:2] == 'F' or nombre[1:2] == 'Y'): return nombre[:1]+'20'+nombre[1:3]+plazo
         if (nombre[1:2] == 'J'): return nombre[:1]+'14'+nombre[1:3]+plazo
         if (nombre[1:2] == 'G'): return nombre[:1]+'30'+nombre[1:3]+plazo
+        if (nombre[1:2] == 'O'): return nombre[:1]+'14'+nombre[1:3]+plazo
         if (nombre[1:2] == 'E'): return nombre[:1]+'31'+nombre[1:3]+plazo
         else: return nombre[:1]+'18'+nombre[1:3]+plazo
     elif (nombre[:2] == 'MR' or nombre[:2] == 'CL') and (nombre[4:5] == 'D' or nombre[4:5] == 'C'):
@@ -454,11 +455,14 @@ def buscoOperaciones(inicio,fin):
                 except: pass
 
         if valor[1]: # # Columna Q en el excel /////////////////////////////////////////////////////////////////////////////////
+
             if str(valor[1]).lower() == 'c': cancelaCompra(valor[0])
             elif str(valor[1]).lower() == 'x': cancelarTodo(inicio,fin)
             elif valor[1] == '+': enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
             elif str(valor[1]).upper() == 'P': getPortfolio(hb, os.environ.get('account_id'))
-            else: enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0]) # Compra Bid
+            else: 
+                try: enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0]) # Compra Bid
+                except: shtTest.range('Q'+str(int(valor[0]+1))).value = ''
             shtTest.range('Q'+str(int(valor[0]+1))).value = ''
 
         if valor[2]: #  Columna R en el excel //////////////////////////////////////////////////////////////////////////////////
@@ -466,7 +470,9 @@ def buscoOperaciones(inicio,fin):
             elif str(valor[2]).lower() == 'x': cancelarTodo(inicio,fin)
             elif valor[2] == '+': enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
             elif str(valor[2]).upper() == 'P': getPortfolio(hb, os.environ.get('account_id'))
-            else: enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[2],valor[0]) # Compra Ask
+            else: 
+                try: enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[2],valor[0]) # Compra Ask
+                except: shtTest.range('R'+str(int(valor[0]+1))).value = ''
             shtTest.range('R'+str(int(valor[0]+1))).value = ''
 
         if valor[3]: # Columna S en el excel ///////////////////////////////////////////////////////////////////////////////////
@@ -474,7 +480,9 @@ def buscoOperaciones(inicio,fin):
             elif str(valor[3]).lower() == 'x': cancelarTodo(inicio,fin)
             elif valor[3] == '-': enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
             elif str(valor[3]).upper() == 'P': getPortfolio(hb, os.environ.get('account_id'))
-            else: enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[3],valor[0]) # Vendo Bid
+            else: 
+                try: enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[3],valor[0]) # Vendo Bid
+                except: shtTest.range('S'+str(int(valor[0]+1))).value = ''
             shtTest.range('S'+str(int(valor[0]+1))).value = ''
 
         if valor[4]: # Columna T en el excel //////////////////////////////////////////////////////////////////////////////////
@@ -482,7 +490,9 @@ def buscoOperaciones(inicio,fin):
             elif str(valor[4]).lower() == 'x': cancelarTodo(inicio,fin)
             elif valor[4] == '-': enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidad,valor[0])
             elif str(valor[4]).upper() == 'P': getPortfolio(hb, os.environ.get('account_id'))
-            else: enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[4],valor[0]) # Vendo Ask
+            else: 
+                try: enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[4],valor[0]) # Vendo Ask
+                except: shtTest.range('T'+str(int(valor[0]+1))).value = ''
             shtTest.range('T'+str(int(valor[0]+1))).value = ''
 ############################################################ CARGA BUCLE EN EXCEL ##############################################
 while True:
