@@ -18,11 +18,11 @@ shtTest.range('Q1').value = 'BONOS'
 shtTest.range('S1').value = 'OPCIONES'
 shtTest.range('W1').value = 'TRAILING'
 shtTest.range('X1').value = 'STOP'
-shtTest.range('Y1').value = 50
+shtTest.range('Y1').value = 'ROLLER'
 shtTest.range('Z1').value = 0.001
 shtTest.range('AB1').value = 0.0001
 rangoDesde = '26'
-rangoHasta = '59'
+rangoHasta = '89'
 
 def getBonosList():
     rng = shtTickers.range('E2:E145').expand()
@@ -33,7 +33,7 @@ def getBonosList():
     return Bonos
 def getOptionsList():
     global allOptions
-    rng = shtTickers.range('A2:A35').expand()
+    rng = shtTickers.range('A2:A61').expand()
     oOpciones = rng.value
     allOptions = pd.DataFrame({'symbol': oOpciones},columns=["symbol", "bid_size", "bid", "ask", "ask_size", "last","change", "open", "high", "low", "previous_close", "turnover", "volume",'operations', 'datetime'])
     allOptions = allOptions.set_index('symbol')
@@ -75,6 +75,7 @@ def on_securities(online, quotes):
     thisData['change'] = thisData["change"] / 100
     thisData['datetime'] = pd.to_datetime(thisData['datetime'])
     everything.update(thisData)
+    
 def on_repos(online, quotes):
     global cauciones
     thisData = quotes
@@ -132,6 +133,7 @@ def getPortfolio(hb, comitente):
         
         if os.environ.get('name') == 'COCOS.CAPITAL':
             portfolio = requests.post("https://cocoscap.com/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
+            
         else: 
             portfolio = requests.post("https://clientes.bcch.org.ar/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
         subtotal = [ (i['DETA'],i['IMPO']) for i in portfolio["Result"]["Totales"]["Detalle"] ]
@@ -230,7 +232,7 @@ def ilRulo():
     celda,pesos,dolar = 64,1000,0.01
     tikers = {'cclCI':['',dolar],'ccl24':['',dolar],'mepCI':['',dolar],'mep24':['',dolar],'arsCIccl':['',pesos],'ars24ccl':['',pesos],'arsCImep':['',pesos],'ars24mep':['',pesos]}
     
-    for valor in shtTest.range('A64:A201').value:
+    for valor in shtTest.range('A92:A229').value:
         if not valor: continue
         name = str(valor).split()
         
@@ -455,7 +457,6 @@ def buscoOperaciones(inicio,fin):
                 except: pass
 
         if valor[1]: # # Columna Q en el excel /////////////////////////////////////////////////////////////////////////////////
-
             if str(valor[1]).lower() == 'c': cancelaCompra(valor[0])
             elif str(valor[1]).lower() == 'x': cancelarTodo(inicio,fin)
             elif valor[1] == '+': enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidad,valor[0])
@@ -503,8 +504,10 @@ while True:
             try: getPortfolio(hb, os.environ.get('account_id'))
             except: pass
             break
+        
+    if not shtTest.range('Y1').value: buscoOperaciones(2,25)
+    else: buscoOperaciones(rangoDesde,rangoHasta)
 
-    buscoOperaciones(rangoDesde,rangoHasta)
     time.sleep(2)
 
     try: 
@@ -532,6 +535,7 @@ shtTest.range('Q1').value = 'BONOS'
 shtTest.range('S1').value = 'OPCIONES'
 shtTest.range('W1').value = 'TRAILING'
 shtTest.range('X1').value = 'STOP'
+shtTest.range('Y1').value = 'ROLLER'
 
 #[ ]><   \n
 #print("\nimprimir en linea nueva")
