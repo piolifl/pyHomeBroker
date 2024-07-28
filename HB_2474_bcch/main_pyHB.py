@@ -10,8 +10,8 @@ import requests
 
 env = environ.Env()
 environ.Env.read_env()
-wb = xw.Book('..\\epgb_pyHB.xlsx')
-#wb = xw.Book('..\\EPGB AG-OC.xlsb')
+#wb = xw.Book('..\\epgb_pyHB.xlsx')
+wb = xw.Book('..\\epgb_pyHB.xlsb')
 shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
 shtTest.range('Q1').value = 'BONOS'
@@ -194,14 +194,14 @@ def namesMep(nombre,plazo):
     else: return nombre[:4]+'D'+plazo
 
 def cargoXplazo(dicc):
-    mejorMep = dicc['mepCI'][0]
+    mejorMep = namesMep(dicc['mepCI'][0],' - spot')
     if mejorMep == 'AL30D - spot': shtTest.range('A2').value = ''
     else: shtTest.range('A2').value = mejorMep
     shtTest.range('A3').value = 'AL30D - spot'
     shtTest.range('A4').value = 'AL30 - spot'
     shtTest.range('A5').value = namesArs(dicc['mepCI'][0],' - spot')
 
-    mejorMep = dicc['mep24'][0]
+    mejorMep =  namesMep(dicc['mep24'][0],' - 24hs')
     if mejorMep == 'AL30D - 24hs': shtTest.range('A6').value = ''
     else: shtTest.range('A6').value = mejorMep
     shtTest.range('A7').value = 'AL30D - 24hs'
