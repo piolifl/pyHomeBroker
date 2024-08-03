@@ -24,13 +24,6 @@ shtTest.range('AB1').value = 0.0001
 rangoDesde = '26'
 rangoHasta = '89'
 
-def getBonosList():
-    rng = shtTickers.range('E2:E145').expand()
-    oBonos = rng.value
-    Bonos = pd.DataFrame({'symbol' : oBonos}, columns=["symbol", "bid_size", "bid", "ask", "ask_size", "last", "change", "open", "high", "low", "previous_close", "turnover", "volume", 'operations', 'datetime'])
-    Bonos = Bonos.set_index('symbol')
-    Bonos['datetime'] = pd.to_datetime(Bonos['datetime'])
-    return Bonos
 def getOptionsList():
     global allOptions
     rng = shtTickers.range('A2:A61').expand()
@@ -39,6 +32,49 @@ def getOptionsList():
     allOptions = allOptions.set_index('symbol')
     allOptions['datetime'] = pd.to_datetime(allOptions['datetime'])
     return allOptions
+def getAccionesList():
+    rng = shtTickers.range('C2:C10').expand()
+    oAcciones = rng.value
+    ACC = pd.DataFrame({'symbol' : oAcciones}, columns=["symbol", "bid_size", "bid", "ask", "ask_size", "last","change", "open", "high", "low", "previous_close", "turnover", "volume",'operations', 'datetime'])
+    ACC = ACC.set_index('symbol')
+    ACC['datetime'] = pd.to_datetime(ACC['datetime'])
+    return ACC
+def getBonosList():
+    rng = shtTickers.range('E2:E75').expand()
+    oBonos = rng.value
+    Bonos = pd.DataFrame({'symbol' : oBonos}, columns=["symbol", "bid_size", "bid", "ask", "ask_size", "last", "change", "open", "high", "low", "previous_close", "turnover", "volume", 'operations', 'datetime'])
+    Bonos = Bonos.set_index('symbol')
+    Bonos['datetime'] = pd.to_datetime(Bonos['datetime'])
+    return Bonos
+def getLetrasList():
+    rng = shtTickers.range('G2:G20').expand()
+    oLetras = rng.value
+    Letras = pd.DataFrame({'symbol' : oLetras}, columns=["symbol", "bid_size", "bid", "ask", "ask_size", "last","change", "open", "high", "low", "previous_close", "turnover", "volume",'operations', 'datetime'])
+    Letras = Letras.set_index('symbol')
+    Letras['datetime'] = pd.to_datetime(Letras['datetime'])
+    return Letras
+def getONSList():
+    rng = shtTickers.range('I2:I50').expand()
+    oONS = rng.value
+    ONS = pd.DataFrame({'symbol' : oONS}, columns=["symbol", "bid_size", "bid", "ask", "ask_size", "last","change", "open", "high", "low", "previous_close", "turnover", "volume",'operations', 'datetime'])
+    ONS = ONS.set_index('symbol')
+    ONS['datetime'] = pd.to_datetime(ONS['datetime'])
+    return ONS
+def getCedearsList():
+    rng = shtTickers.range('K2:K50').expand()
+    oCedears = rng.value
+    Cedears = pd.DataFrame({'symbol' : oCedears}, columns=["symbol", "bid_size", "bid", "ask", "ask_size", "last","change", "open", "high", "low", "previous_close", "turnover", "volume",'operations', 'datetime'])
+    Cedears = Cedears.set_index('symbol')
+    Cedears['datetime'] = pd.to_datetime(Cedears['datetime'])
+    return Cedears
+def getPanelGeneralList():
+    rng = shtTickers.range('M2:M10').expand()
+    oPanelGeneral = rng.value
+    PanelGeneral = pd.DataFrame({'symbol' : oPanelGeneral}, columns=["symbol", "bid_size", "bid", "ask", "ask_size", "last","change", "open", "high", "low", "previous_close", "turnover", "volume",'operations', 'datetime'])
+    PanelGeneral = PanelGeneral.set_index('symbol')
+    PanelGeneral['datetime'] = pd.to_datetime(PanelGeneral['datetime'])
+    return PanelGeneral
+
 
 i = 1
 fechas = []
@@ -50,10 +86,17 @@ cauciones = pd.DataFrame({'settlement':fechas}, columns=['settlement', 'bid_amou
 cauciones['settlement'] = pd.to_datetime(cauciones['settlement'])
 cauciones = cauciones.set_index('settlement')
 
-bonos = getBonosList()
 options = getOptionsList()
 options = options.rename(columns={"bid_size": "bidsize", "ask_size": "asksize"})
-everything = bonos
+ACC = getAccionesList()
+bonos = getBonosList()
+letras = getLetrasList()
+ONS = getONSList()
+cedears = getCedearsList()
+PanelGeneral = getPanelGeneralList()
+
+
+everything = pd.concat([ACC, bonos, letras, ONS, cedears, PanelGeneral ])
 listLength = len(options) +30
 
 def on_options(online, quotes):
@@ -520,8 +563,6 @@ while True:
     try:
         if not shtTest.range('S1').value: 
             shtTest.range('A30').options(index=True,header=False).value=options  
-       #shtTest.range('A26').options(index=True, header=False).value = everything
-       #shtTest.range('A' + str(listLength)).options(index=True, header=False).value = options
     except: print("______ ERROR al cargar OPCIONES en Excel ______ ",time.strftime("%H:%M:%S")) 
         
     if str(shtTest.range('A1').value) != 'symbol': ilRulo()
@@ -538,4 +579,3 @@ shtTest.range('X1').value = 'STOP'
 shtTest.range('Y1').value = 'ROLLER'
 
 #[ ]><   \n
-#print("\nimprimir en linea nueva")
