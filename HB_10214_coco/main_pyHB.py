@@ -237,42 +237,59 @@ def namesMep(nombre,plazo):
     else: return nombre[:4]+'D'+plazo
 
 def cargoXplazo(dicc):
-    mejorMep = namesMep(dicc['mepCI'][0],' - spot')
-    if mejorMep == 'AL30D - spot': shtTest.range('A2').value = ''
-    else: shtTest.range('A2').value = mejorMep
-    shtTest.range('A3').value = 'AL30D - spot'
-    shtTest.range('A4').value = 'AL30 - spot'
-    shtTest.range('A5').value = namesArs(dicc['mepCI'][0],' - spot')
+    mejorMep = dicc['mepCI'][0]
+    mejorMep24 = dicc['mep24'][0]
+    mepArs = namesMep(dicc['arsCImep'][0],' - spot')
+    mepArs24 = namesMep(dicc['ars24mep'][0],' - 24hs')
+    mepCcl = namesMep(dicc['cclCI'][0],' - spot')
+    mepCcl24 = namesMep(dicc['ccl24'][0],' - 24hs')
 
-    mejorMep =  namesMep(dicc['mep24'][0],' - 24hs')
-    if mejorMep == 'AL30D - 24hs': shtTest.range('A6').value = ''
-    else: shtTest.range('A6').value = mejorMep
-    shtTest.range('A7').value = 'AL30D - 24hs'
-    shtTest.range('A8').value = 'AL30 - 24hs'
-    shtTest.range('A9').value = namesArs(dicc['mep24'][0],' - 24hs')
+    if mejorMep == 'AL30D - spot': shtTest.range('A2:A5').value = ''
+    else: 
+        shtTest.range('A2').value = mejorMep
+        shtTest.range('A3').value = 'AL30D - spot'
+        shtTest.range('A4').value = 'AL30 - spot'
+        shtTest.range('A5').value = namesArs(dicc['mepCI'][0],' - spot')
+
+    if mejorMep24 == 'AL30D - 24hs': shtTest.range('A6:A9').value = ''
+    else: 
+        shtTest.range('A6').value = mejorMep24
+        shtTest.range('A7').value = 'AL30D - 24hs'
+        shtTest.range('A8').value = 'AL30 - 24hs'
+        shtTest.range('A9').value = namesArs(dicc['mep24'][0],' - 24hs')
     
-    shtTest.range('A10').value = dicc['mepCI'][0]
-    shtTest.range('A11').value = namesMep(dicc['arsCImep'][0],' - spot')
-    shtTest.range('A12').value = dicc['arsCImep'][0]
-    shtTest.range('A13').value = namesArs(dicc['mepCI'][0],' - spot')
-    shtTest.range('A14').value = dicc['mep24'][0]
-    shtTest.range('A15').value = namesMep(dicc['ars24mep'][0],' - 24hs')
-    shtTest.range('A16').value = dicc['ars24mep'][0]
-    shtTest.range('A17').value = namesArs(dicc['mep24'][0],' - 24hs')
+    if mejorMep == mepArs: shtTest.range('A10:A13').value = ''
+    else:
+        shtTest.range('A10').value = mejorMep
+        shtTest.range('A11').value = mepArs
+        shtTest.range('A12').value = dicc['arsCImep'][0]
+        shtTest.range('A13').value = namesArs(dicc['mepCI'][0],' - spot')
 
-    shtTest.range('A18').value = dicc['mepCI'][0]
-    shtTest.range('A19').value = namesMep(dicc['cclCI'][0],' - spot')
-    shtTest.range('A20').value = dicc['cclCI'][0]
-    shtTest.range('A21').value = namesCcl(dicc['mepCI'][0],' - spot')
-    shtTest.range('A22').value = dicc['mep24'][0]
-    shtTest.range('A23').value = namesMep(dicc['ccl24'][0],' - 24hs')
-    shtTest.range('A24').value = dicc['ccl24'][0]
-    shtTest.range('A25').value = namesCcl(dicc['mep24'][0],' - 24hs')
+    if mejorMep24 == mepArs24: shtTest.range('A14:A17').value = ''
+    else:
+        shtTest.range('A14').value = mejorMep24
+        shtTest.range('A15').value = mepArs24
+        shtTest.range('A16').value = dicc['ars24mep'][0]
+        shtTest.range('A17').value = namesArs(dicc['mep24'][0],' - 24hs')
+
+    if mejorMep == mepCcl:  shtTest.range('A18:A21').value = ''
+    else:
+        shtTest.range('A18').value = mejorMep
+        shtTest.range('A19').value = mepCcl
+        shtTest.range('A20').value = dicc['cclCI'][0]
+        shtTest.range('A21').value = namesCcl(dicc['mepCI'][0],' - spot')
+
+    if mejorMep24 == mepCcl24: shtTest.range('A22:A25').value = ''
+    else:
+        shtTest.range('A22').value = mejorMep24
+        shtTest.range('A23').value = mepCcl24
+        shtTest.range('A24').value = dicc['ccl24'][0]
+        shtTest.range('A25').value = namesCcl(dicc['mep24'][0],' - 24hs')
 
     shtTest.range('A1').value = 'symbol'
 
 def ilRulo():
-    celda,pesos,dolar = 64,1000,0.01
+    celda,pesos,dolar = 92,1000,0.01
     tikers = {'cclCI':['',dolar],'ccl24':['',dolar],'mepCI':['',dolar],'mep24':['',dolar],'arsCIccl':['',pesos],'ars24ccl':['',pesos],'arsCImep':['',pesos],'ars24mep':['',pesos]}
     
     for valor in shtTest.range('A92:A229').value:
@@ -280,21 +297,27 @@ def ilRulo():
         name = str(valor).split()
         
         if str(name[2]).lower() == 'spot':
+
             if str(name[0][-1:]).upper()=='C':
+
                 arsC = shtTest.range('AA'+str(celda)).value
                 if not arsC: arsC = 1000
                 if arsC > tikers['arsCIccl'][1]: tikers['arsCIccl'] = [namesArs(name[0],' - spot'),arsC]
+
                 ccl = shtTest.range('Z'+str(celda)).value
                 if not ccl: ccl = 0.01
                 if ccl > tikers['cclCI'][1]: tikers['cclCI'] = [valor,ccl]
 
             if str(name[0][-1:]).upper()=='D': 
+
                 arsM = shtTest.range('AA'+str(celda)).value
                 if not arsM: arsM = 1000
                 if arsM > tikers['arsCImep'][1]: tikers['arsCImep'] = [namesArs(name[0],' - spot'),arsM]
+
                 mep = shtTest.range('Z'+str(celda)).value
                 if not mep: mep = 0.01
                 if mep > tikers['mepCI'][1]: tikers['mepCI'] = [valor,mep]
+
 
         if str(name[2]) == '24hs':
             if str(name[0][-1:]).upper()=='C':
