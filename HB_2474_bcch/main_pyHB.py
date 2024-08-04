@@ -98,6 +98,7 @@ PanelGeneral = getPanelGeneralList()
 
 everything = pd.concat([ACC, bonos, letras, ONS, cedears, PanelGeneral ])
 listLength = len(options) +30
+allLength = len(everything) + listLength
 
 def on_options(online, quotes):
     global options
@@ -289,10 +290,10 @@ def cargoXplazo(dicc):
     shtTest.range('A1').value = 'symbol'
 
 def ilRulo():
-    celda,pesos,dolar = 92,1000,0.01
+    celda,pesos,dolar = listLength+2,1000,0.01
     tikers = {'cclCI':['',dolar],'ccl24':['',dolar],'mepCI':['',dolar],'mep24':['',dolar],'arsCIccl':['',pesos],'ars24ccl':['',pesos],'arsCImep':['',pesos],'ars24mep':['',pesos]}
     
-    for valor in shtTest.range('A92:A229').value:
+    for valor in shtTest.range('A'+str(celda)+':A'+str(allLength)).value:
         if not valor: continue
         name = str(valor).split()
         
