@@ -566,7 +566,7 @@ def buscoOperaciones(inicio,fin):
 while True:
 
     if time.strftime("%H:%M:%S") > '17:01:00': 
-        if time.strftime("%H:%M:%S") > '17:30:00': pass
+        if time.strftime("%H:%M:%S") > '17:10:00': pass
         else:
             try: getPortfolio(hb, os.environ.get('account_id'))
             except: pass
