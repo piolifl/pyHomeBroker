@@ -44,7 +44,6 @@ def getPortfolio(hb, comitente):
         
         if os.environ.get('name') == 'COCOS.CAPITAL':
             portfolio = requests.post("https://cocoscap.com/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
-            
         else: 
             portfolio = requests.post("https://clientes.bcch.org.ar/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
         subtotal = [ (i['DETA'],i['IMPO']) for i in portfolio["Result"]["Totales"]["Detalle"] ]
@@ -68,7 +67,7 @@ def getPortfolio(hb, comitente):
     except: pass
 
 #--------------------------------------------------------------------------------------------------------------------------------
-print(time.strftime("%H:%M:%S"),f"Logueo correcto en: {os.environ.get('name')} cuenta: {int(os.environ.get('account_id'))}")
+print(time.strftime("%H:%M:%S"),f"solo ORDENES: {os.environ.get('name')} cuenta: {int(os.environ.get('account_id'))}")
 #--------------------------------------------------------------------------------------------------------------------------------
 
 def cancelaCompra(celda):
@@ -322,3 +321,29 @@ shtTest.range('X1').value = 'STOP'
 shtTest.range('Y1').value = 'ROLLER'
 
 #[ ]><   \n
+
+
+'''
+{'Success': True, 'Error': {'Codigo': 0, 'Descripcion': None}, 
+'Result': {'Totales': 
+{'TotalPosicion': '110221.19', 
+'Detalle': [
+        {'DETA': 'Tenencia Opciones', 'IMPO': '-18203.9', 'TIPO': '10', 'Hora': 'Pesos', 'CANT': None, 'TCAM': '1'}, 
+        {'DETA': 'Cuenta Corriente $', 'IMPO': '128425.09', 'TIPO': '10', 'Hora': 'Pesos', 'CANT': None, 'TCAM': '1'}]}, 
+'Activos': [{'GTOS': '0', 'IMPO': '128425.09', 'ESPE': 'Subtotal Cuenta Corriente', 'TIPO': '11', 'Hora': '', 
+'Subtotal': [
+{'IMPO': '128425.09', 'ESPE': '', 
+'APERTURA': [
+{'DETA': 'Vencido', 'IMPO': '7185.22', 'GTIA': None, 'ACUM': '7185.22'}, 
+{'DETA': '24 Hs. 14/08/24', 'IMPO': None, 'GTIA': None, 'ACUM': '7185.22'}, 
+{'DETA': '48 Hs. 15/08/24', 'IMPO': None, 'GTIA': None, 'ACUM': '7185.22'}, 
+{'DETA': '72 Hs. 16/08/24', 'IMPO': None, 'GTIA': None, 'ACUM': '7185.22'}, 
+{'DETA': '+ de 72 Hs.', 'IMPO': None, 'GTIA': None, 'ACUM': '7185.22'}, 
+{'DETA': 'Gtia.Opciones', 'IMPO': '121239.87', 'GTIA': None, 'ACUM': '128425.09'}], 'Detalle': [
+{'DETA': 'Disponible', 'IMPO': '7185.22', 'CANT': None, 'PCIO': '1'}, 
+{'DETA': 'Garantia', 'IMPO': '121239.87', 'CANT': None, 'PCIO': '1'}], 'TESP': '0', 'NERE': 'Pesos', 'GTOS': '0', 'DETA': 'Total', 'TIPO': '11', 'Hora': 'Pesos', 'AMPL': '', 'DIVI': '100', 'TICK': 'Pesos', 'CANT': None, 'PCIO': '1', 'CAN3': '0', 'CAN2': '0', 'CAN0': '0'}], 'CANT': None, 'TCAM': '1', 'CAN2': '116.5157897'}, {'GTOS': '-3696.89316', 'IMPO': '-18203.9', 'ESPE': 'Subtotal Opciones', 'TIPO': '10', 'Hora': '', 'Subtotal': [{'IMPO': '4', 'ESPE': '8308B', 'TESP': '4', 'NERE': 'GFGV26973G', 'GTOS': '-9.01', 'DETA': '', 'TIPO': '10', 'Hora': 'ANTERIOR', 'AMPL': 'GFG(V) 2,697.300 AGOSTO', 'DIVI': '100', 'TICK': 'GFGV26973G', 'CANT': '1', 'PCIO': '.04', 'CAN3': '-69.2544197', 'CAN2': '.0036291', 'CAN0': '.1301'}, {'IMPO': '198', 'ESPE': '8279B', 'TESP': '4', 'NERE': 'GFGV29581G', 'GTOS': '-2411.94294', 'DETA': '', 'TIPO': '10', 'Hora': 'ANTERIOR', 'AMPL': 'GFG(V) 2,958.100 AGOSTO', 'DIVI': '100', 'TICK': 'GFGV29581G', 'CANT': '22', 'PCIO': '.09', 'CAN3': '-92.4136272', 'CAN2': '.1796388', 'CAN0': '1.1863377'}, {'IMPO': '1080', 'ESPE': '8364B', 'TESP': '4', 'NERE': 'GFGV29581O', 'GTOS': '431.21', 'DETA': '', 'TIPO': '10', 'Hora': 'ANTERIOR', 'AMPL': 'GFG(V) 2,958.100 OCTUBRE', 'DIVI': '100', 'TICK': 'GFGV29581O', 'CANT': '4', 'PCIO': '2.7', 'CAN3': '66.4637248', 'CAN2': '.9798479', 'CAN0': '1.621975'}, {'IMPO': '3890.1', 'ESPE': '8359B', 'TESP': '4', 'NERE': 'GFGV32581O', 'GTOS': '45.45', 'DETA': '', 'TIPO': '10', 'Hora': 'ANTERIOR', 'AMPL': 'GFG(V) 3,258.100 OCTUBRE', 'DIVI': '100', 'TICK': 'GFGV32581O', 'CANT': '3', 'PCIO': '12.967', 'CAN3': '1.1821622', 'CAN2': '3.5293576', 'CAN0': '12.8155'}, {'IMPO': '167.4', 'ESPE': '8285B', 'TESP': '4', 'NERE': 'GFGV34081G', 'GTOS': '-52.81266', 'DETA': '', 'TIPO': '10', 'Hora': 'ANTERIOR', 'AMPL': 'GFG(V) 3,408.100 AGOSTO', 'DIVI': '100', 'TICK': 'GFGV34081G', 'CANT': '2', 'PCIO': '.837', 'CAN3': '-23.9825721', 'CAN2': '.1518764', 'CAN0': '1.1010633'}, {'IMPO': '-16841.2', 'ESPE': '8351B', 'TESP': '4', 'NERE': 'GFGV35581O', 'GTOS': '-1659.59', 'DETA': '', 'TIPO': '10', 'Hora': 'ANTERIOR', 'AMPL': 'GFG(V) 3,558.100 OCTUBRE', 'DIVI': '100', 'TICK': 'GFGV35581O', 'CANT': '-4', 'PCIO': '42.103', 'CAN3': '10.931581', 'CAN2': '-15.2794576', 'CAN0': '37.954025'}, {'IMPO': '-6702.2', 'ESPE': '8239B', 'TESP': '4', 'NERE': 'GFGV37081G', 'GTOS': '-40.19756', 'DETA': '', 'TIPO': '10', 'Hora': 'ANTERIOR', 'AMPL': 'GFG(V) 3,708.100 AGOSTO', 'DIVI': '100', 'TICK': 'GFGV37081G', 'CANT': '-23', 'PCIO': '2.914', 'CAN3': '.6033855', 'CAN2': '-6.0806819', 'CAN0': '2.8965228'}], 'CANT': None, 'TCAM': '1', 'CAN2': '-16.5157897'}]}}
+
+
+[('Tenencia Opciones', '-18203.9'), ('Cuenta Corriente $', '128425.09')]
+
+'''
