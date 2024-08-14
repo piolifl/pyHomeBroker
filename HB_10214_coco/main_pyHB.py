@@ -181,7 +181,7 @@ def getPortfolio(hb, comitente):
         else: 
             portfolio = requests.post("https://clientes.bcch.org.ar/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
         subtotal = [ (i['DETA'],i['IMPO']) for i in portfolio["Result"]["Totales"]["Detalle"] ]
-        print(subtotal)
+        print(subtotal,time.strftime("%H:%M:%S"))
         subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
         for i in subtotal[0:]:
             if i[0]['NERE'] != 'Pesos':  
@@ -380,23 +380,22 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                 shtTest.range('AD'+str(int(celda+1))).value = float(precio)
                 try: shtTest.range('W'+str(int(celda+1))).value += int(size) * precio*100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio*100
-                print(f'______ BUY  opcion {symbol[0]} 24hs // precio: {precio} // + {int(size)} // orden: {orderC}') 
+                print(f'______/ BUY  opcion {symbol[0]} 24hs // precio: {precio} // + {int(size)}') 
             else:
                 orderC = hb.orders.send_buy_order(symbol[0],symbol[2], float(precio), int(size))
                 shtTest.range('AD'+str(int(celda+1))).value = float(precio/100)
                 try: shtTest.range('W'+str(int(celda+1))).value += int(size) * precio/100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio/100
-                print(f'______ BUY  {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // + {int(size)} // orden: {orderC}')
+                print(f'______/ BUY  {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // + {int(size)}')
             # ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             shtTest.range('Q'+str(int(celda+1))+':'+'R'+str(int(celda+1))).value = ''
             try: shtTest.range('V'+str(int(celda+1))).value += int(size)
             except: shtTest.range('V'+str(int(celda+1))).value = int(size)
             shtTest.range('AB'+str(int(celda+1))).value = orderC
             shtTest.range('AC'+str(int(celda+1))).value = int(size)
-            shtTest.range('AH'+str(int(celda+1))).value = str(time.strftime("%H:%M:%S"))
         except: 
             shtTest.range('Q'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
-            print(f'______ ERROR en COMPRA. {symbol[0]} // precio: {precio} // + {int(size)}')
+            print(f'______/ ERROR en COMPRA. {symbol[0]} // precio: {precio} // + {int(size)}')
     else: 
         try:
             if len(symbol) < 2:
@@ -404,23 +403,22 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                 shtTest.range('AG'+str(int(celda+1))).value = float(precio)
                 try: shtTest.range('W'+str(int(celda+1))).value -= int(size) * precio*100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio*100
-                print(f'______ SELL opcion {symbol[0]} 24hs // precio: {precio} // - {int(size)} // orden: {orderV}')
+                print(f'______/ SELL opcion {symbol[0]} 24hs // precio: {precio} // - {int(size)}')
             else:
                 orderV = hb.orders.send_sell_order(symbol[0],symbol[2], float(precio), int(size))
                 shtTest.range('AG'+str(int(celda+1))).value = float(precio/100)
                 try: shtTest.range('W'+str(int(celda+1))).value -= int(size) * precio/100
                 except: shtTest.range('W'+str(int(celda+1))).value = int(size) * precio/100
-                print(f'______ SELL {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // - {int(size)} // orden: {orderV}')
+                print(f'______/ SELL {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // - {int(size)}')
             # ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             shtTest.range('S'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
             try: shtTest.range('V'+str(int(celda+1))).value -= int(size)
             except: shtTest.range('V'+str(int(celda+1))).value = int(size)/-1
             shtTest.range('AE'+str(int(celda+1))).value = orderV
             shtTest.range('AF'+str(int(celda+1))).value = int(size)
-            shtTest.range('AH'+str(int(celda+1))).value = str(time.strftime("%H:%M:%S"))
         except:
             shtTest.range('Q'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
-            print(f'______ ERROR en VENTA. {symbol[0]} // precio: {precio} // {int(size)/-1}')
+            print(f'______/ ERROR en VENTA. {symbol[0]} // precio: {precio} // {int(size)/-1}')
     try: 
         tieneW = shtTest.range('W'+str(int(celda+1))).value
         tieneV = shtTest.range('V'+str(int(celda+1))).value
