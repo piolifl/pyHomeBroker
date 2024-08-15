@@ -46,8 +46,8 @@ def getPortfolio(hb, comitente):
             portfolio = requests.post("https://cocoscap.com/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
         else: 
             portfolio = requests.post("https://clientes.bcch.org.ar/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
-        subtotal = [ (i['DETA'],i['IMPO']) for i in portfolio["Result"]["Totales"]["Detalle"] ]
-        print(subtotal)
+        for i in portfolio['Result']['Activos'][0]['Subtotal'][0]['APERTURA']:
+            if i['IMPO'] != None: print(i['DETA'],i['IMPO'] )
         subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
         for i in subtotal[0:]:
             if i[0]['NERE'] != 'Pesos':  
