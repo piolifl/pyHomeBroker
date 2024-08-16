@@ -18,7 +18,6 @@ shtTest.range('Q1').value = 'BONOS'
 shtTest.range('S1').value = 'OPCIONES'
 shtTest.range('W1').value = 'TRAILING'
 shtTest.range('X1').value = 'STOP'
-shtTest.range('Y1').value = 'ROLLER'
 shtTest.range('Z1').value = 0.001
 shtTest.range('AB1').value = 0.0001
 rangoDesde = '26'
@@ -143,8 +142,8 @@ def getTodos():
     hb.online.subscribe_securities('bluechips', 'SPOT')    # Acciones del Panel lider - spot
     hb.online.subscribe_securities('government_bonds', '24hs') # Bonos - 24hs
     hb.online.subscribe_securities('government_bonds', 'SPOT')  # Bonos - spot
-    #hb.online.subscribe_securities('cedears', '24hs')      # CEDEARS - 24hs
-    #hb.online.subscribe_securities('cedears', 'SPOT')      # CEDEARS - spot
+    hb.online.subscribe_securities('cedears', '24hs')      # CEDEARS - 24hs
+    hb.online.subscribe_securities('cedears', 'SPOT')      # CEDEARS - spot
     #hb.online.subscribe_securities('general_board', '24hs') # Acciones del Panel general - 24hs
     #hb.online.subscribe_securities('general_board', 'SPOT') # Acciones del Panel general - spot
     hb.online.subscribe_securities('short_term_government_bonds', '24hs')  # LETRAS - 24hs
@@ -203,6 +202,8 @@ def getPortfolio(hb, comitente):
 
 #--------------------------------------------------------------------------------------------------------------------------------
 print(time.strftime("%H:%M:%S"),f"Logueo correcto en: {os.environ.get('name')} cuenta: {int(os.environ.get('account_id'))}")
+
+shtTest.range('Y1').value = os.environ.get('name')
 #--------------------------------------------------------------------------------------------------------------------------------
 def namesArs(nombre,plazo): 
     if nombre[:2] == 'BA': return 'BA37D'+plazo
@@ -570,9 +571,8 @@ while True:
             try: getPortfolio(hb, os.environ.get('account_id'))
             except: pass
             break
-        
-    if not shtTest.range('Y1').value: buscoOperaciones(2,25)
-    else: buscoOperaciones(rangoDesde,rangoHasta)
+    
+    if str(shtTest.range('Y1').value).upper() == 'BCCH': buscoOperaciones(rangoDesde,rangoHasta)
 
     time.sleep(2)
 
@@ -599,6 +599,6 @@ shtTest.range('Q1').value = 'BONOS'
 shtTest.range('S1').value = 'OPCIONES'
 shtTest.range('W1').value = 'TRAILING'
 shtTest.range('X1').value = 'STOP'
-shtTest.range('Y1').value = 'ROLLER'
+shtTest.range('Y1').value = 'BROKER'
 
 #[ ]><   \n
