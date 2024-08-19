@@ -10,7 +10,6 @@ import requests
 
 env = environ.Env()
 environ.Env.read_env()
-#wb = xw.Book('..\\epgb_pyHB.xlsx')
 wb = xw.Book('..\\epgb_pyHB.xlsb')
 shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')

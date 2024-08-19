@@ -4,7 +4,7 @@ import pandas as pd
 import xlwings as xw
 import winsound
 
-wb = xw.Book('.\\epgb_pyRofex.xlsb')
+wb = xw.Book('.\\epgb.xlsb')
 shtTickers = wb.sheets('pyRofex')
 shtData = wb.sheets('HomeBroker')
 
@@ -13,7 +13,7 @@ shtData.range('S1').value = 'OPERAR'
 shtData.range('W1').value = 'TRAILING'
 shtData.range('X1').value = 'STOP'
 shtData.range('Z1').value = 0.001
-shtData.range('AB1').value = 0.0001
+shtData.range('AB1').value = 0.0025
 
 rangoDesde = '2'
 rangoHasta = '90'
@@ -256,7 +256,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     if not shtData.range('V'+str(int(celda+1))).value: shtData.range('W'+str(int(celda+1))+':'+'X'+str(int(celda+1))).value = 0
     if tipo.lower() == 'buy': 
         try: 
-            #pyRofex.send_order_via_websocket(ticker=symbol,side=pyRofex.Side.BUY,size=int(size),order_type=pyRofex.OrderType.LIMIT,price=float(precio)) 
+            pyRofex.send_order_via_websocket(ticker=symbol,side=pyRofex.Side.BUY,size=int(size),order_type=pyRofex.OrderType.LIMIT,price=float(precio)) 
             #pyRofex.send_order(ticker=symbol,side=pyRofex.Side.BUY,size=int(size),order_type=pyRofex.OrderType.LIMIT,price=float(precio)) 
             
             if len(str(symbol).split())<2:
@@ -280,7 +280,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
 
     else: 
         try:
-            #pyRofex.send_order_via_websocket(ticker=symbol,side=pyRofex.Side.SELL,size=int(size),order_type=pyRofex.OrderType.LIMIT,price=float(precio)) 
+            pyRofex.send_order_via_websocket(ticker=symbol,side=pyRofex.Side.SELL,size=int(size),order_type=pyRofex.OrderType.LIMIT,price=float(precio)) 
             #pyRofex.send_order(ticker=symbol,side=pyRofex.Side.SELL,size=int(size),order_type=pyRofex.OrderType.LIMIT,price=float(precio)) 
             
             if len(str(symbol).split())<2:
@@ -439,7 +439,7 @@ while True:
     
     if str(shtData.range('A1').value) != 'symbol': ilRulo()
     if not shtData.range('S1').value : buscoOperaciones(rangoDesde,rangoHasta)
-    time.sleep(1)
+    time.sleep(10)
     try: 
         if not shtData.range('Q1').value:
             shtData.range('A30').options(index=False, headers=False).value = df_datos
