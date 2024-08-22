@@ -18,7 +18,7 @@ shtTest.range('S1').value = 'OPCIONES'
 shtTest.range('W1').value = 'TRAILING'
 shtTest.range('X1').value = 'STOP'
 shtTest.range('Z1').value = 0.001
-shtTest.range('AB1').value = 0.0001
+shtTest.range('AB1').value = 0.0046
 rangoDesde = '26'
 rangoHasta = '89'
 
@@ -444,10 +444,10 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
         if cantidad > stock : cantidad = int(stock)
 
         if len(nombre) < 2: # Ingresa si son OPCIONES ///////////////////////////////////////////////////////////////////////////
-            if bid * 100 > costo * (1 + (ganancia*10)):
+            if bid > costo * (1 + (ganancia*10)):
                 if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'TRAILING': pass
                 else: shtTest.range('W'+str(int(nroCelda+1))).value = 'TRAILING'
-                shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
+                shtTest.range('X'+str(int(nroCelda+1))).value = bid
             if not shtTest.range('X1').value:
                 if last * 100 < costo * (1 - (ganancia*75)): # Precio baja activo stop y envia orden venta
                     if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP' and bid > last * (1-(ganancia*15)):

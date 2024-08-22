@@ -202,7 +202,7 @@ def getPortfolio(hb, comitente):
 #--------------------------------------------------------------------------------------------------------------------------------
 print(time.strftime("%H:%M:%S"),f"Logueo correcto en: {os.environ.get('name')} cuenta: {int(os.environ.get('account_id'))}")
 
-shtTest.range('Y1').value = os.environ.get('name')
+
 #--------------------------------------------------------------------------------------------------------------------------------
 def namesArs(nombre,plazo): 
     if nombre[:2] == 'BA': return 'BA37D'+plazo
@@ -444,10 +444,10 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
         if cantidad > stock : cantidad = int(stock)
 
         if len(nombre) < 2: # Ingresa si son OPCIONES ///////////////////////////////////////////////////////////////////////////
-            if bid > costo * (1 + (ganancia*10)):
+            if bid * 100 > costo * (1 + (ganancia*10)):
                 if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'TRAILING': pass
                 else: shtTest.range('W'+str(int(nroCelda+1))).value = 'TRAILING'
-                shtTest.range('X'+str(int(nroCelda+1))).value = bid
+                shtTest.range('X'+str(int(nroCelda+1))).value = bid * 100
             if not shtTest.range('X1').value:
                 if last * 100 < costo * (1 - (ganancia*75)): # Precio baja activo stop y envia orden venta
                     if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP' and bid > last * (1-(ganancia*15)):
@@ -570,9 +570,6 @@ while True:
             try: getPortfolio(hb, os.environ.get('account_id'))
             except: pass
             break
-    
-    if str(shtTest.range('Y1').value).upper() == 'BCCH': buscoOperaciones(rangoDesde,rangoHasta)
-
     time.sleep(2)
 
     try: 
