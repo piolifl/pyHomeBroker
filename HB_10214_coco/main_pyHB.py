@@ -141,14 +141,14 @@ def getTodos():
     hb.online.subscribe_securities('bluechips', 'SPOT')    # Acciones del Panel lider - spot
     hb.online.subscribe_securities('government_bonds', '24hs') # Bonos - 24hs
     hb.online.subscribe_securities('government_bonds', 'SPOT')  # Bonos - spot
-    hb.online.subscribe_securities('cedears', '24hs')      # CEDEARS - 24hs
-    hb.online.subscribe_securities('cedears', 'SPOT')      # CEDEARS - spot
+    #hb.online.subscribe_securities('cedears', '24hs')      # CEDEARS - 24hs
+    #hb.online.subscribe_securities('cedears', 'SPOT')      # CEDEARS - spot
     #hb.online.subscribe_securities('general_board', '24hs') # Acciones del Panel general - 24hs
     #hb.online.subscribe_securities('general_board', 'SPOT') # Acciones del Panel general - spot
     hb.online.subscribe_securities('short_term_government_bonds', '24hs')  # LETRAS - 24hs
     hb.online.subscribe_securities('short_term_government_bonds', 'SPOT')   # LETRAS - spot
-    hb.online.subscribe_securities('corporate_bonds', '24hs')  # Obligaciones Negociables - 24hs
-    hb.online.subscribe_securities('corporate_bonds', 'SPOT')  # Obligaciones Negociables - spot
+    #hb.online.subscribe_securities('corporate_bonds', '24hs')  # Obligaciones Negociables - 24hs
+    #hb.online.subscribe_securities('corporate_bonds', 'SPOT')  # Obligaciones Negociables - spot
     hb.online.subscribe_repos()
 
 def login():
@@ -424,7 +424,8 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
         tieneW = shtTest.range('W'+str(int(celda+1))).value
         tieneV = shtTest.range('V'+str(int(celda+1))).value
         if tieneW != 'TRAILING' or tieneW != 'STOP' or tieneW != '': 
-            shtTest.range('X'+str(int(celda+1))).value = tieneW / tieneV
+            if len(symbol) < 2: shtTest.range('X'+str(int(celda+1))).value = tieneW / tieneV / 100
+            else: shtTest.range('X'+str(int(celda+1))).value = tieneW / tieneV
         else: 
             shtTest.range('W'+str(int(celda+1))).value = ''
             shtTest.range('X'+str(int(celda+1))).value = 0
@@ -448,8 +449,9 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                 if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'TRAILING': pass
                 else: shtTest.range('W'+str(int(nroCelda+1))).value = 'TRAILING'
                 shtTest.range('X'+str(int(nroCelda+1))).value = bid
-            if not shtTest.range('X1').value:
-                if last * 100 < costo * (1 - (ganancia*75)): # Precio baja activo stop y envia orden venta
+            else: shtTest.range('W'+str(int(nroCelda+1))).value = ''
+            if not shtTest.range('X1').value:  #  STOP rutina de salida
+                if last < costo * (1 - (ganancia*75)): # Precio baja activo stop y envia orden venta
                     if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP' and bid > last * (1-(ganancia*15)):
                         shtTest.range('W'+str(int(nroCelda+1))).value = ''
                         shtTest.range('X'+str(int(nroCelda+1))).value = 0
@@ -459,7 +461,9 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int):
                         if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP': pass
                         else:
                             shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'
-                            winsound.PlaySound("SystemHand", winsound.SND_ALIAS)      
+                            winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
+                else: shtTest.range('W'+str(int(nroCelda+1))).value = ''
+            
 
         else: # Ingresa si son BONOS / LETRAS / ON / CEDEARS ////////////////////////////////////////////////////////////////////
             if time.strftime("%H:%M:%S") > '16:24:50' and str(nombre[2]).lower() == 'spot': 
@@ -515,12 +519,11 @@ def buscoOperaciones(inicio,fin):
         cantidad = shtTest.range('Y'+str(int(valor[0]+1))).value
         if cantidad == None: cantidad = 1
 
-        if not shtTest.range('W1').value: # Activa TRAILING  ///////////////////////////////////////////////////////////////////
-            if not valor[6]: pass
-            else:
-                try: 
-                    if valor[6] > 0: trailingStop('A'+str((int(valor[0])+1)),cantidad,int(valor[0]))
-                except: pass
+        try:
+            if not shtTest.range('W1').value: # Activa TRAILING  ///////////////////////////////////////////////////////////////
+                if not valor[5]:  pass
+                else: trailingStop('A'+str((int(valor[0])+1)),cantidad,int(valor[0]))
+        except: pass
 
         if valor[1]: # # Columna Q en el excel /////////////////////////////////////////////////////////////////////////////////
             if str(valor[1]).lower() == 'c': cancelaCompra(valor[0])
