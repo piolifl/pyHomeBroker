@@ -10,7 +10,7 @@ import winsound
 
 env = environ.Env()
 environ.Env.read_env()
-wb = xw.Book('..\\epgb_pyHB.xlsb')
+wb = xw.Book('.\\epgb_pyHB.xlsb')
 shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
 shtTest.range('Q1').value = 'BONOS'
@@ -365,12 +365,26 @@ def cancelarTodo(desde,hasta):
         hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
         shtTest.range('AB'+str(desde)+':'+'AH'+str(hasta)).value = ''
         print(" /// Todas las ordenes activas canceladas ",time.strftime("%H:%M:%S"))
-    except: print(time.strftime("%H:%M:%S"),'______ ERROR al cancelar orden.')
+    except: print(time.strftime("%H:%M:%S"),'______ ERROR al cancelar TODAS las oredenes activas.')
+
+def precioPPC(celdaV=str, celdaW=str):
+    tieneV = shtTest.range(str(celdaV)).value
+    if not tieneV or tieneV == 'None': tieneV = 0
+    valorW = shtTest.range(str(celdaW)).value
+    if not valorW or valorW == 'None': valorW = 0
+    try:
+        if valorW < 0 or valorW == 0 or valorW > 0: 
+            if tieneV < 0: return valorW / tieneV / -100
+            else: return valorW / tieneV / 100
+        else: return 0
+    except: pass
 
 def cantidadAuto(nroCelda):
     cantidad = shtTest.range('Y'+str(int(nroCelda))).value
     if not cantidad or cantidad == None or cantidad == 'None': cantidad = 1
-    return abs(int(cantidad))
+    try:
+        if cantidad > 0: return abs(int(cantidad))
+    except: return 1
 
 def soloContinua():
     pass
@@ -407,14 +421,16 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                     if valorW:
                         if valorW < 0 or valorW == 0 or valorW > 0: 
                             shtTest.range('W'+str(int(celda+1))).value += abs(int(size)) * precio / 100
-                    else: shtTest.range('W'+str(int(celda+1))).value = (abs(int(size)) + abs(int(tieneStock))) * precio / 100
+                    else: 
+                        shtTest.range('W'+str(int(celda+1))).value = (abs(int(size)) + abs(int(tieneStock))) * precio / 100
                 except: pass
                 print(f'______/ BUY + {int(size)} {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // {orderC}')
             
             shtTest.range('Q'+str(int(celda+1))+':'+'R'+str(int(celda+1))).value = ''
-
-            try: shtTest.range('V'+str(int(celda+1))).value += abs(int(size))
-            except: shtTest.range('V'+str(int(celda+1))).value = abs(int(tieneStock)) + abs(int(size))
+            try: 
+                shtTest.range('V'+str(int(celda+1))).value += abs(int(size))
+            except: 
+                shtTest.range('V'+str(int(celda+1))).value = abs(int(tieneStock)) + abs(int(size))
 
             shtTest.range('AB'+str(int(celda+1))).value = orderC
             shtTest.range('AC'+str(int(celda+1))).value = abs(int(size))
@@ -433,11 +449,11 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                         if valorW < 0 or valorW == 0 or valorW > 0: 
                             if tieneStock < 0:
                                 shtTest.range('W'+str(int(celda+1))).value += abs(int(size)) * precio * 100
-                            else: shtTest.range('W'+str(int(celda+1))).value -= abs(int(size)) * precio * 100
+                            else: 
+                                shtTest.range('W'+str(int(celda+1))).value -= abs(int(size)) * precio * 100
                     else: 
                         shtTest.range('W'+str(int(celda+1))).value = (abs(int(size)) + abs(int(tieneStock))) * precio * 100
                 except: pass
-
                 print(f'______/ SELL opcion - {int(size)} {symbol[0]} // precio: {precio} // {orderV}')
 
             else:
@@ -448,17 +464,18 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                         if valorW < 0 or valorW == 0 or valorW > 0: 
                             if tieneStock < 0:
                                 shtTest.range('W'+str(int(celda+1))).value -= abs(int(size)) * precio / 100
-                            else: shtTest.range('W'+str(int(celda+1))).value -= abs(int(size)) * precio / 100
+                            else: 
+                                shtTest.range('W'+str(int(celda+1))).value -= abs(int(size)) * precio / 100
                     else: 
                         shtTest.range('W'+str(int(celda+1))).value = (abs(int(size)) + abs(int(tieneStock))) * precio / 100
                 except: pass
-                
                 print(f'______/ SELL - {int(size)} {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // {orderV}')
            
             shtTest.range('S'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
-
-            try: shtTest.range('V'+str(int(celda+1))).value -= abs(int(size))
-            except: shtTest.range('V'+str(int(celda+1))).value = abs(int(tieneStock)) - abs(int(size))
+            try: 
+                shtTest.range('V'+str(int(celda+1))).value -= abs(int(size))
+            except: 
+                shtTest.range('V'+str(int(celda+1))).value = abs(int(tieneStock)) - abs(int(size))
 
             shtTest.range('AE'+str(int(celda+1))).value = orderV
             shtTest.range('AF'+str(int(celda+1))).value = abs(int(size))
@@ -466,15 +483,8 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
             shtTest.range('Q'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
             print(f'______/ ERROR en VENTA. {symbol[0]} // precio: {precio} // {int(size)}')
 
-    tieneStock = shtTest.range('V'+str(int(celda+1))).value
-    if not tieneStock: tieneStock = 0
-    tienePPC = shtTest.range('W'+str(int(celda+1))).value
-    try:
-        if tienePPC < 0 or tienePPC == 0 or tienePPC > 0: 
-            if tieneStock < 0: shtTest.range('X'+str(int(celda+1))).value = tienePPC / tieneStock / -100
-            else: shtTest.range('X'+str(int(celda+1))).value = tienePPC / tieneStock / 100
-    except:
-        shtTest.range('X'+str(int(celda+1))).value = precio
+    try: shtTest.range('X'+str(int(celda+1))).value = precioPPC('V'+str(int(celda+1)), 'W'+str(int(celda+1)))
+    except: shtTest.range('X'+str(int(celda+1))).value = precio
 ############################################################### TRAILING STOP #################################################
 def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
     try:
