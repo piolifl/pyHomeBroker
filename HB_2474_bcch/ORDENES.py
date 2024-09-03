@@ -198,7 +198,7 @@ def getPortfolio(hb, comitente):
     except: pass
 
 #--------------------------------------------------------------------------------------------------------------------------------
-print(time.strftime("%H:%M:%S"),f"Logueo correcto en: {os.environ.get('name')} cuenta: {int(os.environ.get('account_id'))}")
+print(time.strftime("%H:%M:%S"),f"SOLO ENVIO DE OREDES: {os.environ.get('name')} cuenta: {int(os.environ.get('account_id'))}")
 
 shtTest.range('Y1').value = os.environ.get('name')
 
@@ -657,7 +657,7 @@ while True:
 
     time.sleep(2)
 
-    try: 
+    '''try: 
         if not shtTest.range('Q1').value:
             shtTest.range('A'+str(listLength)).options(index=True,header=False).value = everything
             try: shtTest.range('AJ2').options(index=True, header=False).value = cauciones
@@ -667,7 +667,7 @@ while True:
     try:
         if not shtTest.range('S1').value: 
             shtTest.range('A30').options(index=True,header=False).value=options  
-    except: print("______ ERROR al cargar OPCIONES en Excel ______ ",time.strftime("%H:%M:%S")) 
+    except: print("______ ERROR al cargar OPCIONES en Excel ______ ",time.strftime("%H:%M:%S")) '''
         
     if str(shtTest.range('A1').value) != 'symbol': ilRulo()
     

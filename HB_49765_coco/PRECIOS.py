@@ -198,7 +198,7 @@ def getPortfolio(hb, comitente):
     except: pass
 
 #--------------------------------------------------------------------------------------------------------------------------------
-print(time.strftime("%H:%M:%S"),f"Logueo correcto en: {os.environ.get('name')} cuenta: {int(os.environ.get('account_id'))}")
+print(time.strftime("%H:%M:%S"),f"SOLO TRAE PRECIOS: {os.environ.get('name')} cuenta: {int(os.environ.get('account_id'))}")
 
 shtTest.range('Y1').value = os.environ.get('name')
 
@@ -652,8 +652,8 @@ while True:
         if time.strftime("%H:%M:%S") > '17:10:00': pass
         else: break
     
-    if str(shtTest.range('Y1').value).upper() == 'BCCH': 
-        buscoOperaciones(rangoDesde,rangoHasta)
+    '''if str(shtTest.range('Y1').value).upper() == 'BCCH': 
+        buscoOperaciones(rangoDesde,rangoHasta)'''
 
     time.sleep(2)
 

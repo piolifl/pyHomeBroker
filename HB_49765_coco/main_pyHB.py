@@ -10,7 +10,7 @@ import winsound
 
 env = environ.Env()
 environ.Env.read_env()
-wb = xw.Book('.\\epgb_pyHB.xlsb')
+wb = xw.Book('..\\epgb_pyHB.xlsb')
 shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
 shtTest.range('Q1').value = 'BONOS'
@@ -367,7 +367,7 @@ def cancelarTodo(desde,hasta):
         print(" /// Todas las ordenes activas canceladas ",time.strftime("%H:%M:%S"))
     except: print(time.strftime("%H:%M:%S"),'______ ERROR al cancelar TODAS las oredenes activas.')
 
-def precioPPC(celdaV=str, celdaW=str):
+def precioPPC(celdaV=str, celdaW=str, precio=float):
     tieneV = shtTest.range(str(celdaV)).value
     if not tieneV or tieneV == 'None': tieneV = 0
     valorW = shtTest.range(str(celdaW)).value
@@ -376,8 +376,8 @@ def precioPPC(celdaV=str, celdaW=str):
         if valorW < 0 or valorW == 0 or valorW > 0: 
             if tieneV < 0: return valorW / tieneV / -100
             else: return valorW / tieneV / 100
-        else: return 0
-    except: pass
+        else: return precio
+    except: return precio
 
 def cantidadAuto(nroCelda):
     cantidad = shtTest.range('Y'+str(int(nroCelda))).value
@@ -389,6 +389,7 @@ def cantidadAuto(nroCelda):
 def soloContinua():
     pass
 
+   
 ###############################################################  ENVIAR ORDENES ################################################    
 def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     global orderC, orderV
@@ -483,7 +484,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
             shtTest.range('Q'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
             print(f'______/ ERROR en VENTA. {symbol[0]} // precio: {precio} // {int(size)}')
 
-    try: shtTest.range('X'+str(int(celda+1))).value = precioPPC('V'+str(int(celda+1)), 'W'+str(int(celda+1)))
+    try: shtTest.range('X'+str(int(celda+1))).value = precioPPC('V'+str(int(celda+1)), 'W'+str(int(celda+1)),precio)
     except: shtTest.range('X'+str(int(celda+1))).value = precio
 ############################################################### TRAILING STOP #################################################
 def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
@@ -525,9 +526,11 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
                     else: shtTest.range('W'+str(int(nroCelda+1))).value = 'SELLTRAIL'
                     shtTest.range('X'+str(int(nroCelda+1))).value = ask
                 if not shtTest.range('X1').value:  
-                    if last > abs(costo) * (1 - (ganancia*75)): 
+
+                    if last > abs(costo) * (1 + (ganancia*75)): 
                         if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP': 
-                            if ask < last * (1+(ganancia*45)):
+
+                            if ask < last * (1-(ganancia*15)):
                                 if shtTest.range('Y'+str(int(nroCelda+1))).value : 
                                     try: shtTest.range('U'+str(int(nroCelda+1))).value += cantidad
                                     except: pass
