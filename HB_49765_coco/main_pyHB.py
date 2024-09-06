@@ -614,7 +614,9 @@ def buscoOperaciones(inicio,fin):
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
             elif str(valor[2]).upper() == 'P': getPortfolio(hb, os.environ.get('account_id'))
             else: 
-                try: enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[2],valor[0]) # Compra Ask
+                try: 
+                    if shtTest.range('AB'+str(int(valor[0]+1))).value: cancelaCompra(valor[0])
+                    enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[2],valor[0]) # Compra Ask
                 except: shtTest.range('R'+str(int(valor[0]+1))).value = ''
             shtTest.range('R'+str(int(valor[0]+1))).value = ''
 
@@ -625,7 +627,9 @@ def buscoOperaciones(inicio,fin):
                 enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
             elif str(valor[3]).upper() == 'P': getPortfolio(hb, os.environ.get('account_id'))
             else: 
-                try: enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[3],valor[0]) # Vendo Bid
+                try: 
+                    if shtTest.range('AE'+str(int(valor[0]+1))).value: cancelarVenta(valor[0])
+                    enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[3],valor[0]) # Vendo Bid
                 except: shtTest.range('S'+str(int(valor[0]+1))).value = ''
             shtTest.range('S'+str(int(valor[0]+1))).value = ''
 
