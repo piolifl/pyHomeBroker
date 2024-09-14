@@ -13,6 +13,8 @@ environ.Env.read_env()
 wb = xw.Book('..\\epgb_pyHB.xlsb')
 shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
+shtTest.range('Q1').value = 'BONOS'
+shtTest.range('S1').value = 'OPCIONES'
 shtTest.range('W1').value = 'TRAILING'
 shtTest.range('X1').value = 'STOP'
 shtTest.range('Z1').value = 0.001
@@ -341,21 +343,21 @@ def ilRulo():
 def cancelaCompra(celda):
     try:
         orderC = shtTest.range('AB'+str(int(celda+1))).value
-        if not orderC or orderC == None or orderC == 'None' or orderC == '': orderC = 0
+        if not orderC: orderC = 0
         hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderC))
         shtTest.range('V'+str(int(celda+1))).value -= shtTest.range('AC'+str(int(celda+1))).value
         shtTest.range('AB'+str(int(celda+1))+':'+'AD'+str(int(celda+1))).value = ''
-        print(f" /// Cancelada Compra : {int(orderC)} ",end='')
+        print(f" /// Cancelada Compra : {int(orderC)} ",time.strftime("%H:%M:%S"))
     except: print(time.strftime("%H:%M:%S"),'______ ERROR al cancelar compra.')
 
 def cancelarVenta(celda):
     try:
         orderV = shtTest.range('AE'+str(int(celda+1))).value
-        if not orderV or orderV == None or orderV == 'None' or orderV == '': orderV = 0
+        if not orderV: orderV = 0
         hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderV))
         shtTest.range('V'+str(int(celda+1))).value += shtTest.range('AF'+str(int(celda+1))).value
         shtTest.range('AE'+str(int(celda+1))+':'+'AG'+str(int(celda+1))).value = ''
-        print(f" /// Cancelada Venta : {int(orderV)} ",end='')
+        print(f" /// Cancelada Venta : {int(orderV)} ",time.strftime("%H:%M:%S"))
     except: print(time.strftime("%H:%M:%S"),'______ ERROR al cancelar venta.')
 
 def cancelarTodo(desde,hasta):
@@ -367,9 +369,9 @@ def cancelarTodo(desde,hasta):
 
 def precioPPC(celdaV=str, celdaW=str, precio=float):
     tieneV = shtTest.range(str(celdaV)).value
-    if not tieneV or tieneV == None or tieneV == 'None' or tieneV == '': tieneV = 0
+    if not tieneV or tieneV == 'None': tieneV = 0
     valorW = shtTest.range(str(celdaW)).value
-    if not valorW or valorW == None or valorW == 'None' or valorW == '': valorW = 0
+    if not valorW or valorW == 'None': valorW = 0
     try:
         if valorW < 0 or valorW == 0 or valorW > 0: 
             if tieneV < 0: return valorW / tieneV / -100
@@ -399,11 +401,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
         shtTest.range('W'+str(int(celda+1))).value = 0
         tieneStock = 0
     valorW = shtTest.range('W'+str(int(celda+1))).value
-    ultimo = shtTest.range('F'+str(int(celda+1))).value
-    if not ultimo or ultimo == None or ultimo == 'None' or ultimo == '':
-        ultimo = price
     if tipo.lower() == 'buy': 
-
         try: 
             if len(symbol) < 2:
                 orderC = hb.orders.send_buy_order(symbol[0],'24hs', float(precio), abs(int(size)))
@@ -446,6 +444,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
             if len(symbol) < 2:
                 orderV = hb.orders.send_sell_order(symbol[0],'24hs', float(precio), abs(int(size)))
                 shtTest.range('AG'+str(int(celda+1))).value = float(precio)
+
                 try:
                     if valorW:
                         if valorW < 0 or valorW == 0 or valorW > 0: 
@@ -658,9 +657,29 @@ while True:
 
     time.sleep(2)
 
+    try: 
+        if not shtTest.range('Q1').value:
+            shtTest.range('A'+str(listLength)).options(index=True,header=False).value = everything
+            try: shtTest.range('AJ2').options(index=True, header=False).value = cauciones
+            except: print("______ ERROR al cargar cauciones en Excel ______ ",time.strftime("%H:%M:%S")) 
+    except: print("______ ERROR al cargar Bonos/Letras en Excel ______ ",time.strftime("%H:%M:%S")) 
+
+    try:
+        if not shtTest.range('S1').value: 
+            shtTest.range('A30').options(index=True,header=False).value=options  
+    except: print("______ ERROR al cargar OPCIONES en Excel ______ ",time.strftime("%H:%M:%S")) 
+        
+    if str(shtTest.range('A1').value) != 'symbol': ilRulo()
     
 try: 
     hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
     hb.online.disconnect()
 except: pass
+print(time.strftime("%H:%M:%S"), 'Mercado cerrado. ')
+shtTest.range('Q1').value = 'BONOS'
+shtTest.range('S1').value = 'OPCIONES'
+shtTest.range('W1').value = 'TRAILING'
+shtTest.range('X1').value = 'STOP'
+shtTest.range('Y1').value = 'BROKER'
 
+#[ ]><   \n

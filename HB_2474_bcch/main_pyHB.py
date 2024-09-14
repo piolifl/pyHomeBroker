@@ -343,21 +343,21 @@ def ilRulo():
 def cancelaCompra(celda):
     try:
         orderC = shtTest.range('AB'+str(int(celda+1))).value
-        if not orderC: orderC = 0
+        if not orderC or orderC == None or orderC == 'None' or orderC == '': orderC = 0
         hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderC))
         shtTest.range('V'+str(int(celda+1))).value -= shtTest.range('AC'+str(int(celda+1))).value
         shtTest.range('AB'+str(int(celda+1))+':'+'AD'+str(int(celda+1))).value = ''
-        print(f" /// Cancelada Compra : {int(orderC)} ",time.strftime("%H:%M:%S"))
+        print(f" /// Cancelada Compra : {int(orderC)} ",end='')
     except: print(time.strftime("%H:%M:%S"),'______ ERROR al cancelar compra.')
 
 def cancelarVenta(celda):
     try:
         orderV = shtTest.range('AE'+str(int(celda+1))).value
-        if not orderV: orderV = 0
+        if not orderV or orderV == None or orderV == 'None' or orderV == '': orderV = 0
         hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderV))
         shtTest.range('V'+str(int(celda+1))).value += shtTest.range('AF'+str(int(celda+1))).value
         shtTest.range('AE'+str(int(celda+1))+':'+'AG'+str(int(celda+1))).value = ''
-        print(f" /// Cancelada Venta : {int(orderV)} ",time.strftime("%H:%M:%S"))
+        print(f" /// Cancelada Venta : {int(orderV)} ",end='')
     except: print(time.strftime("%H:%M:%S"),'______ ERROR al cancelar venta.')
 
 def cancelarTodo(desde,hasta):
@@ -369,9 +369,9 @@ def cancelarTodo(desde,hasta):
 
 def precioPPC(celdaV=str, celdaW=str, precio=float):
     tieneV = shtTest.range(str(celdaV)).value
-    if not tieneV or tieneV == 'None': tieneV = 0
+    if not tieneV or tieneV == None or tieneV == 'None' or tieneV == '': tieneV = 0
     valorW = shtTest.range(str(celdaW)).value
-    if not valorW or valorW == 'None': valorW = 0
+    if not valorW or valorW == None or valorW == 'None' or valorW == '': valorW = 0
     try:
         if valorW < 0 or valorW == 0 or valorW > 0: 
             if tieneV < 0: return valorW / tieneV / -100
@@ -401,6 +401,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
         shtTest.range('W'+str(int(celda+1))).value = 0
         tieneStock = 0
     valorW = shtTest.range('W'+str(int(celda+1))).value
+
     if tipo.lower() == 'buy': 
         try: 
             if len(symbol) < 2:
@@ -444,7 +445,6 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
             if len(symbol) < 2:
                 orderV = hb.orders.send_sell_order(symbol[0],'24hs', float(precio), abs(int(size)))
                 shtTest.range('AG'+str(int(celda+1))).value = float(precio)
-
                 try:
                     if valorW:
                         if valorW < 0 or valorW == 0 or valorW > 0: 
