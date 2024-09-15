@@ -1,6 +1,6 @@
 from pyhomebroker import HomeBroker     
 import xlwings as xw                    
-import pandas as pd                     
+import pandas as pd                  
 from datetime import date, timedelta
 import time
 import os
@@ -13,13 +13,13 @@ environ.Env.read_env()
 wb = xw.Book('..\\epgb_pyHB.xlsb')
 shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
-shtTest.range('Q1').value = 'BONOS'
-shtTest.range('S1').value = 'OPCIONES'
+
 shtTest.range('W1').value = 'TRAILING'
 shtTest.range('X1').value = 'STOP'
 shtTest.range('Z1').value = 0.001
 rangoDesde = '26'
 rangoHasta = '89'
+hoyEs = time.strftime("%A")
 
 def getOptionsList():
     global allOptions
@@ -91,7 +91,6 @@ ONS = getONSList()
 cedears = getCedearsList()
 PanelGeneral = getPanelGeneralList()
 
-
 everything = pd.concat([ACC, bonos, letras, ONS, cedears, PanelGeneral ])
 listLength = len(options) +30
 allLength = len(everything) + listLength
@@ -157,8 +156,8 @@ def login():
 
 hb = HomeBroker(int(os.environ.get('broker')), on_options=on_options, on_securities=on_securities, on_repos=on_repos)
 
-def finSemana():
-    if time.strftime("%A") == 'Saturday' or time.strftime("%A") == 'Sunday':
+def diaLaboral():
+    if hoyEs == 'Saturday' or hoyEs == 'Sunday':
         return 'Fin de semana'
 
 def getPortfolio(hb, comitente):
@@ -200,7 +199,7 @@ def getPortfolio(hb, comitente):
     except: pass
 
 #--------------------------------------------------------------------------------------------------------------------------------
-if finSemana():
+if diaLaboral():
     print('Es FIN DE SEMANA, sin logueo y no se actualizan los precios en la planilla.')
 else: 
     login()
@@ -350,7 +349,7 @@ def ilRulo():
 def cancelaCompra(celda):
     orderC = shtTest.range('AB'+str(int(celda+1))).value
     if not orderC or orderC == None or orderC == 'None' or orderC == '': orderC = 0
-    if not finSemana(): 
+    if not diaLaboral(): 
         try: 
             hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderC))
             print(f" /// Cancelada Compra : {int(orderC)} ",end='')
@@ -362,7 +361,7 @@ def cancelaCompra(celda):
 def cancelarVenta(celda):
     orderV = shtTest.range('AE'+str(int(celda+1))).value
     if not orderV or orderV == None or orderV == 'None' or orderV == '': orderV = 0
-    if not finSemana(): 
+    if not diaLaboral(): 
         try:
             hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderV))
             print(f" /// Cancelada Venta : {int(orderV)} ",end='')
@@ -371,7 +370,7 @@ def cancelarVenta(celda):
     shtTest.range('AE'+str(int(celda+1))+':'+'AG'+str(int(celda+1))).value = ''
 
 def cancelarTodo(desde,hasta):
-    if not finSemana():
+    if not diaLaboral():
         try:  
             hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
             print(" /// Todas las ordenes activas canceladas ",time.strftime("%H:%M:%S"))
@@ -395,18 +394,18 @@ def soloContinua():
 ###############################################################  ENVIAR ORDENES ################################################    
 def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     global orderC, orderV
-    orderC, orderV = 1234567,7654321
+    orderC, orderV = hoyEs,hoyEs
     symbol = str(shtTest.range(str(symbol)).value).split()
     precio = shtTest.range(str(price)).value
     if tipo.lower() == 'buy': 
         try: 
             if len(symbol) < 2:
-                if not finSemana(): orderC = hb.orders.send_buy_order(symbol[0],'24hs', float(precio), abs(int(size)))
+                if not diaLaboral(): orderC = hb.orders.send_buy_order(symbol[0],'24hs', float(precio), abs(int(size)))
                 shtTest.range('AD'+str(int(celda+1))).value = float(precio)
                 shtTest.range('X'+str(int(celda+1))).value = precio
                 print(f'______/ BUY  opcion + {int(size)} {symbol[0]} // precio: {precio} // {orderC}') 
             else:
-                if not finSemana(): orderC = hb.orders.send_buy_order(symbol[0],symbol[2], float(precio), abs(int(size)))
+                if not diaLaboral(): orderC = hb.orders.send_buy_order(symbol[0],symbol[2], float(precio), abs(int(size)))
                 shtTest.range('AD'+str(int(celda+1))).value = float(precio/100)
                 shtTest.range('X'+str(int(celda+1))).value = precio / 100
                 print(f'______/ BUY + {int(size)} {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // {orderC}')
@@ -423,12 +422,12 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     else: # VENTA
         try:
             if len(symbol) < 2:
-                if not finSemana(): orderV = hb.orders.send_sell_order(symbol[0],'24hs', float(precio), abs(int(size)))
+                if not diaLaboral(): orderV = hb.orders.send_sell_order(symbol[0],'24hs', float(precio), abs(int(size)))
                 shtTest.range('AG'+str(int(celda+1))).value = float(precio)
                 shtTest.range('X'+str(int(celda+1))).value = precio
                 print(f'______/ SELL opcion - {int(size)} {symbol[0]} // precio: {precio} // {orderV}')
             else:
-                if not finSemana(): orderV = hb.orders.send_sell_order(symbol[0],symbol[2], float(precio), abs(int(size)))
+                if not diaLaboral(): orderV = hb.orders.send_sell_order(symbol[0],symbol[2], float(precio), abs(int(size)))
                 shtTest.range('AG'+str(int(celda+1))).value = float(precio/100)
                 shtTest.range('X'+str(int(celda+1))).value = precio /100
                 print(f'______/ SELL - {int(size)} {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // {orderV}')
@@ -511,33 +510,16 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
                     else: shtTest.range('W'+str(int(nroCelda+1))).value = 'BUYTRAIL'
                     shtTest.range('X'+str(int(nroCelda+1))).value = round(bid / 100,5)
 
-                # Si X1 esta vacio, habilita estrategias de ventas  ////////////////////////////////////////////////////////////
                 if not shtTest.range('X1').value:
-                    #  Precio LAST baja, inica estrategia salida vendiendo stock spot en 24hs
                     if last / 100 < abs(costo) * (1 - ganancia):
-                        if str(nombre[2]).lower() == 'spot':
-                            bid2 = shtTest.range('C'+str(int(nroCelda+2))).value
-                            last2 = shtTest.range('F'+str(int(nroCelda+2))).value
-                            if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='STOP' and (bid2/100)>(last2/100)*(1-ganancia):
-                                try: shtTest.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
-                                except: pass
-                                try: shtTest.range('V'+str(int(nroCelda+1))).value -= abs(cantidad)
-                                except: pass
-                                print(f'{time.strftime("%H:%M:%S")} STOP vendo    ',end=' || ')
-
-                                if shtTest.range('Y'+str(int(nroCelda+1))).value : 
-                                    enviarOrden('sell','A'+str((int(nroCelda)+2)),'C'+str((int(nroCelda)+2)),abs(cantidad),nroCelda+1)
-                            else: 
-                                if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP': pass
-                                else: shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'
-                        else:
-                            if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='STOP' and (bid/100)>(last/100)*(1-ganancia):
-                                print(f'{time.strftime("%H:%M:%S")} STOP vendo    ',end=' || ')
-                                if shtTest.range('Y'+str(int(nroCelda+1))).value : 
-                                    enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
-                            else: 
-                                if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP': pass
-                                else: shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'
+                        if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='STOP' and (bid/100)>(last/100)*(1-ganancia):
+                            print(f'{time.strftime("%H:%M:%S")} STOP vendo    ',end=' || ')
+                            if shtTest.range('Y'+str(int(nroCelda+1))).value : 
+                                shtTest.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
+                                enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
+                        else: 
+                            if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP': pass
+                            else: shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'
     except: pass
 ############################################################## BUSCA OPERACIONES ###############################################
 def buscoOperaciones(inicio,fin):
@@ -557,7 +539,7 @@ def buscoOperaciones(inicio,fin):
             elif valor[1] == '+': 
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
             elif str(valor[1]).upper() == 'P': 
-                if not finSemana(): getPortfolio(hb, os.environ.get('account_id'))
+                if not diaLaboral(): getPortfolio(hb, os.environ.get('account_id'))
             else: 
                 try: 
                     if shtTest.range('AB'+str(int(valor[0]+1))).value: cancelaCompra(valor[0]) # CANCELA oreden compra anterior
@@ -571,7 +553,7 @@ def buscoOperaciones(inicio,fin):
             elif valor[2] == '+': 
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
             elif str(valor[2]).upper() == 'P': 
-                if not finSemana(): getPortfolio(hb, os.environ.get('account_id'))
+                if not diaLaboral(): getPortfolio(hb, os.environ.get('account_id'))
             else: 
                 try: 
                     if shtTest.range('AB'+str(int(valor[0]+1))).value: cancelaCompra(valor[0])
@@ -585,7 +567,7 @@ def buscoOperaciones(inicio,fin):
             elif valor[3] == '-': 
                 enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
             elif str(valor[3]).upper() == 'P': 
-                if not finSemana(): getPortfolio(hb, os.environ.get('account_id'))
+                if not diaLaboral(): getPortfolio(hb, os.environ.get('account_id'))
             else: 
                 try: 
                     if shtTest.range('AE'+str(int(valor[0]+1))).value: cancelarVenta(valor[0])
@@ -599,7 +581,7 @@ def buscoOperaciones(inicio,fin):
             elif valor[4] == '-': 
                 enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
             elif str(valor[4]).upper() == 'P': 
-                if not finSemana(): getPortfolio(hb, os.environ.get('account_id'))
+                if not diaLaboral(): getPortfolio(hb, os.environ.get('account_id'))
             else: 
                 try: 
                     if shtTest.range('AE'+str(int(valor[0]+1))).value: cancelarVenta(valor[0]) # CANCELA oreden venta anterior
@@ -613,22 +595,13 @@ while True:
     if time.strftime("%H:%M:%S") > '17:01:00': 
         if time.strftime("%H:%M:%S") > '17:05:00': pass
         else: break
+    
+    if str(shtTest.range('Y1').value).upper() == 'BCCH': 
+        buscoOperaciones(rangoDesde,rangoHasta)
 
     time.sleep(2)
 
-    try: 
-        if not shtTest.range('Q1').value:
-            shtTest.range('A'+str(listLength)).options(index=True,header=False).value = everything
-            try: shtTest.range('AJ2').options(index=True, header=False).value = cauciones
-            except: print("______ ERROR al cargar cauciones en Excel ______ ",time.strftime("%H:%M:%S")) 
-    except: print("______ ERROR al cargar Bonos/Letras en Excel ______ ",time.strftime("%H:%M:%S")) 
-
-    try:
-        if not shtTest.range('S1').value: 
-            shtTest.range('A30').options(index=True,header=False).value=options  
-    except: print("______ ERROR al cargar OPCIONES en Excel ______ ",time.strftime("%H:%M:%S")) 
-        
-    if str(shtTest.range('A1').value) != 'symbol': ilRulo()
+    
     
 try: 
     hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
@@ -637,8 +610,7 @@ except: pass
 
 print(time.strftime("%H:%M:%S"), 'Mercado cerrado. ')
 
-shtTest.range('Q1').value = 'BONOS'
-shtTest.range('S1').value = 'OPCIONES'
+
 shtTest.range('W1').value = 'TRAILING'
 shtTest.range('X1').value = 'STOP'
 shtTest.range('Y1').value = 'BROKER'
