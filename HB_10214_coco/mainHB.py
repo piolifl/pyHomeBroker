@@ -178,8 +178,14 @@ def getPortfolio(hb, comitente):
         else: 
             portfolio = requests.post("https://clientes.bcch.org.ar/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
 
+        try: print('Total:', portfolio['Result']['Activos'][0]['Subtotal'][0]['IMPO'], end='  ')
+        except: pass
+        try: print('Disponible:',portfolio['Result']['Activos'][0]['Subtotal'][0]['Detalle'][0]['IMPO'], end='  ')
+        except: pass
+
         for i in portfolio['Result']['Activos'][0]['Subtotal'][0]['APERTURA']:
-            if i['IMPO'] != None: print(i['DETA'],i['IMPO'] )
+            if i['IMPO'] != None: print(i['DETA'],':',i['IMPO'], end='  ' )
+        print(' ||')
 
         subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
         for i in subtotal[0:]:
@@ -353,7 +359,7 @@ def cancelaCompra(celda):
     if not diaLaboral(): 
         try: 
             hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderC))
-            print(f" /// Cancelada Compra : {int(orderC)} ",end='')
+            print(f"        /// Cancelada Compra : {int(orderC)} ",end='')
         except: print(time.strftime("%H:%M:%S"),'______ ERROR al cancelar compra.')
     try: shtTest.range('V'+str(int(celda+1))).value -= shtTest.range('AC'+str(int(celda+1))).value
     except: pass
@@ -365,28 +371,29 @@ def cancelarVenta(celda):
     if not diaLaboral(): 
         try:
             hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderV))
-            print(f" /// Cancelada Venta : {int(orderV)} ",end='')
+            print(f"        /// Cancelada Venta  : {int(orderV)} ",end='')
         except: print(time.strftime("%H:%M:%S"),'______ ERROR al cancelar venta.')
-    shtTest.range('V'+str(int(celda+1))).value += shtTest.range('AF'+str(int(celda+1))).value
+    try: shtTest.range('V'+str(int(celda+1))).value += shtTest.range('AF'+str(int(celda+1))).value
+    except: pass
     shtTest.range('AE'+str(int(celda+1))+':'+'AG'+str(int(celda+1))).value = ''
 
 def cancelarTodo(desde,hasta):
     if not diaLaboral():
         try:  
             hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
-            print(" /// Todas las ordenes activas canceladas ",time.strftime("%H:%M:%S"))
+            print("             /// Todas las ordenes activas canceladas ")
         except: print(time.strftime("%H:%M:%S"),'______ ERROR al cancelar TODAS las oredenes activas.')
     shtTest.range('AB'+str(desde)+':'+'AH'+str(hasta)).value = ''
 
 def cantidadAuto(nroCelda):
     cantidad = shtTest.range('Y'+str(int(nroCelda))).value
-    tieneStock = shtTest.range('U'+str(int(nroCelda))).value
+    #tieneStock = shtTest.range('U'+str(int(nroCelda))).value
     if not cantidad or cantidad == None or cantidad == 'None': cantidad = 1
     if not tieneStock or tieneStock == None or tieneStock == 'None': tieneStock = 0
-    if cantidad > abs(tieneStock): cantidad = abs(tieneStock)
-    try:
-        if cantidad > 0: return abs(int(cantidad))
-    except: return 1
+    #if cantidad > abs(tieneStock) and abs(tieneStock) != 0: cantidad = abs(tieneStock)
+    
+    return abs(int(cantidad))
+
 
 def soloContinua():
     pass
@@ -438,7 +445,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
 
         shtTest.range('S'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
         try: shtTest.range('V'+str(int(celda+1))).value -= abs(int(size))
-        except: shtTest.range('V'+str(int(celda+1))).value = abs(int(size))
+        except: shtTest.range('V'+str(int(celda+1))).value = int(size) / -1
         shtTest.range('AE'+str(int(celda+1))).value = orderV
         shtTest.range('AF'+str(int(celda+1))).value = abs(int(size))
 ############################################################### TRAILING STOP #################################################
