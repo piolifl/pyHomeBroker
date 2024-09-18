@@ -387,11 +387,14 @@ def cancelarTodo(desde,hasta):
 
 def cantidadAuto(nroCelda):
     cantidad = shtTest.range('Y'+str(int(nroCelda))).value
-    #tieneStock = shtTest.range('U'+str(int(nroCelda))).value
-    if not cantidad or cantidad == None or cantidad == 'None': cantidad = 1
-    if not tieneStock or tieneStock == None or tieneStock == 'None': tieneStock = 0
-    #if cantidad > abs(tieneStock) and abs(tieneStock) != 0: cantidad = abs(tieneStock)
-    
+    tieneStock = shtTest.range('V'+str(int(nroCelda))).value
+    if not cantidad or cantidad == None or cantidad == 'None': 
+        cantidad = 1
+    if not tieneStock or tieneStock == None or tieneStock == 'None': 
+        tieneStock = 0
+    if cantidad > abs(tieneStock):
+        if tieneStock == 0: print(' ERROR, V sin stock disponible para enviar orden solicitada.') 
+        cantidad = abs(tieneStock)
     return abs(int(cantidad))
 
 
