@@ -6,14 +6,15 @@ import time
 import os
 import environ
 import requests
-import winsound
+import yfinance as yf
 
 env = environ.Env()
 environ.Env.read_env()
 wb = xw.Book('..\\epgb_pyHB.xlsb')
 shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
-
+shtTest.range('Q1').value = 'BONOS'
+shtTest.range('S1').value = 'OPCIONES'
 shtTest.range('W1').value = 'TRAILING'
 shtTest.range('X1').value = 'STOP'
 shtTest.range('Z1').value = 0.001
@@ -358,8 +359,8 @@ def cancelaCompra(celda):
     if not diaLaboral(): 
         try: 
             hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderC))
-            print(f"        /// Cancelada Compra : {int(orderC)} ",end='')
-        except: print(time.strftime("%H:%M:%S"),'______ ERROR al cancelar compra.')
+            print(f"/// Cancelada Compra : {int(orderC)} ")
+        except: print('______ ERROR al cancelar compra.')
     try: shtTest.range('V'+str(int(celda+1))).value -= shtTest.range('AC'+str(int(celda+1))).value
     except: pass
     shtTest.range('AB'+str(int(celda+1))+':'+'AD'+str(int(celda+1))).value = ''
@@ -370,8 +371,8 @@ def cancelarVenta(celda):
     if not diaLaboral(): 
         try:
             hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderV))
-            print(f"        /// Cancelada Venta  : {int(orderV)} ",end='')
-        except: print(time.strftime("%H:%M:%S"),'______ ERROR al cancelar venta.')
+            print(f"/// Cancelada Venta  : {int(orderV)} ")
+        except: print('______ ERROR al cancelar venta.')
     try: shtTest.range('V'+str(int(celda+1))).value += shtTest.range('AF'+str(int(celda+1))).value
     except: pass
     shtTest.range('AE'+str(int(celda+1))+':'+'AG'+str(int(celda+1))).value = ''
@@ -380,27 +381,27 @@ def cancelarTodo(desde,hasta):
     if not diaLaboral():
         try:  
             hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
-            print("             /// Todas las ordenes activas canceladas ")
-        except: print(time.strftime("%H:%M:%S"),'______ ERROR al cancelar TODAS las oredenes activas.')
+            print("/// Todas las ordenes activas canceladas ")
+        except: print('______ ERROR al cancelar TODAS las oredenes activas.')
     shtTest.range('AB'+str(desde)+':'+'AH'+str(hasta)).value = ''
 
 def cantidadAuto(nroCelda):
     cantidad = shtTest.range('Y'+str(int(nroCelda))).value
-    tieneStock = shtTest.range('V'+str(int(nroCelda))).value
     if not cantidad or cantidad == None or cantidad == 'None': 
-        cantidad = 1
+        cantidad = 0
+    '''tieneStock = shtTest.range('V'+str(int(nroCelda))).value
     if not tieneStock or tieneStock == None or tieneStock == 'None': 
         tieneStock = 0
-    if cantidad > abs(tieneStock):
-        if tieneStock == 0: print(' ERROR, V sin stock disponible para enviar orden solicitada.') 
-        cantidad = abs(tieneStock)
+    if cantidad >= abs(tieneStock):
+        print('ERROR, V sin stock disponible para enviar orden solicitada.') 
+        cantidad = 0'''
     return abs(int(cantidad))
-
 
 def soloContinua():
     pass
 
-   
+vuelta = 0
+
 ###############################################################  ENVIAR ORDENES ################################################    
 def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     global orderC, orderV
@@ -413,15 +414,15 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                 if not diaLaboral(): orderC = hb.orders.send_buy_order(symbol[0],'24hs', float(precio), abs(int(size)))
                 shtTest.range('AD'+str(int(celda+1))).value = float(precio)
                 shtTest.range('X'+str(int(celda+1))).value = precio
-                print(f'______/ BUY  opcion + {int(size)} {symbol[0]} // precio: {precio} // {orderC}') 
+                print(f'        ______/ BUY  opcion + {int(size)} {symbol[0]} // precio: {precio} // {orderC}') 
             else:
                 if not diaLaboral(): orderC = hb.orders.send_buy_order(symbol[0],symbol[2], float(precio), abs(int(size)))
                 shtTest.range('AD'+str(int(celda+1))).value = float(precio/100)
                 shtTest.range('X'+str(int(celda+1))).value = precio / 100
-                print(f'______/ BUY + {int(size)} {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // {orderC}')
+                print(f'        ______/ BUY + {int(size)} {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // {orderC}')
         except: 
             shtTest.range('Q'+str(int(celda+1))+':'+'R'+str(int(celda+1))).value = ''
-            print(f'______/ ERROR en COMPRA. {symbol[0]} // precio: {precio} // + {int(size)}')
+            print(f'        ______/ ERROR en COMPRA. {symbol[0]} // precio: {precio} // + {int(size)}')
 
         shtTest.range('Q'+str(int(celda+1))+':'+'R'+str(int(celda+1))).value = ''
         try: shtTest.range('V'+str(int(celda+1))).value += abs(int(size))
@@ -609,8 +610,8 @@ while True:
     if str(shtTest.range('Y1').value).upper() == 'BCCH': 
         buscoOperaciones(rangoDesde,rangoHasta)
 
+    
     time.sleep(2)
-
 
     
 try: 
@@ -620,6 +621,8 @@ except: pass
 
 print(time.strftime("%H:%M:%S"), 'Mercado cerrado. ')
 
+shtTest.range('Q1').value = 'BONOS'
+shtTest.range('S1').value = 'OPCIONES'
 shtTest.range('W1').value = 'TRAILING'
 shtTest.range('X1').value = 'STOP'
 shtTest.range('Y1').value = 'BROKER'
