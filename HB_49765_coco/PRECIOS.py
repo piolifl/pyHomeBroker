@@ -15,8 +15,7 @@ shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
 shtTest.range('Q1').value = 'BONOS'
 shtTest.range('S1').value = 'OPCIONES'
-shtTest.range('W1').value = 'TRAILING'
-shtTest.range('X1').value = 'STOP'
+
 shtTest.range('Z1').value = 0.001
 rangoDesde = '26'
 rangoHasta = '89'
@@ -208,7 +207,9 @@ def getPortfolio(hb, comitente):
 #--------------------------------------------------------------------------------------------------------------------------------
 if diaLaboral():
     print('Es FIN DE SEMANA, sin logueo y no se actualizan los precios en la planilla.')
+    esFinde = True
 else: 
+    esFinde = False
     login()
     getTodos()
     print(time.strftime("%H:%M:%S"),f"Logueo correcto en: {os.environ.get('name')} cuenta: {int(os.environ.get('account_id'))}")
@@ -356,7 +357,7 @@ def ilRulo():
 def cancelaCompra(celda):
     orderC = shtTest.range('AB'+str(int(celda+1))).value
     if not orderC or orderC == None or orderC == 'None' or orderC == '': orderC = 0
-    if not diaLaboral(): 
+    if esFinde == False: 
         try: 
             hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderC))
             print(f"/// Cancelada Compra : {int(orderC)} ")
@@ -368,7 +369,7 @@ def cancelaCompra(celda):
 def cancelarVenta(celda):
     orderV = shtTest.range('AE'+str(int(celda+1))).value
     if not orderV or orderV == None or orderV == 'None' or orderV == '': orderV = 0
-    if not diaLaboral(): 
+    if esFinde == False: 
         try:
             hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderV))
             print(f"/// Cancelada Venta  : {int(orderV)} ")
@@ -378,7 +379,7 @@ def cancelarVenta(celda):
     shtTest.range('AE'+str(int(celda+1))+':'+'AG'+str(int(celda+1))).value = ''
 
 def cancelarTodo(desde,hasta):
-    if not diaLaboral():
+    if esFinde == False:
         try:  
             hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
             print("/// Todas las ordenes activas canceladas ")
@@ -389,18 +390,15 @@ def cantidadAuto(nroCelda):
     cantidad = shtTest.range('Y'+str(int(nroCelda))).value
     if not cantidad or cantidad == None or cantidad == 'None': 
         cantidad = 0
-    '''tieneStock = shtTest.range('V'+str(int(nroCelda))).value
-    if not tieneStock or tieneStock == None or tieneStock == 'None': 
-        tieneStock = 0
-    if cantidad >= abs(tieneStock):
-        print('ERROR, V sin stock disponible para enviar orden solicitada.') 
-        cantidad = 0'''
     return abs(int(cantidad))
 
 def soloContinua():
     pass
 
 vuelta = 0
+def traerADR():
+    galiciaADR= yf.download('GGAL',period='1d',interval='1d')['Close'].values
+    return galiciaADR[0]
 
 ###############################################################  ENVIAR ORDENES ################################################    
 def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
@@ -411,12 +409,12 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     if tipo.lower() == 'buy': 
         try: 
             if len(symbol) < 2:
-                if not diaLaboral(): orderC = hb.orders.send_buy_order(symbol[0],'24hs', float(precio), abs(int(size)))
+                if esFinde == False: orderC = hb.orders.send_buy_order(symbol[0],'24hs', float(precio), abs(int(size)))
                 shtTest.range('AD'+str(int(celda+1))).value = float(precio)
                 shtTest.range('X'+str(int(celda+1))).value = precio
                 print(f'        ______/ BUY  opcion + {int(size)} {symbol[0]} // precio: {precio} // {orderC}') 
             else:
-                if not diaLaboral(): orderC = hb.orders.send_buy_order(symbol[0],symbol[2], float(precio), abs(int(size)))
+                if esFinde == False: orderC = hb.orders.send_buy_order(symbol[0],symbol[2], float(precio), abs(int(size)))
                 shtTest.range('AD'+str(int(celda+1))).value = float(precio/100)
                 shtTest.range('X'+str(int(celda+1))).value = precio / 100
                 print(f'        ______/ BUY + {int(size)} {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // {orderC}')
@@ -433,12 +431,12 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     else: # VENTA
         try:
             if len(symbol) < 2:
-                if not diaLaboral(): orderV = hb.orders.send_sell_order(symbol[0],'24hs', float(precio), abs(int(size)))
+                if esFinde == False: orderV = hb.orders.send_sell_order(symbol[0],'24hs', float(precio), abs(int(size)))
                 shtTest.range('AG'+str(int(celda+1))).value = float(precio)
                 shtTest.range('X'+str(int(celda+1))).value = precio
                 print(f'______/ SELL opcion - {int(size)} {symbol[0]} // precio: {precio} // {orderV}')
             else:
-                if not diaLaboral(): orderV = hb.orders.send_sell_order(symbol[0],symbol[2], float(precio), abs(int(size)))
+                if esFinde == False: orderV = hb.orders.send_sell_order(symbol[0],symbol[2], float(precio), abs(int(size)))
                 shtTest.range('AG'+str(int(celda+1))).value = float(precio/100)
                 shtTest.range('X'+str(int(celda+1))).value = precio /100
                 print(f'______/ SELL - {int(size)} {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // {orderV}')
@@ -607,34 +605,27 @@ while True:
         if time.strftime("%H:%M:%S") > '17:05:00': pass
         else: break
     
-    if vuelta > 30 :  
-        try: 
-            galiciaADR= yf.download('GGAL',period='1d',interval='1d')['Close'].values
-            print(time.strftime("%H:%M:%S"),'Ggal ADR ',galiciaADR[0])
-            #galiciaADRMin= yf.download('GGAL',period='1d',interval='1d')['Low'].values
-            #galiciaADRMax= yf.download('GGAL',period='1d',interval='1d')['High'].values
-        except: 
-            galiciaADR = 0.00
-            #galiciaADRMin = 0.00
-            #galiciaADRMax = 0.00
-        shtTest.range('Z90').value = galiciaADR[0]
-        #shtTest.range('AA90').value = galiciaADRMin[0]
-        #shtTest.range('AA91').value = galiciaADRMax[0]
-        vuelta = 0
-    else: vuelta += 1
-    
     time.sleep(2)
 
     try: 
-        if not shtTest.range('Q1').value:
+        if not shtTest.range('Q1').value and esFinde == False:
             shtTest.range('A'+str(listLength)).options(index=True,header=False).value = everything
             try: shtTest.range('AJ2').options(index=True, header=False).value = cauciones
             except: print("______ ERROR al cargar cauciones en Excel ______ ",time.strftime("%H:%M:%S")) 
     except: print("______ ERROR al cargar Bonos/Letras en Excel ______ ",time.strftime("%H:%M:%S")) 
 
     try:
-        if not shtTest.range('S1').value: 
+        if not shtTest.range('S1').value and esFinde == False: 
             shtTest.range('A30').options(index=True,header=False).value=options  
+            try:
+                if vuelta > 30: 
+                    valorAdr = traerADR()
+                    print(time.strftime("%H:%M:%S"),'Ggal ADR ',valorAdr)
+                    shtTest.range('Z90').value = valorAdr
+                    vuelta = 0
+                else: vuelta += 1
+            except: print('ERROR, al cargar el ADR desde yahoo finance')
+
     except: print("______ ERROR al cargar OPCIONES en Excel ______ ",time.strftime("%H:%M:%S")) 
         
     if str(shtTest.range('A1').value) != 'symbol': ilRulo()
@@ -648,8 +639,7 @@ print(time.strftime("%H:%M:%S"), 'Mercado cerrado. ')
 
 shtTest.range('Q1').value = 'BONOS'
 shtTest.range('S1').value = 'OPCIONES'
-shtTest.range('W1').value = 'TRAILING'
-shtTest.range('X1').value = 'STOP'
+
 shtTest.range('Y1').value = 'BROKER'
 
 #[ ]><   \n
