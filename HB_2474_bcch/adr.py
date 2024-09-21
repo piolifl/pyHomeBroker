@@ -1,19 +1,13 @@
 import yfinance as yf
-import xlwings as xw 
 
-wb = xw.Book('.\\epgb_pyHB.xlsb')
-shtTest = wb.sheets('HomeBroker')
 
 #yf.download('GGAL',period='1d',interval='1d')['Close'].value
 
-galiciaADR= yf.download('GGAL',period='1d',interval='1d').values
+galiciaADR= yf.download('GGAL',period='1d',interval='1d',prepost=True)['Close'].values
     
 
 print(galiciaADR)    
 
-shtTest.range('AA90').value = galiciaADR[0]  
-    
-    
     
 '''   
     galiciaADRMin= yf.download('GGAL',period='1d',interval='1d')['Low'].values

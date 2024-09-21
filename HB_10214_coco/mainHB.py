@@ -361,8 +361,8 @@ def cancelaCompra(celda):
     if esFinde == False: 
         try: 
             hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderC))
-            print(f"/// Cancelada Compra : {int(orderC)} ")
-        except: print('______ ERROR al cancelar compra.')
+            print(f"/// Cancelada Compra : {int(orderC)} ",end='\t')
+        except: pass
     try: shtTest.range('V'+str(int(celda+1))).value -= shtTest.range('AC'+str(int(celda+1))).value
     except: pass
     shtTest.range('AB'+str(int(celda+1))+':'+'AD'+str(int(celda+1))).value = ''
@@ -373,8 +373,8 @@ def cancelarVenta(celda):
     if esFinde == False: 
         try:
             hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderV))
-            print(f"/// Cancelada Venta  : {int(orderV)} ")
-        except: print('______ ERROR al cancelar venta.')
+            print(f"/// Cancelada Venta  : {int(orderV)} " ,end='\t')
+        except: pass
     try: shtTest.range('V'+str(int(celda+1))).value += shtTest.range('AF'+str(int(celda+1))).value
     except: pass
     shtTest.range('AE'+str(int(celda+1))+':'+'AG'+str(int(celda+1))).value = ''
@@ -384,7 +384,7 @@ def cancelarTodo(desde,hasta):
         try:  
             hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
             print("/// Todas las ordenes activas canceladas ")
-        except: print('______ ERROR al cancelar TODAS las oredenes activas.')
+        except: pass
     shtTest.range('AB'+str(desde)+':'+'AH'+str(hasta)).value = ''
 
 def cantidadAuto(nroCelda):
@@ -549,7 +549,7 @@ def buscoOperaciones(inicio,fin):
             elif valor[1] == '+': 
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
             elif str(valor[1]).upper() == 'P': 
-                if not diaLaboral(): getPortfolio(hb, os.environ.get('account_id'))
+                if esFinde == False: getPortfolio(hb, os.environ.get('account_id'))
             else: 
                 try: 
                     if shtTest.range('AB'+str(int(valor[0]+1))).value: cancelaCompra(valor[0]) # CANCELA oreden compra anterior
@@ -563,7 +563,7 @@ def buscoOperaciones(inicio,fin):
             elif valor[2] == '+': 
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
             elif str(valor[2]).upper() == 'P': 
-                if not diaLaboral(): getPortfolio(hb, os.environ.get('account_id'))
+                if esFinde == False: getPortfolio(hb, os.environ.get('account_id'))
             else: 
                 try: 
                     if shtTest.range('AB'+str(int(valor[0]+1))).value: cancelaCompra(valor[0])
@@ -577,7 +577,7 @@ def buscoOperaciones(inicio,fin):
             elif valor[3] == '-': 
                 enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
             elif str(valor[3]).upper() == 'P': 
-                if not diaLaboral(): getPortfolio(hb, os.environ.get('account_id'))
+                if esFinde == False: getPortfolio(hb, os.environ.get('account_id'))
             else: 
                 try: 
                     if shtTest.range('AE'+str(int(valor[0]+1))).value: cancelarVenta(valor[0])
@@ -591,7 +591,7 @@ def buscoOperaciones(inicio,fin):
             elif valor[4] == '-': 
                 enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
             elif str(valor[4]).upper() == 'P': 
-                if not diaLaboral(): getPortfolio(hb, os.environ.get('account_id'))
+                if esFinde == False: getPortfolio(hb, os.environ.get('account_id'))
             else: 
                 try: 
                     if shtTest.range('AE'+str(int(valor[0]+1))).value: cancelarVenta(valor[0]) # CANCELA oreden venta anterior
@@ -624,7 +624,7 @@ while True:
             try:
                 if vuelta > 30: 
                     valorAdr = traerADR()
-                    print(time.strftime("%H:%M:%S"),'Ggal ADR ',valorAdr)
+                    print(time.strftime("%H:%M:%S"),'Ggal ADR: \n\t\t\t',valorAdr)
                     shtTest.range('Z90').value = valorAdr
                     vuelta = 0
                 else: vuelta += 1
