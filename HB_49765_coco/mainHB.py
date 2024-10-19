@@ -175,6 +175,10 @@ def getPortfolio(hb, comitente):
         
         if os.environ.get('name') == 'COCOS.CAPITAL':
             portfolio = requests.post("https://cocoscap.com/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
+        
+        elif os.environ.get('name') == 'VETA':
+            portfolio = requests.post("https://cuentas.vetacapital.com.ar/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
+        
         else: 
             portfolio = requests.post("https://clientes.bcch.org.ar/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
 
@@ -599,6 +603,7 @@ def buscoOperaciones(inicio,fin):
                 except: shtTest.range('T'+str(int(valor[0]+1))).value = ''
             shtTest.range('T'+str(int(valor[0]+1))).value = ''
 ############################################################ CARGA BUCLE EN EXCEL ##############################################
+broker = str(shtTest.range('Y1').value).upper()
 
 while True:
 
@@ -606,8 +611,9 @@ while True:
         if time.strftime("%H:%M:%S") > '17:05:00': pass
         else: break
     
-    if str(shtTest.range('Y1').value).upper() == 'BCCH': 
+    if broker == 'BCCH' or broker == 'VETA': 
         buscoOperaciones(rangoDesde,rangoHasta)
+    
     
     time.sleep(2)
 
