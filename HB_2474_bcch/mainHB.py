@@ -18,7 +18,7 @@ shtTest.range('S1').value = 'OPCIONES'
 shtTest.range('W1').value = 'TRAILING'
 shtTest.range('X1').value = 'STOP'
 shtTest.range('Z1').value = 0.001
-rangoDesde = '26'
+rangoDesde = '2'
 rangoHasta = '89'
 hoyEs = time.strftime("%A")
 
@@ -230,7 +230,9 @@ def namesArs(nombre,plazo):
     elif nombre[:2] == 'GOGL': return 'GOOGL'+plazo
     elif (nombre[:1] == 'X' or nombre[:1] == 'S') and (nombre[3:4] == 'D' or nombre[3:4] == 'C'):
         if (nombre[1:2] == 'F' or nombre[1:2] == 'Y'): return nombre[:1]+'20'+nombre[1:3]+plazo
-        if (nombre[1:2] == 'J'): return nombre[:1]+'14'+nombre[1:3]+plazo
+        if (nombre[1:2] == 'M'): return nombre[:1]+'31'+nombre[1:3]+plazo
+        if (nombre[1:2] == 'N'): return nombre[:1]+'29'+nombre[1:3]+plazo
+        if (nombre[1:2] == 'J'): return nombre[:1]+'30'+nombre[1:3]+plazo
         if (nombre[1:2] == 'G'): return nombre[:1]+'30'+nombre[1:3]+plazo
         if (nombre[1:2] == 'O'): return nombre[:1]+'14'+nombre[1:3]+plazo
         if (nombre[1:2] == 'E'): return nombre[:1]+'31'+nombre[1:3]+plazo
@@ -405,6 +407,18 @@ def traerADR():
     galiciaADR= yf.download('GGAL',period='1d',interval='1d')['Close'].values
     return galiciaADR[0]
 
+def ruloAutomatico(celda):
+    shtTest.range('Q'+str(int(celda+1))).value = ""
+    if celda+1 == 2 or celda+1 == 6 or celda+1 == 8 or celda+1 == 14 or celda+1 == 18 or celda+1 == 22:
+        stockVenta = shtTest.range('U'+str(int(celda+1))).value
+        if stockVenta != None:
+            shtTest.range('S'+str(int(celda+1))).value = "-"
+            shtTest.range('R'+str(int(celda+2))).value = "+"
+            shtTest.range('S'+str(int(celda+3))).value = "-"
+            shtTest.range('R'+str(int(celda+4))).value = "+"
+            if esFinde == False: getPortfolio(hb, os.environ.get('account_id'))
+        else: print('No hay stock disponible para inciar RULO')
+
 ###############################################################  ENVIAR ORDENES ################################################    
 def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     global orderC, orderV
@@ -550,6 +564,7 @@ def buscoOperaciones(inicio,fin):
         if valor[1]: # # Columna Q en el excel /////////////////////////////////////////////////////////////////////////////////
             if str(valor[1]).lower() == 'c': cancelaCompra(valor[0])
             elif str(valor[1]).lower() == 'x': cancelarTodo(inicio,fin)
+            elif str(valor[1]).lower() == 'r': ruloAutomatico(valor[0])
             elif valor[1] == '+': 
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
             elif str(valor[1]).upper() == 'P': 
@@ -628,10 +643,9 @@ while True:
         if not shtTest.range('S1').value and esFinde == False: 
             shtTest.range('A30').options(index=True,header=False).value=options  
             try:
-                if vuelta > 30: 
+                if vuelta > 25: 
                     valorAdr = traerADR()
-                    print(time.strftime("%H:%M:%S"),'Ggal ADR: \n\t\t\t',valorAdr)
-                    shtTest.range('Z90').value = valorAdr
+                    shtTest.range('Y90').value = valorAdr
                     vuelta = 0
                 else: vuelta += 1
             except: print('ERROR, al cargar el ADR desde yahoo finance')
