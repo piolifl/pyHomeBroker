@@ -4,9 +4,13 @@ import yfinance as yf
 #yf.download('GGAL',period='1d',interval='1d')['Close'].value
 
 galiciaADR= yf.download('GGAL',period='1d',interval='1d',prepost=True)['Close'].values
+Low = yf.download('GGAL',period='1d',interval='1d',prepost=True)['Low'].values
+High = yf.download('GGAL',period='1d',interval='1d',prepost=True)['Close'].values
     
 
-print(galiciaADR)    
+print(galiciaADR)   
+print(Low) 
+print(High) 
 
     
 '''   
