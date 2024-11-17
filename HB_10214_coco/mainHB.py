@@ -163,7 +163,7 @@ def diaLaboral():
 
 def getPortfolio(hb, comitente):
     try:
-        shtTest.range('U'+str(rangoDesde)+':'+'U'+str(rangoHasta)).value = ''
+        shtTest.range('U'+str(rangoDesde)+':'+'U'+str(265)).value = ''
         payload = {'comitente': str(comitente),
         'consolida': '0',
         'proceso': '22',
@@ -196,7 +196,7 @@ def getPortfolio(hb, comitente):
             if i[0]['NERE'] != 'Pesos':  
                 subtotal = [ ( x['NERE'],x['CAN0'],x['CANT']) for x in i[0:] if x['CANT'] != None]
                 for x in subtotal:
-                    for valor in shtTest.range('A'+str(rangoDesde)+':'+'P'+str(rangoHasta)).value:
+                    for valor in shtTest.range('A'+str(rangoDesde)+':'+'P'+str(265)).value:
                         if not valor[0]: continue
                         ticker = str(valor[0]).split()
                         if x[0] == ticker[0]: 
@@ -232,7 +232,7 @@ def namesArs(nombre,plazo):
         if (nombre[1:2] == 'F' or nombre[1:2] == 'Y'): return nombre[:1]+'20'+nombre[1:3]+plazo
         if (nombre[1:2] == 'M'): return nombre[:1]+'31'+nombre[1:3]+plazo
         if (nombre[1:2] == 'N'): return nombre[:1]+'29'+nombre[1:3]+plazo
-        if (nombre[1:2] == 'J'): return nombre[:1]+'30'+nombre[1:3]+plazo
+        if (nombre[1:2] == 'J'): return nombre[:1]+'18'+nombre[1:3]+plazo
         if (nombre[1:2] == 'G'): return nombre[:1]+'30'+nombre[1:3]+plazo
         if (nombre[1:2] == 'O'): return nombre[:1]+'14'+nombre[1:3]+plazo
         if (nombre[1:2] == 'E'): return nombre[:1]+'31'+nombre[1:3]+plazo
