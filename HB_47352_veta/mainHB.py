@@ -13,6 +13,7 @@ environ.Env.read_env()
 wb = xw.Book('..\\epgb_pyHB.xlsb')
 shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
+
 shtTest.range('Q1').value = 'BONOS'
 shtTest.range('S1').value = 'OPCIONES'
 shtTest.range('W1').value = 'TRAILING'
@@ -20,6 +21,7 @@ shtTest.range('X1').value = 'STOP'
 shtTest.range('Z1').value = 0.001
 rangoDesde = '2'
 rangoHasta = '89'
+
 hoyEs = time.strftime("%A")
 
 def getOptionsList():
