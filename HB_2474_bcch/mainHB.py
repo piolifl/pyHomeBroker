@@ -13,13 +13,15 @@ environ.Env.read_env()
 wb = xw.Book('..\\epgb_pyHB.xlsb')
 shtTest = wb.sheets('HomeBroker')
 shtTickers = wb.sheets('Tickers')
+
 shtTest.range('Q1').value = 'BONOS'
 shtTest.range('S1').value = 'OPCIONES'
 shtTest.range('W1').value = 'TRAILING'
 shtTest.range('X1').value = 'STOP'
 shtTest.range('Z1').value = 0.001
 rangoDesde = '2'
-rangoHasta = '89'
+rangoHasta = '90'
+
 hoyEs = time.strftime("%A")
 
 def getOptionsList():
@@ -645,7 +647,7 @@ while True:
             try:
                 if vuelta > 25: 
                     valorAdr = traerADR()
-                    shtTest.range('Y90').value = valorAdr
+                    shtTest.range('Y91').value = valorAdr
                     vuelta = 0
                 else: vuelta += 1
             except: print('ERROR, al cargar el ADR desde yahoo finance')

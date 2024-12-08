@@ -20,7 +20,7 @@ shtTest.range('W1').value = 'TRAILING'
 shtTest.range('X1').value = 'STOP'
 shtTest.range('Z1').value = 0.001
 rangoDesde = '2'
-rangoHasta = '89'
+rangoHasta = '90'
 
 hoyEs = time.strftime("%A")
 
@@ -645,9 +645,9 @@ while True:
         if not shtTest.range('S1').value and esFinde == False: 
             shtTest.range('A30').options(index=True,header=False).value=options  
             try:
-                if vuelta > 25: 
+                if vuelta > 10: 
                     valorAdr = traerADR()
-                    shtTest.range('Y90').value = valorAdr
+                    shtTest.range('Y91').value = valorAdr
                     vuelta = 0
                 else: vuelta += 1
             except: print('ERROR, al cargar el ADR desde yahoo finance')

@@ -629,7 +629,6 @@ while True:
     if broker == 'BCCH' or broker == 'VETA': 
         buscoOperaciones(rangoDesde,rangoHasta)
     
-    
     time.sleep(2)
 
     try: 
