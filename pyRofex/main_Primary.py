@@ -173,7 +173,6 @@ pyRofex.market_data_subscription(tickers=instruments, entries=entries, depth=1)
 
 
 def soloContinua():
-
     pass
 
 def namesArs(nombre,plazo): 
@@ -386,9 +385,9 @@ def buscoOperaciones(inicio,fin):
 
 def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     nombre = str(shtData.range(str(symbol)).value).split()
-    if len(nombre) == 2: symbol = "MERV - XMEV - " + str(nombre[1]).upper() + ' - ' + str(nombre[0])
-    elif len(nombre) > 2: symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])
-    else : symbol = "MERV - XMEV - " + str(nombre[0]) + ' - 24hs'
+    if len(nombre) == 2: symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[1]) # Es caucho
+    elif len(nombre) > 2: symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])   # Son bonos
+    else : symbol = "MERV - XMEV - " + str(nombre[0]) + ' - 24hs' # Son opciones
     precio = shtData.range(str(price)).value
     gastos = float(shtData.range('AB1').value/100)
 
