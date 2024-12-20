@@ -1,34 +1,49 @@
-import pycocos
+'''import pycocos
 import pandas as pd
 import xlwings as xw
 import time
 
-'''
-wb = xw.Book('D:\\pyHomeBroker\\epgb_appCocos.xlsb')
-shtTickers = wb.sheets('pyRofex')
-shtData = wb.sheets('MATRIZ OMS')
-'''
+
+#wb = xw.Book('D:\\pyHomeBroker\\epgb_appCocos.xlsb')
+#shtTickers = wb.sheets('pyRofex')
+#shtData = wb.sheets('MATRIZ OMS')
+
 # Inicializar la conexión a Cocos
 app = pycocos.Cocos("miryam.borda79@gmail.com","Bordame1+")
 
-# Definir los instrumentos que te interesan
-instrumentos = ['ALUA', 'BBAR', 'GGAL']
-
 # Obtener los datos de los instrumentos
-for i in instrumentos:
-    precios = app.get_instrument_snapshot(ticker=i, segment=app.segments.DEFAULT)
-    df = pd.DataFrame(precios)
+lista_pesos = app.get_instrument_list_snapshot(
+    instrument_type=app.instrument_types.BONOS, 
+    instrument_subtype=app.instrument_subtypes.USD, 
+    settlement=app.settlements.T1, 
+    currency=app.currencies.USD, 
+    segment=app.segments.DEFAULT)
 
-# Convertir los datos a un DataFrame de pandas
+
+
+for i in lista_pesos['items']:
+    print(i)
+'''
+resultado  = {'short_ticker': 'AE38D', 'long_ticker': 'AE38D-0002-C-CT-USD', 'instrument_code': 'AE38', 'ext_code_cv': 5923, 'instrument_name': 'BONO REP. ARGENTINA USD STEP UP 2038', 'instrument_short_name': 'Argentina 2038', 'instrument_type': 'BONOS_PUBLICOS', 'instrument_subtype': 'NACIONALES_USD', 'maturity': '2038-01-09', 'expires_at': '2038-01-09', 'logo_file_name': 'ARG.jpg', 'id_venue': 'BYMA', 'id_session': 'CT', 'id_segment': 'C', 'settlement_days': 1, 'currency': 'USD', 'price_factor': 100, 'contract_size': 1, 'min_lot_size': 1, 'id_security': 3399, 'tick_size': 0.01, 'date': '2024-12-19', 'open': 72.7, 'high': 72.7, 'low': 71, 'close': 71.65, 'prev_close': 72.8, 'last': 71.65, 'bid': 70.11, 'ask': 73, 'bids': [{'size': 2000, 'price': 70.11}, {'size': 705, 'price': 70}, {'size': 7158, 'price': 69}, {'size': 50, 'price': 65.25}, {'size': 50, 'price': 62}], 'asks': [{'size': 3381, 'price': 73}, {'size': 1199, 'price': 74}, {'size': 200, 'price': 76.75}, {'size': 4557, 'price': 77.75}, {'size': 18154, 'price': 81.03}], 'turnover': 2208009.86, 'volume': 3084465, 'variation': -0.0157967, 'term': 4768, 'id_tick_size_rule': 'BYMA_FIXED_INCOME'}
+
+for i in resultado['long_ticker']:
+    print(i[0:])
+
+#df = pd.DataFrame(lista_pesos)
+
+
+    #df = pd.DataFrame(precios)
+
+# Convertir los datos a un DataFrame de pandas299171299171
 
 
 # Exportar los datos a un archivo Excel
-print(df)
+#print(df)
 
 
-app.logout()
 
-[
+
+resultado = [
     {
         'short_ticker': 'AL30', 
         'long_ticker': 'AL30-0002-C-CT-ARS', 
@@ -289,4 +304,4 @@ app.logout()
 ]
 
 
-
+#app.logout()

@@ -56,10 +56,12 @@ cedear = pd.DataFrame(rng.value, columns=['ticker', 'symbol'])
 rng = shtTickers.range('T2:U2').expand() # CAUCHO
 caucion = pd.DataFrame(rng.value, columns=['ticker', 'symbol'])
 
-tickers = pd.concat([acc,opciones, bonos,cedear,ons,letras, caucion ])
+tickers = pd.concat([opciones, acc, bonos,cedear,ons,letras, caucion ])
 
-listLength = len(opciones) + 35
-allLength = len(tickers)  + len(caucion) - 1
+listLength = len(opciones) + len(acc) + 31
+allLength = 30 + len(tickers)  - len(caucion)
+
+
 
 instruments_2 = pyRofex.get_detailed_instruments()
 data = pd.DataFrame(instruments_2['instruments'])
@@ -330,7 +332,6 @@ def stokDisponible(nroCelda):
     stok = shtData.range('U'+str(int(nroCelda))).value
     if not stok or stok == None or stok == 'None': 
         stok = 0
-    
     return abs(int(stok))
 
 def buscoOperaciones(inicio,fin):
@@ -419,7 +420,6 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     else: shtData.range('X'+str(int(celda+1))).value = (precio / 100) * (1 + gastos)
 
 def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
-    
     try:
         costo = shtData.range('X'+str(int(nroCelda+1))).value 
         if not costo or costo == None or costo == 'None': soloContinua()
@@ -439,9 +439,9 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
 
         if len(nombre) < 2: # Ingresa si son OPCIONES ///////////////////////////////////////////////////////////////////////////
             if vendido == 'no':
-                if bid > abs(costo) * (1 + (ganancia*75)):
+                if bid > abs(costo) * (1 + (ganancia*15)):
                     shtData.range('X'+str(int(nroCelda+1))).value = bid
-                    print(f'TRAILING {nombre[0]} siguiente precio {bid * (1+(ganancia*75))}', time.strftime("%H:%M:%S"))
+                    print(f'BUYTRAIL {nombre[0]} actual {last} siguiente precio {bid * (1+(ganancia*15))}', time.strftime("%H:%M:%S"))
                     if str(shtData.range('W'+str(int(nroCelda+1))).value) == 'BUYTRAIL': pass
                     else: shtData.range('W'+str(int(nroCelda+1))).value = 'BUYTRAIL'
                     
@@ -459,9 +459,9 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
                                 print(f'STOP {nombre[0]} x {cantidad} precio {bid} target salida {costo * (1-(ganancia*75))}', time.strftime("%H:%M:%S"))
                                 shtData.range('W'+str(int(nroCelda+1))).value = 'STOP'
             else:
-                if ask < abs(costo) * (1 - (ganancia*75)):
+                if ask < abs(costo) * (1 - (ganancia*15)):
                     shtData.range('X'+str(int(nroCelda+1))).value = ask
-                    print(f'TRAILING {nombre[0]} siguiente precio {costo * (1-(ganancia*75))}', time.strftime("%H:%M:%S"))
+                    print(f'SELLTRAIL {nombre[0]} actual {last} siguiente precio {costo * (1-(ganancia*15))}', time.strftime("%H:%M:%S"))
                     if str(shtData.range('W'+str(int(nroCelda+1))).value) == 'SELLTRAIL': pass
                     else: shtData.range('W'+str(int(nroCelda+1))).value = 'SELLTRAIL'
                     
@@ -495,7 +495,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
             else:
                 if bid > abs(costo) * (1 + ganancia):     
                     shtData.range('X'+str(int(nroCelda+1))).value = bid   
-                    print(f'TRAILING {nombre[0]} precio objetivo {bid * (1+(ganancia))}', time.strftime("%H:%M:%S"))     
+                    print(f'TRAILING {nombre[0]} actual {last} precio objetivo {bid * (1+(ganancia))}', time.strftime("%H:%M:%S"))     
                     if str(shtData.range('W'+str(int(nroCelda+1))).value) == 'BUYTRAIL': pass
                     else: shtData.range('W'+str(int(nroCelda+1))).value = 'BUYTRAIL'
                 
@@ -536,9 +536,9 @@ while True:
     
     if not shtData.range('S1').value:
         try:
-            if vuelta > 15: 
+            if vuelta > 10: 
                 valorAdr = traerADR()
-                shtData.range('Z31').value = valorAdr
+                shtData.range('Z61').value = valorAdr
                 vuelta = 0
             else: vuelta += 1
         except: print('ERROR, al cargar el ADR desde yahoo finance')
