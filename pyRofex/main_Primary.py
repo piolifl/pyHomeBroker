@@ -19,7 +19,7 @@ shtData.range('X1').value = 'STOP'
 shtData.range('Y1').value = 'VETA OMS'
 shtData.range('Z1').value = 0.001
 rangoDesde = '2'
-rangoHasta = '64'
+rangoHasta = '75'
 shtData.range('W'+str(rangoDesde)+':'+'W'+str(rangoHasta)).value = '' 
 hoyEs = time.strftime("%A")
     
@@ -528,8 +528,8 @@ while True:
         try:
             if vuelta > 10: 
                 valorAdr = traerADR()
-                shtData.range('Z61').value = valorAdr
-                shtData.range('Y62').value = time.strftime("%H:%M:%S")
+                shtData.range('Z71').value = valorAdr
+                shtData.range('Y72').value = time.strftime("%H:%M:%S")
                 vuelta = 0
                 if time.strftime("%H:%M:%S") > '17:30:20':
                     print(time.strftime("%H:%M:%S"), 'ADR cerrado. ')
