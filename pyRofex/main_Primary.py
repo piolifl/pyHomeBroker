@@ -436,7 +436,9 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
                 if bid > abs(costo) * (1 + (ganancia*15)):
                     shtData.range('X'+str(int(nroCelda+1))).value = bid
                     print(f'BUYTRAIL {time.strftime("%H:%M:%S")} {nombre[0]} actual {last} siguiente precio {bid * (1+(ganancia*15))}')
-                    if str(shtData.range('W'+str(int(nroCelda+1))).value) == 'BUYTRAIL': pass
+                    if str(shtData.range('W'+str(int(nroCelda+1))).value) == 'BUYTRAIL': 
+                        if last < abs(costo) * (1 - (ganancia)): shtData.range('W'+str(int(nroCelda+1))).value = ' '
+                        else: pass
                     else: shtData.range('W'+str(int(nroCelda+1))).value = 'BUYTRAIL'
                     
                 if not shtData.range('X1').value:
@@ -457,7 +459,9 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
                 if ask < abs(costo) * (1 - (ganancia*15)):
                     shtData.range('X'+str(int(nroCelda+1))).value = ask
                     print(f'SELLTRAIL {time.strftime("%H:%M:%S")} {nombre[0]} actual {last} siguiente precio {costo * (1-(ganancia*15))}')
-                    if str(shtData.range('W'+str(int(nroCelda+1))).value) == 'SELLTRAIL': pass
+                    if str(shtData.range('W'+str(int(nroCelda+1))).value) == 'SELLTRAIL': 
+                        if last > abs(costo) * (1 + (ganancia)): shtData.range('W'+str(int(nroCelda+1))).value = ' '
+                        else: pass
                     else: shtData.range('W'+str(int(nroCelda+1))).value = 'SELLTRAIL'
                     
                 if not shtData.range('X1').value:  
@@ -489,7 +493,9 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
                 if bid > abs(costo) * (1 + ganancia):     
                     shtData.range('X'+str(int(nroCelda+1))).value = bid   
                     print(f'TRAILING {time.strftime("%H:%M:%S")} {nombre[0]} {last} precio objetivo {bid * (1+(ganancia))}')     
-                    if str(shtData.range('W'+str(int(nroCelda+1))).value) == 'BUYTRAIL': pass
+                    if str(shtData.range('W'+str(int(nroCelda+1))).value) == 'BUYTRAIL': 
+                        if last < abs(costo) * (1 - (ganancia)): shtData.range('W'+str(int(nroCelda+1))).value = ' '
+                        else: pass
                     else: shtData.range('W'+str(int(nroCelda+1))).value = 'BUYTRAIL'
                 
                 if not shtData.range('X1').value:
