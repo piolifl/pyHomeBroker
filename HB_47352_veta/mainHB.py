@@ -10,19 +10,19 @@ import yfinance as yf
 
 env = environ.Env()
 environ.Env.read_env()
-wb = xw.Book('..\\epgb_pyHB.xlsb')
-shtTest = wb.sheets('HomeBroker')
+#wb = xw.Book('..\\epgb_pyHB.xlsb')
+wb = xw.Book('.\\epgb.xlsb')
+#shtTest = wb.sheets('HomeBroker')
+shtTest = wb.sheets('MATRIZ OMS')
 shtTickers = wb.sheets('Tickers')
 
-shtTest.range('Q1').value = 'BONOS'
-shtTest.range('S1').value = 'OPCIONES'
 shtTest.range('W1').value = 'TRAILING'
 shtTest.range('X1').value = 'STOP'
 shtTest.range('Z1').value = 0.001
 rangoDesde = '2'
-rangoHasta = '90'
+rangoHasta = '74'
 
-hoyEs = time.strftime("%A")
+hoyEs = 'lunes' # time.strftime("%A")
 
 def getOptionsList():
     global allOptions
@@ -95,7 +95,7 @@ cedears = getCedearsList()
 PanelGeneral = getPanelGeneralList()
 
 everything = pd.concat([ACC, bonos, letras, ONS, cedears, PanelGeneral ])
-listLength = len(options) +30
+listLength = len(options) +31
 allLength = len(everything) + listLength
 
 def on_options(online, quotes):
@@ -184,9 +184,11 @@ def getPortfolio(hb, comitente):
         else: 
             portfolio = requests.post("https://clientes.bcch.org.ar/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
 
-        try: print('Total:', portfolio['Result']['Activos'][0]['Subtotal'][0]['IMPO'], end='  ')
+        try: 
+            print('Total:', portfolio['Result']['Activos'][0]['Subtotal'][0]['IMPO'], end='  ')
         except: pass
-        try: print('Disponible:',portfolio['Result']['Activos'][0]['Subtotal'][0]['Detalle'][0]['IMPO'], end='  ')
+        try: 
+            print('Disponible:',portfolio['Result']['Activos'][0]['Subtotal'][0]['Detalle'][0]['IMPO'], end='  ')
         except: pass
 
         for i in portfolio['Result']['Activos'][0]['Subtotal'][0]['APERTURA']:
@@ -401,6 +403,12 @@ def cantidadAuto(nroCelda):
         cantidad = 0
     return abs(int(cantidad))
 
+def stokDisponible(nroCelda):
+    stok = shtTest.range('U'+str(int(nroCelda))).value
+    if not stok or stok == None or stok == 'None': 
+        stok = 0
+    return abs(int(stok))
+
 def soloContinua():
     pass
 
@@ -476,81 +484,100 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
         costo = shtTest.range('X'+str(int(nroCelda+1))).value 
         if not costo or costo == None or costo == 'None': soloContinua()
         nombre = str(shtTest.range(str(nombre)).value).split()
-        bid = shtTest.range('C'+str(int(nroCelda+1))).value
-        ask = shtTest.range('D'+str(int(nroCelda+1))).value
-        last = shtTest.range('F'+str(int(nroCelda+1))).value
+        if str(nombre[0]).upper() == 'GGAL' or str(nombre[0]).upper() == 'GGALD' or len(nombre) < 2: 
+            bid = shtTest.range('C'+str(int(nroCelda+1))).value
+            ask = shtTest.range('D'+str(int(nroCelda+1))).value
+            last = shtTest.range('F'+str(int(nroCelda+1))).value
+        else : 
+            bid = shtTest.range('C'+str(int(nroCelda+1))).value / 100
+            ask = shtTest.range('D'+str(int(nroCelda+1))).value / 100
+            last = shtTest.range('F'+str(int(nroCelda+1))).value / 100
         if not last or last == None or last == 'None': soloContinua()
 
         ganancia = shtTest.range('Z1').value
-        if not ganancia: ganancia = 0.0005
+        if not ganancia: ganancia = 0.001
 
         if len(nombre) < 2: # Ingresa si son OPCIONES ///////////////////////////////////////////////////////////////////////////
-            if vendido == 'no':
-                if bid > abs(costo) * (1 + (ganancia*75)):
+            if vendido == 'no': # OPCIONES COMPRADAS +++++++++++++++++
+
+                if bid > abs(costo) * (1 + (ganancia*15)):
+                    shtTest.range('X'+str(int(nroCelda+1))).value = bid
+                    print(f'BUYTRAIL {time.strftime("%H:%M:%S")} {nombre[0]} actual {last} siguiente precio {bid * (1+(ganancia*15))}')
                     if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'BUYTRAIL': pass
                     else: shtTest.range('W'+str(int(nroCelda+1))).value = 'BUYTRAIL'
-                    shtTest.range('X'+str(int(nroCelda+1))).value = bid
+                    
                 if not shtTest.range('X1').value:
-                    if last < abs(costo) * (1 - (ganancia*75)): 
+                    if last < abs(costo) * (1 - (ganancia*25)): 
                         if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP':
-                            if bid > last * (1-(ganancia*45)):
+
+                            if bid > last * (1-(ganancia*5)):
                                 if shtTest.range('Y'+str(int(nroCelda+1))).value : 
                                     try: shtTest.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
                                     except: pass
-                                    
                                     enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
                         else:
                             if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP': pass
-                            else: shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'
-            else:
-                if ask < abs(costo) * (1 - (ganancia*75)):
+                            else: 
+                                print(f'STOP {time.strftime("%H:%M:%S")} {nombre[0]} {last} target salida {costo * (1-(ganancia*25))}')
+                                shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'
+
+
+
+            else: # OPCIONES VENDIDAS -------------------------------
+                if ask < abs(costo) * (1 - (ganancia*15)):
+                    shtTest.range('X'+str(int(nroCelda+1))).value = ask
+                    print(f'SELLTRAIL {time.strftime("%H:%M:%S")} {nombre[0]} actual {last} siguiente precio {costo * (1-(ganancia*15))}')
                     if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'SELLTRAIL': pass
                     else: shtTest.range('W'+str(int(nroCelda+1))).value = 'SELLTRAIL'
-                    shtTest.range('X'+str(int(nroCelda+1))).value = ask
+                    
                 if not shtTest.range('X1').value:  
-
-                    if last > abs(costo) * (1 + (ganancia*75)): 
+                    if last > abs(costo) * (1 + (ganancia*25)): 
                         if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP': 
-
-                            if ask < last * (1-(ganancia*15)):
+                            if ask < last * (1-(ganancia*5)):
                                 if shtTest.range('Y'+str(int(nroCelda+1))).value : 
                                     try: shtTest.range('U'+str(int(nroCelda+1))).value += abs(cantidad)
                                     except: pass
-                                    
                                     enviarOrden('buy','A'+str((int(nroCelda)+1)),'D'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
                         else:
                             if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP': pass
-                            else: shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'
+                            else: 
+                                print(f'STOP {time.strftime("%H:%M:%S")} {nombre[0]} {last} target salida {costo * (1+(ganancia*25))}')
+                                shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'
 
         else: # Ingresa si son BONOS / LETRAS / ON / CEDEARS ////////////////////////////////////////////////////////////////////
-            if time.strftime("%H:%M:%S") > '16:24:50' and str(nombre[2]).lower() == 'spot': 
-                if time.strftime("%H:%M:%S") > '17:05:00': pass
+            if time.strftime("%H:%M:%S") > '16:24:00' and str(nombre[2]).lower() == 'spot': 
+                if time.strftime("%H:%M:%S") > '17:01:00': soloContinua()
                 else: 
                     shtTest.range('W'+str(int(nroCelda+1))).value = "CLOSED"
-                    pass
-            if time.strftime("%H:%M:%S") > '16:56:50' and str(nombre[2]).lower() == '24hs': 
-                if time.strftime("%H:%M:%S") > '17:05:00': pass
+                    soloContinua()
+            if time.strftime("%H:%M:%S") > '16:56:00' and str(nombre[2]).lower() == '24hs': 
+                if time.strftime("%H:%M:%S") > '17:01:00': soloContinua()
                 else: 
                     shtTest.range('W'+str(int(nroCelda+1))).value = "CLOSED"
-                    pass
+                    soloContinua()
             else:
-                # Rutina, si el precio BID sube modifica precio promedio de compra //////////////////////////////////////////////
-                if bid / 100 > abs(costo) * (1 + ganancia):             
+                if bid > abs(costo) * (1 + ganancia):     
+                    shtTest.range('X'+str(int(nroCelda+1))).value = bid   
+                    print(f'TRAILING {time.strftime("%H:%M:%S")} {nombre[0]} {last} precio objetivo {bid * (1+(ganancia))}')     
                     if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'BUYTRAIL': pass
                     else: shtTest.range('W'+str(int(nroCelda+1))).value = 'BUYTRAIL'
-                    shtTest.range('X'+str(int(nroCelda+1))).value = round(bid / 100,5)
-
+                
                 if not shtTest.range('X1').value:
-                    if last / 100 < abs(costo) * (1 - ganancia):
-                        if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='STOP' and (bid/100)>(last/100)*(1-ganancia):
-                            print(f'{time.strftime("%H:%M:%S")} STOP vendo    ',end=' || ')
+                    if last < abs(costo) * (1 - ganancia*3):
+                        if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='STOP' and (bid)>(last)*(1-ganancia*1.5):
                             if shtTest.range('Y'+str(int(nroCelda+1))).value : 
+                                tengoStok = stokDisponible(nroCelda+1)
+                                if tengoStok < 1: soloContinua()
+                                elif cantidad > tengoStok: cantidad = tengoStok
                                 shtTest.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
+                                shtTest.range('W'+str(int(nroCelda+1))).value = ''
                                 enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
                         else: 
-                            if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP': pass
-                            else: shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'
-    except: pass
+                            print(f'STOP {time.strftime("%H:%M:%S")} {nombre[0]} {last} target salida {costo * (1-ganancia*5)}')
+                            if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP': soloContinua()
+                            else: 
+                                shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'
+    except: soloContinua()
 ############################################################## BUSCA OPERACIONES ###############################################
 def buscoOperaciones(inicio,fin):
     for valor in shtTest.range('P'+str(inicio)+':'+'U'+str(fin)).value:
@@ -628,10 +655,10 @@ while True:
         if time.strftime("%H:%M:%S") > '17:05:00': pass
         else: break
     
-    if broker == 'BCCH' or broker == 'VETA': 
+    if broker == 'BCCH': 
         buscoOperaciones(rangoDesde,rangoHasta)
     
-    
+
     time.sleep(2)
 
     try: 
@@ -643,7 +670,7 @@ while True:
 
     try:
         if not shtTest.range('S1').value and esFinde == False: 
-            shtTest.range('A30').options(index=True,header=False).value=options  
+            shtTest.range('A31').options(index=True,header=False).value=options  
             try:
                 if vuelta > 10: 
                     valorAdr = traerADR()
