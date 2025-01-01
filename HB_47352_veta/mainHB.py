@@ -11,7 +11,7 @@ import yfinance as yf
 env = environ.Env()
 environ.Env.read_env()
 #wb = xw.Book('..\\epgb_pyHB.xlsb')
-wb = xw.Book('.\\epgb.xlsb')
+wb = xw.Book('..\\epgb.xlsb')
 #shtTest = wb.sheets('HomeBroker')
 shtTest = wb.sheets('MATRIZ OMS')
 shtTickers = wb.sheets('Tickers')
