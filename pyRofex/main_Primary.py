@@ -6,14 +6,12 @@ import pandas as pd
 import yfinance as yf
 import requests
 
-
 wb = xw.Book('D:\\pyHomeBroker\\epgb.xlsb')
 shtTickers = wb.sheets('pyRofex')
 shtData = wb.sheets('MATRIZ OMS')
 #shtData = wb.sheets('Hoja1')
 #shtOperaciones = wb.sheets('MATRIZ OMS')
 
-shtData.range('O1').value = 'VAR'
 shtData.range('Q1').value = 'PRECIOS'
 shtData.range('S1').value = 'ADR'
 shtData.range('W1').value = 'TRAILING'
@@ -25,7 +23,6 @@ rangoHasta = '75'
 shtData.range('W'+str(rangoDesde)+':'+'W'+str(rangoHasta)).value = '' 
 hoyEs = time.strftime("%A")
     
-
 def diaLaboral():
     if hoyEs == 'Saturday' or hoyEs == 'Sunday':
         return 'Fin de semana'
@@ -40,9 +37,23 @@ pyRofex._set_environment_parameter("url", "https://api.veta.xoms.com.ar/", pyRof
 pyRofex._set_environment_parameter("ws", "wss://api.veta.xoms.com.ar/", pyRofex.Environment.LIVE)
 
 pyRofex.initialize(user="20263866623", password="Bordame01!", account="47352", environment=pyRofex.Environment.LIVE)
-print(("online"), time.strftime("%H:%M:%S"))
+print(("online VETA OMS 47352"), time.strftime("%H:%M:%S"))
 
-    
+def loguinHB():
+    from pyhomebroker import HomeBroker  
+    global hb
+    hb = HomeBroker(int('284'))
+    hb.auth.login(
+        dni='26386662', 
+        user='piolifl',  
+        password='Bordame01',
+        raise_exception=True)
+
+loguinHB()
+
+print(("online VETA HOME BROKER 47352"), time.strftime("%H:%M:%S"))
+
+
 rng = shtTickers.range('A2:C2').expand() # OPCIONES
 opciones = pd.DataFrame(rng.value, columns=['ticker', 'symbol', 'strike'])
 rng = shtTickers.range('E2:F2').expand() # ACCIONES
@@ -148,7 +159,6 @@ def order_exception_handler(e):
     print("Exception Occurred: {0}".format(e.message))
 
 
-
 pyRofex.init_websocket_connection(market_data_handler=market_data_handler,
                                   error_handler=error_handler,
                                   exception_handler=exception_handler,
@@ -169,22 +179,14 @@ entries = [pyRofex.MarketDataEntry.BIDS,
 pyRofex.market_data_subscription(tickers=instruments, entries=entries, depth=1)
 #pyRofex.order_report_subscription()
 
-def loguinHB():
-    from pyhomebroker import HomeBroker  
-    global hb
-    hb = HomeBroker(int('284'))
-    hb.auth.login(
-        dni='26386662', 
-        user='piolifl',  
-        password='Bordame01',
-        raise_exception=True)
-    
 
-def getPortfolio(hb, comitente):
-    try: loguinHB()
+loguinHB()
+def getPortfolioHB(hb, comitente):
+    '''try: loguinHB()
     except: print('Error al intentar logueo con HB')
+    '''
     try:
-        shtData.range('U'+str(rangoDesde)+':'+'U'+str(265)).value = ''
+        shtData.range('U'+str(rangoDesde)+':'+'U'+str(rangoHasta)).value = ''
         payload = {'comitente': str(comitente),
         'consolida': '0',
         'proceso': '22',
@@ -197,6 +199,7 @@ def getPortfolio(hb, comitente):
         portfolio = requests.post("https://cuentas.vetacapital.com.ar/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
 
         try: 
+            shtData.range('O1').value = portfolio['Result']['Activos'][0]['Subtotal'][0]['IMPO']
             print('Total:', portfolio['Result']['Activos'][0]['Subtotal'][0]['IMPO'], end='  ')
         except: pass
         try: 
@@ -208,13 +211,18 @@ def getPortfolio(hb, comitente):
         print(' ||')
 
         subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
+
         for i in subtotal[0:]:
             if i[0]['NERE'] != 'Pesos':  
                 subtotal = [ ( x['NERE'],x['CAN0'],x['CANT']) for x in i[0:] if x['CANT'] != None]
+
                 for x in subtotal:
-                    for valor in shtData.range('A'+str(rangoDesde)+':'+'P'+str(265)).value:
+
+                    for valor in shtData.range('A'+str(rangoDesde)+':'+'P'+str(rangoHasta)).value:
+
                         if not valor[0]: continue
                         ticker = str(valor[0]).split()
+                        
                         if x[0] == ticker[0]: 
                             shtData.range('U'+str(int(valor[15]+1))).value = x[2]
                             if not shtData.range('V'+str(int(valor[15]+1))).value:
@@ -223,10 +231,36 @@ def getPortfolio(hb, comitente):
                                 else:
                                     try: shtData.range('X'+str(int(valor[15]+1))).value = x[1] /100
                                     except: shtData.range('X'+str(int(valor[15]+1))).value = x[1]
-        shtData.range('O1').value = 'VAR'
-        hb.online.disconnect()
+        
+        #hb.online.disconnect()
     except: pass
 
+def cancelaCompraHB(celda):
+    orderC = shtData.range('AC'+str(int(celda+1))).value
+    if not orderC or orderC == None or orderC == 'None' or orderC == '': orderC = 0
+
+    if esFinde == False: 
+        try: 
+            hb.orders.cancel_order('47352',int(orderC))
+            print(f"/// Cancelada Compra : {int(orderC)} ",end='\t')
+        except: 
+            print(f'Error al cancelar COMPRA {orderC} con HB')
+    try: shtData.range('V'+str(int(celda+1))).value -= shtData.range('AB'+str(int(celda+1))).value
+    except: pass
+    shtData.range('AB'+str(int(celda+1))+':'+'AC'+str(int(celda+1))).value = ''
+        
+def cancelarVentaHB(celda):
+    orderV = shtData.range('AE'+str(int(celda+1))).value
+    if not orderV or orderV == None or orderV == 'None' or orderV == '': orderV = 0
+    if esFinde == False: 
+        try:
+            hb.orders.cancel_order('47352',int(orderV))
+            print(f"/// Cancelada Venta  : {int(orderV)} " ,end='\t')
+        except: 
+            print(f'Error al cancelar VENTA {orderV} con HB')
+    try: shtData.range('V'+str(int(celda+1))).value += shtData.range('AD'+str(int(celda+1))).value
+    except: pass
+    shtData.range('AD'+str(int(celda+1))+':'+'AE'+str(int(celda+1))).value = ''
 
 def soloContinua():
     pass
@@ -403,14 +437,7 @@ def buscoOperaciones(inicio,fin):
 
         if valor[1]: # # Columna Q en el excel /////////////////////////////////////////////////////////////////////////////////
             if str(valor[1]).lower() == 'r': ruloAutomatico(valor[0])
-
-            elif str(valor[1]).lower() == 'c': 
-                cancel_order = pyRofex.cancel_order(orderBuy["order"]["clientId"])
-                print(cancel_order)
-            elif str(valor[1]).lower() == 'e':  
-                order_status = pyRofex.get_order_status(orderBuy["order"]["clientId"])
-                print(order_status)
-
+            elif str(valor[1]).lower() == 'p': getPortfolioHB(hb,'47352')
             elif valor[1] == '+': 
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
             else: 
@@ -421,7 +448,8 @@ def buscoOperaciones(inicio,fin):
 
         
         if valor[2]: #  Columna R en el excel //////////////////////////////////////////////////////////////////////////////////
-            if valor[2] == '+': 
+            if str(valor[2]).lower() == 'p': getPortfolioHB(hb,'47352')
+            elif valor[2] == '+': 
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
             else: 
                 try: 
@@ -430,7 +458,8 @@ def buscoOperaciones(inicio,fin):
             shtData.range('R'+str(int(valor[0]+1))).value = ''
         
         if valor[3]: # Columna S en el excel ///////////////////////////////////////////////////////////////////////////////////
-            if valor[3] == '-': 
+            if str(valor[3]).lower() == 'p': getPortfolioHB(hb,'47352')
+            elif valor[3] == '-': 
                 enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
             else: 
                 try: 
@@ -439,7 +468,8 @@ def buscoOperaciones(inicio,fin):
             shtData.range('S'+str(int(valor[0]+1))).value = ''
 
         if valor[4]: # Columna T en el excel //////////////////////////////////////////////////////////////////////////////////
-            if valor[4] == '-': 
+            if str(valor[4]).lower() == 'p': getPortfolioHB(hb,'47352')
+            elif valor[4] == '-': 
                 enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
             else: 
                 try: 
@@ -448,7 +478,7 @@ def buscoOperaciones(inicio,fin):
             shtData.range('T'+str(int(valor[0]+1))).value = ''
 
 def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
-    global orderBuy, orderSell
+
     nombre = str(shtData.range(str(symbol)).value).split()
     if len(nombre) == 2: symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[1]) # Es caucho
     elif len(nombre) > 2: symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])   # Son bonos
@@ -472,11 +502,11 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
         try: shtData.range('V'+str(int(celda+1))).value += abs(int(size))
         except: shtData.range('V'+str(int(celda+1))).value = abs(int(size))
 
-        try: 
-            shtData.range('AB'+str(int(celda+1))).value = orderBuy['status']
+        '''try: 
+            shtData.range('AB'+str(int(celda+1))).value = abs(int(size))
             shtData.range('AC'+str(int(celda+1))).value = orderBuy['order']['clientId']
         except: pass
-    
+    '''
     else: # VENTA
         try:
             if esFinde == False: 
@@ -493,11 +523,11 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
         try: shtData.range('V'+str(int(celda+1))).value -= abs(int(size))
         except: shtData.range('V'+str(int(celda+1))).value = int(size) / -1
 
-        try: 
-            shtData.range('AD'+str(int(celda+1))).value = orderSell['status']
+        '''try: 
+            shtData.range('AD'+str(int(celda+1))).value = abs(int(size))
             shtData.range('AE'+str(int(celda+1))).value = orderSell['order']['clientId']
         except: pass
-
+'''
     if str(nombre[0]).upper() == 'GGAL' or str(nombre[0]).upper() == 'GGALD' or len(nombre) < 2 :
         shtData.range('X'+str(int(celda+1))).value = precio * (1 + gastos)
     else: shtData.range('X'+str(int(celda+1))).value = (precio / 100) * (1 + gastos)
@@ -613,12 +643,15 @@ while True:
         if time.strftime("%H:%M:%S") < '17:01:10':
             print(time.strftime("%H:%M:%S"), 'Mercado local cerrado, continua ADR. ')
             shtData.range('Q1').value = 'PRECIOS'
-    try: 
+            shtData.range('W1').value = 'TRAILING'
+            shtData.range('X1').value = 'STOP'
+            shtData.range('Z1').value = 0.001
+    '''try: 
         if not shtData.range('O1').value:
             loguinHB()
-            getPortfolio(hb,'47352')
+            getPortfolioHB(hb,'47352')
     except: print('Hubo un error al traer el portfolio')
-
+'''
     try: 
         if not shtData.range('Q1').value:
             shtData.range('A30').options(index=False, headers=False).value = df_datos
@@ -634,18 +667,16 @@ while True:
                 if time.strftime("%H:%M:%S") > '17:30:20':
                     print(time.strftime("%H:%M:%S"), 'ADR cerrado. ')
                     pyRofex.close_websocket_connection()
+                    hb.online.disconnect()
                     break
             else: vuelta += 1
         except: print('ERROR, al cargar el ADR desde yahoo finance')
     #shtOperaciones.range('AI63').options(index=False, headers=False).value = operaciones
+
     time.sleep(3)
 
-
 shtData.range('S1').value = 'ADR'
-shtData.range('W1').value = 'TRAILING'
-shtData.range('X1').value = 'STOP'
-shtData.range('Y1').value = 'BROKER'
-shtData.range('Z1').value = 0.001
+
         
         
     
