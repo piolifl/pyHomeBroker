@@ -494,7 +494,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                         shtData.range('V'+str(int(celda+1))+':W'+str(int(celda+1))).value = ""
                 except: pass
 
-                orderBuy = pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(size)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
+                pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(size)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
                 print(f'______/ BUY   + {int(size)} {symbol} // precio: {precio}') 
         except: 
             shtData.range('Q'+str(int(celda+1))+':'+'R'+str(int(celda+1))).value = ''
@@ -502,11 +502,6 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
         try: shtData.range('V'+str(int(celda+1))).value += abs(int(size))
         except: shtData.range('V'+str(int(celda+1))).value = abs(int(size))
 
-        '''try: 
-            shtData.range('AB'+str(int(celda+1))).value = abs(int(size))
-            shtData.range('AC'+str(int(celda+1))).value = orderBuy['order']['clientId']
-        except: pass
-    '''
     else: # VENTA
         try:
             if esFinde == False: 
@@ -514,7 +509,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
                     if shtData.range('U'+str(int(celda+1))).value == 0:
                         shtData.range('V'+str(int(celda+1))+':W'+str(int(celda+1))).value = ""
                 except: pass
-                orderSell = pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(size)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
+                pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(size)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
                 print(f'______/ SELL  - {int(size)} {symbol} // precio: {precio}')
                 gastos /= -1
         except:
@@ -523,11 +518,6 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
         try: shtData.range('V'+str(int(celda+1))).value -= abs(int(size))
         except: shtData.range('V'+str(int(celda+1))).value = int(size) / -1
 
-        '''try: 
-            shtData.range('AD'+str(int(celda+1))).value = abs(int(size))
-            shtData.range('AE'+str(int(celda+1))).value = orderSell['order']['clientId']
-        except: pass
-'''
     if str(nombre[0]).upper() == 'GGAL' or str(nombre[0]).upper() == 'GGALD' or len(nombre) < 2 :
         shtData.range('X'+str(int(celda+1))).value = precio * (1 + gastos)
     else: shtData.range('X'+str(int(celda+1))).value = (precio / 100) * (1 + gastos)
@@ -573,8 +563,6 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
                             else: 
                                 print(f'STOP {time.strftime("%H:%M:%S")} {nombre[0]} {last} target salida {costo * (1-(ganancia*25))}')
                                 shtData.range('W'+str(int(nroCelda+1))).value = 'STOP'
-
-
 
             else: # OPCIONES VENDIDAS -------------------------------
                 if ask < abs(costo) * (1 - (ganancia*15)):
@@ -633,25 +621,18 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
     except: soloContinua()
 
 
-
 while True:
 
     if str(shtData.range('A1').value) != 'symbol': ilRulo()
     buscoOperaciones(rangoDesde,rangoHasta)
 
-    if time.strftime("%H:%M:%S") > '17:01:00': 
-        if time.strftime("%H:%M:%S") < '17:01:10':
+    if time.strftime("%H:%M:%S") > '17:00:30': 
+        if time.strftime("%H:%M:%S") < '17:00:35':
             print(time.strftime("%H:%M:%S"), 'Mercado local cerrado, continua ADR. ')
             shtData.range('Q1').value = 'PRECIOS'
             shtData.range('W1').value = 'TRAILING'
             shtData.range('X1').value = 'STOP'
             shtData.range('Z1').value = 0.001
-    '''try: 
-        if not shtData.range('O1').value:
-            loguinHB()
-            getPortfolioHB(hb,'47352')
-    except: print('Hubo un error al traer el portfolio')
-'''
     try: 
         if not shtData.range('Q1').value:
             shtData.range('A30').options(index=False, headers=False).value = df_datos
@@ -665,6 +646,7 @@ while True:
                 shtData.range('Y72').value = time.strftime("%H:%M:%S")
                 vuelta = 0
                 if time.strftime("%H:%M:%S") > '17:30:20':
+                    shtData.range('S1').value = 'ADR'
                     print(time.strftime("%H:%M:%S"), 'ADR cerrado. ')
                     pyRofex.close_websocket_connection()
                     hb.online.disconnect()
@@ -675,7 +657,6 @@ while True:
 
     time.sleep(3)
 
-shtData.range('S1').value = 'ADR'
 
         
         
