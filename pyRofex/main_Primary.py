@@ -19,7 +19,7 @@ shtData.range('X1').value = 'STOP'
 shtData.range('Y1').value = 'VETA OMS'
 shtData.range('Z1').value = 0.001
 rangoDesde = '2'
-rangoHasta = '75'
+rangoHasta = '74'
 shtData.range('W'+str(rangoDesde)+':'+'W'+str(rangoHasta)).value = '' 
 hoyEs = time.strftime("%A")
     
@@ -652,14 +652,7 @@ while True:
                     hb.online.disconnect()
                     break
             else: vuelta += 1
-        except: print('ERROR, al cargar el ADR desde yahoo finance')
+        except: pass
     #shtOperaciones.range('AI63').options(index=False, headers=False).value = operaciones
 
     time.sleep(3)
-
-
-        
-        
-    
-
-
