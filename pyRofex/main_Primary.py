@@ -395,8 +395,10 @@ def ilRulo():
 
 vuelta = 0
 def traerADR():
+    global galiciaADR, ypfADR
     galiciaADR= yf.download('GGAL',period='1d',interval='1d')['Close'].values
-    return galiciaADR[0]
+    ypfADR = yf.download('YPF',period='1d',interval='1d')['Close'].values
+    return galiciaADR[0], ypfADR[0]
 
 def ruloAutomatico(celda):
     shtData.range('Q'+str(int(celda+1))).value = ""
@@ -642,7 +644,8 @@ while True:
         try:
             if vuelta > 10: 
                 valorAdr = traerADR()
-                shtData.range('Z71').value = valorAdr
+                shtData.range('Z71').value = valorAdr[0]
+                shtData.range('Z73').value = valorAdr[1]
                 shtData.range('Y72').value = time.strftime("%H:%M:%S")
                 vuelta = 0
                 if time.strftime("%H:%M:%S") > '17:30:20':
