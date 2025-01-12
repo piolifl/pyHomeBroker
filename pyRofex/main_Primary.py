@@ -18,7 +18,7 @@ shtData.range('W1').value = 'TRAILING'
 shtData.range('X1').value = 'STOP'
 shtData.range('Y1').value = 'VETA OMS'
 shtData.range('Z1').value = 0.001
-rangoDesde = '2'
+rangoDesde = '26'
 rangoHasta = '74'
 shtData.range('W'+str(rangoDesde)+':'+'W'+str(rangoHasta)).value = '' 
 hoyEs = time.strftime("%A")
@@ -182,9 +182,6 @@ pyRofex.market_data_subscription(tickers=instruments, entries=entries, depth=1)
 
 loguinHB()
 def getPortfolioHB(hb, comitente):
-    '''try: loguinHB()
-    except: print('Error al intentar logueo con HB')
-    '''
     try:
         shtData.range('U'+str(rangoDesde)+':'+'U'+str(rangoHasta)).value = ''
         payload = {'comitente': str(comitente),
@@ -199,7 +196,7 @@ def getPortfolioHB(hb, comitente):
         portfolio = requests.post("https://cuentas.vetacapital.com.ar/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
 
         try: 
-            shtData.range('O1').value = portfolio['Result']['Activos'][0]['Subtotal'][0]['IMPO']
+            shtData.range('M1').value = portfolio['Result']['Activos'][0]['Subtotal'][0]['IMPO']
             print('Total:', portfolio['Result']['Activos'][0]['Subtotal'][0]['IMPO'], end='  ')
         except: pass
         try: 
