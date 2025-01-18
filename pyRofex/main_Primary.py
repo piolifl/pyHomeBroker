@@ -42,16 +42,19 @@ print(("online VETA OMS 47352"), time.strftime("%H:%M:%S"))
 def loguinHB():
     from pyhomebroker import HomeBroker  
     global hb
-    hb = HomeBroker(int('284'))
-    hb.auth.login(
-        dni='26386662', 
-        user='piolifl',  
-        password='Bordame01',
-        raise_exception=True)
+    try:
+        hb = HomeBroker(int('284'))
+        hb.auth.login(
+            dni='26386662', 
+            user='piolifl',  
+            password='Bordame01',
+            raise_exception=True)
+        print(("online VETA HOME BROKER 47352"), time.strftime("%H:%M:%S"))
+    except: 
+        print(("    NO se pudo loguear en VETA HOME BROKER 47352    * "), time.strftime("%H:%M:%S"))
+        pass
 
 loguinHB()
-
-print(("online VETA HOME BROKER 47352"), time.strftime("%H:%M:%S"))
 
 
 rng = shtTickers.range('A2:C2').expand() # OPCIONES
@@ -179,8 +182,6 @@ entries = [pyRofex.MarketDataEntry.BIDS,
 pyRofex.market_data_subscription(tickers=instruments, entries=entries, depth=1)
 #pyRofex.order_report_subscription()
 
-
-loguinHB()
 def getPortfolioHB(hb, comitente):
     try:
         shtData.range('U'+str(rangoDesde)+':'+'U'+str(rangoHasta)).value = ''
@@ -623,6 +624,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
 while True:
 
     if str(shtData.range('A1').value) != 'symbol': ilRulo()
+
     buscoOperaciones(rangoDesde,rangoHasta)
 
     if time.strftime("%H:%M:%S") > '17:00:30': 
@@ -633,11 +635,11 @@ while True:
             shtData.range('X1').value = 'STOP'
             shtData.range('Z1').value = 0.001
     try: 
-        if not shtData.range('Q1').value:
+        if not shtData.range('Q1').value and esFinde == False:
             shtData.range('A30').options(index=False, headers=False).value = df_datos
     except: print('Hubo un error al actualizar excel')
     
-    if not shtData.range('S1').value:
+    if not shtData.range('S1').value and esFinde == False:
         try:
             if vuelta > 10: 
                 valorAdr = traerADR()
