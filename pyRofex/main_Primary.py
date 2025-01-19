@@ -438,6 +438,10 @@ def buscoOperaciones(inicio,fin):
         if valor[1]: # # Columna Q en el excel /////////////////////////////////////////////////////////////////////////////////
             if str(valor[1]).lower() == 'r': ruloAutomatico(valor[0])
             elif str(valor[1]).lower() == 'p': getPortfolioHB(hb,'47352')
+
+            elif str(valor[1]).lower() == 'm': baseEjercible(valor[0])
+            elif str(valor[1]).lower() == 'sm': verificaMariposa(valor[0])
+
             elif valor[1] == '+': 
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
             else: 
@@ -619,6 +623,62 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
                             else: 
                                 shtData.range('W'+str(int(nroCelda+1))).value = 'STOP'
     except: soloContinua()
+
+# OPCIONES: estrategia tipo MARIPOSA ------------------------
+def baseEjercible(celda):
+    base = shtData.range('F72').value
+    ticker = shtData.range('A'+str(int(celda+1))).value
+    ticker = str(ticker).split()
+    ticker = ticker[0]
+    shtData.range('Q'+str(int(celda+1))).value = ''
+    if str(ticker[3:4]).upper() == 'C': 
+        ticker = ticker[4:9]
+        try:
+            if int(ticker) - float(base) < 0:
+                print(ticker, 'Es un CALL EJERCIBLE. Mariposa NO permitida para operar')
+            else: verificaMariposa(celda)
+        except:
+            ticker = ticker[:4]
+            if int(ticker) - float(base) < 0:
+                print(ticker, 'Es un CALL EJERCIBLE. Mariposa NO permitida para operar')
+            else: verificaMariposa(celda)
+    else: 
+        ticker = ticker[4:9]
+        try:
+            if float(base) - int(ticker) < 0:
+                print(ticker, 'Es un PUT EJERCIBLE. Mariposa NO permitida para operar')
+            else: verificaMariposa(celda)
+        except:
+            ticker = ticker[:4]
+            if float(base) - int(ticker) < 0:
+                print(ticker, 'Es un PUT EJERCIBLE. Mariposa NO permitida para operar')
+            else: verificaMariposa(celda)
+
+def verificaMariposa(celda=int):
+    activo = shtData.range('AA30').value
+    if str(activo).upper() == 'B':
+        valor = shtData.range('AA'+str(int(celda+1))).value
+        try:
+            if valor > 0: 
+                print(f'Ejecuta mariposa + {valor} || {time.strftime("%H:%M:%S")}')
+                mariposas(celda)
+            else: 
+                shtData.range('Q'+str(int(celda+1))).value = ''
+                print('Cancela mariposa por valor negativo: ', valor)
+        except: 
+            print('Error en valor de mariposa: ', valor)
+            shtData.range('Q'+str(int(celda+1))).value = ''
+
+def mariposas(celda=int):
+    try: 
+        enviarOrden('sell','A'+str((int(celda))),'C'+str((int(celda))),1,celda)
+        enviarOrden('buy','A'+str((int(celda)-1)),'D'+str((int(celda)-1)),1,celda-1)
+        enviarOrden('sell','A'+str((int(celda))),'C'+str((int(celda))),1,celda)
+        enviarOrden('buy','A'+str((int(celda)+1)),'D'+str((int(celda)+1)),1,celda+1)
+    except:
+        print('Falla al intentar una mariposa con: ', shtData.range('A'+str(celda)).value)
+        shtData.range('Q'+str(celda)).value = ''
+# FIN de MARIPOSAS ---------------------------------------------
 
 
 while True:
