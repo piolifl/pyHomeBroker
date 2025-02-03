@@ -551,6 +551,9 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
                     print(f'BUYTRAIL {time.strftime("%H:%M:%S")} {nombre[0]} bid {bid} siguiente precio {bid * (1+(ganancia))}')
                     if str(shtData.range('W'+str(int(nroCelda+1))).value) == 'BUYTRAIL': pass
                     else: shtData.range('W'+str(int(nroCelda+1))).value = 'BUYTRAIL'
+                else:
+                    ppc = 0 if not shtData.range('X'+str(int(nroCelda+1))).value else shtData.range('X'+str(int(nroCelda+1))).value
+                    if ppc > bid : shtData.range('W'+str(int(nroCelda+1))).value = round(bid,2)
                     
                 if not shtData.range('X1').value:
                     if last < abs(costo) * (1 - (ganancia)): 
@@ -571,6 +574,9 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
                     print(f'SELLTRAIL {time.strftime("%H:%M:%S")} {nombre[0]} ask {ask} siguiente precio {ask * (1-(ganancia))}')
                     if str(shtData.range('W'+str(int(nroCelda+1))).value) == 'SELLTRAIL': pass
                     else: shtData.range('W'+str(int(nroCelda+1))).value = 'SELLTRAIL'
+                else:
+                    ppc = 0 if not shtData.range('X'+str(int(nroCelda+1))).value else shtData.range('X'+str(int(nroCelda+1))).value
+                    if ppc < ask : shtData.range('W'+str(int(nroCelda+1))).value = round(ask,2)
                     
                 if not shtData.range('X1').value:  
 
@@ -587,6 +593,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
                             shtData.range('W'+str(int(nroCelda+1))).value = 'STOP'
 
         else: # Ingresa si son BONOS / LETRAS / ON / CEDEARS ////////////////////////////////////////////////////////////////////
+            if shtData.range('W'+str(int(nroCelda+1))).value == "CLOSED": soloContinua()
             if time.strftime("%H:%M:%S") > '16:24:00' and str(nombre[2]).lower() == 'CI': 
                 if time.strftime("%H:%M:%S") > '17:01:00': pass
                 else: 
@@ -607,6 +614,9 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
                 print(f'TRAILING {time.strftime("%H:%M:%S")} {nombre[0]} {last} precio objetivo {bid * (1+(ganancia))}')     
                 if str(shtData.range('W'+str(int(nroCelda+1))).value) == 'BUYTRAIL': pass
                 else: shtData.range('W'+str(int(nroCelda+1))).value = 'BUYTRAIL'
+            else:
+                ppc = 0 if not shtData.range('X'+str(int(nroCelda+1))).value else shtData.range('X'+str(int(nroCelda+1))).value
+                if ppc > bid : shtData.range('W'+str(int(nroCelda+1))).value = round(bid,2)
                 
             if not shtData.range('X1').value:
                 if last < abs(costo) * (1 - ganancia):
@@ -659,12 +669,12 @@ def verificaMariposa(celda=int):
     if str(activo).upper() == 'B':
         valor = shtData.range('AA'+str(int(celda+1))).value
         try:
-            if valor > 0: 
+            if valor > 10: 
                 print(f'Ejecuta mariposa + {valor} || {time.strftime("%H:%M:%S")}')
                 mariposas(celda)
             else: 
                 shtData.range('Q'+str(int(celda+1))).value = ''
-                print('Cancela mariposa por valor negativo: ', valor)
+                print('Cancela mariposa por vaja rentabilidad o valor negativo: ', valor)
         except: 
             print('Error en valor de mariposa: ', valor)
             shtData.range('Q'+str(int(celda+1))).value = ''
