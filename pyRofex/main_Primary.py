@@ -11,7 +11,7 @@ shtTickers = wb.sheets('pyRofex')
 shtData = wb.sheets('MATRIZ OMS')
 #shtData = wb.sheets('Hoja1')
 #shtOperaciones = wb.sheets('MATRIZ OMS')
-
+shtData.range('A1').value = 'symbol'
 shtData.range('Q1').value = 'PRECIOS'
 shtData.range('S1').value = 'ADR'
 shtData.range('X1').value = 'STOP'
@@ -537,6 +537,9 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
             last = shtData.range('F'+str(int(nroCelda+1))).value / 100
         if not last or last == None or last == 'None': soloContinua()
 
+        ppc = shtData.range('X'+str(int(nroCelda+1))).value
+        ppc = 0 if not ppc else ppc
+
         stock = shtData.range('U'+str(int(nroCelda+1))).value
         stock = 1 if not stock else stock
 
@@ -544,14 +547,12 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
             ganancia = shtData.range('Z1').value * 30
             if not ganancia: ganancia = 0.03
 
-            if vendido == 'no': # OPCIONES COMPRADAS +++++++++++++++++
+            if vendido == 'no': # OPCIONES COMPRADAS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                 if bid > abs(costo) * (1 + (ganancia)):
                     shtData.range('X'+str(int(nroCelda+1))).value = bid
                     print(f'BUYTRAIL {time.strftime("%H:%M:%S")} {nombre[0]} bid {bid} objetivo {bid * (1+(ganancia))}')
                 else:
-                    ppc = shtData.range('X'+str(int(nroCelda+1))).value
-                    ppc = 0 if not ppc else ppc
-                    if ppc > bid : shtData.range('W'+str(int(nroCelda+1))).value = round((bid-ppc)*stock*100,2)
+                    shtData.range('W'+str(int(nroCelda+1))).value = round((bid-ppc)*stock*100,2)
                     
                 if not shtData.range('X1').value:
                     if last <= abs(costo) * (1 - (ganancia)) and bid >= last: 
@@ -565,9 +566,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
                     shtData.range('X'+str(int(nroCelda+1))).value = ask
                     print(f'SELLTRAIL {time.strftime("%H:%M:%S")} {nombre[0]} ask {ask} objetivo {ask * (1-(ganancia))}')
                 else:
-                    ppc = shtData.range('X'+str(int(nroCelda+1))).value
-                    ppc = 0 if not ppc else ppc
-                    if ppc < ask : shtData.range('W'+str(int(nroCelda+1))).value = round((ask-ppc)*stock*100,2)
+                    shtData.range('W'+str(int(nroCelda+1))).value = round((ask-ppc)*stock*100,2)
                     
                 if not shtData.range('X1').value:  
                     if last >= abs(costo) * (1 + (ganancia)) and ask <= last: 
@@ -579,15 +578,11 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
         else: # Ingresa si son BONOS / LETRAS / ON / CEDEARS ////////////////////////////////////////////////////////////////////
             if time.strftime("%H:%M:%S") > '16:24:00' and str(nombre[2]).lower() == 'CI': 
                 if time.strftime("%H:%M:%S") > '17:01:00': pass
-                else: 
-                    shtData.range('W'+str(int(nroCelda+1))).value = "CLOSED"
-                    pass
+                else: pass
                     
             if time.strftime("%H:%M:%S") > '16:56:00' and str(nombre[2]).lower() == '24hs': 
                 if time.strftime("%H:%M:%S") > '17:01:00': pass
-                else: 
-                    shtData.range('W'+str(int(nroCelda+1))).value = "CLOSED"
-                    soloContinua()
+                else: soloContinua()
 
             ganancia = shtData.range('Z1').value
             if not ganancia: ganancia = 0.001
@@ -596,9 +591,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
                 shtData.range('X'+str(int(nroCelda+1))).value = bid   
                 print(f'TRAILING {time.strftime("%H:%M:%S")} {nombre[0]} {last} objetivo {bid * (1+(ganancia))}')     
             else:
-                ppc = shtData.range('X'+str(int(nroCelda+1))).value
-                ppc = 0 if not ppc else ppc
-                if ppc > bid : shtData.range('W'+str(int(nroCelda+1))).value = round((bid-ppc)*stock,2)
+                shtData.range('W'+str(int(nroCelda+1))).value = round((bid-ppc)*stock,2)
                 
             if not shtData.range('X1').value:
                 if last <= abs(costo) * (1 - ganancia) and bid >= last:
@@ -670,8 +663,10 @@ def mariposas(celda=int):
 
 
 while True:
-
-    if str(shtData.range('A1').value) != 'symbol': ilRulo()
+    try:
+        if str(shtData.range('A1').value) != 'symbol': ilRulo()
+    except:
+        shtData.range('A1').value = 'symbol'
 
     buscoOperaciones(rangoDesde,rangoHasta)
 
