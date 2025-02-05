@@ -15,11 +15,10 @@ shtData.range('A1').value = 'symbol'
 shtData.range('Q1').value = 'PRECIOS'
 shtData.range('S1').value = 'ADR'
 shtData.range('X1').value = 'STOP'
-shtData.range('Y1').value = 'VETA OMS'
-shtData.range('Z1').value = 0.001
+shtData.range('Y1').value = 'VETA'
+shtData.range('Z1').value = 0.005
 rangoDesde = '26'
 rangoHasta = '74'
-shtData.range('W'+str(rangoDesde)+':'+'W'+str(rangoHasta)).value = '' 
 hoyEs = time.strftime("%A")
     
 def diaLaboral():
@@ -409,14 +408,12 @@ def ruloAutomatico(celda):
 
 def cantidadAuto(nroCelda):
     cantidad = shtData.range('Y'+str(int(nroCelda))).value
-    if not cantidad or cantidad == None or cantidad == 'None': 
-        cantidad = 1
+    cantidad = 1 if not cantidad or cantidad == None or cantidad == 'None' else cantidad
     return abs(int(cantidad))
 
 def stokDisponible(nroCelda):
     stok = shtData.range('U'+str(int(nroCelda))).value
-    if not stok or stok == None or stok == 'None': 
-        stok = 0
+    stok = 0 if not stok or stok == None or stok == 'None' else stok
     return abs(int(stok))
 
 def buscoOperaciones(inicio,fin):
@@ -424,10 +421,8 @@ def buscoOperaciones(inicio,fin):
         try:
             if not valor[5]:  pass
             else: 
-                if valor[5] < 0: vendido = 'si'
-                else: vendido = 'no'
-                if valor[0] < 25: pass
-                else: trailingStop('A'+str((int(valor[0]+1))),cantidadAuto(valor[0]+1),int(valor[0]),vendido)
+                vendido = 'si' if valor[5] < 0 else 'no'
+                trailingStop('A'+str((int(valor[0]+1))),cantidadAuto(valor[0]+1),int(valor[0]),vendido)
         except: pass
 
 
@@ -540,8 +535,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
         ppc = shtData.range('X'+str(int(nroCelda+1))).value
         ppc = 0 if not ppc else ppc
 
-        stock = shtData.range('U'+str(int(nroCelda+1))).value
-        stock = 1 if not stock else stock
+        stock = stokDisponible(int(nroCelda+1))
 
         if len(nombre) < 2: # Ingresa si son OPCIONES ///////////////////////////////////////////////////////////////////////////
             ganancia = shtData.range('Z1').value * 30
@@ -566,7 +560,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
                     shtData.range('X'+str(int(nroCelda+1))).value = ask
                     print(f'SELLTRAIL {time.strftime("%H:%M:%S")} {nombre[0]} ask {ask} objetivo {ask * (1-(ganancia))}')
                 else:
-                    shtData.range('W'+str(int(nroCelda+1))).value = round((ask-ppc)*stock*100,2)
+                    shtData.range('W'+str(int(nroCelda+1))).value = round((ask-ppc)*(stock)*-100,2)
                     
                 if not shtData.range('X1').value:  
                     if last >= abs(costo) * (1 + (ganancia)) and ask <= last: 
@@ -585,7 +579,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
                 else: soloContinua()
 
             ganancia = shtData.range('Z1').value
-            if not ganancia: ganancia = 0.001
+            if not ganancia: ganancia = 0.005
 
             if bid > abs(costo) * (1 + ganancia):     
                 shtData.range('X'+str(int(nroCelda+1))).value = bid   
@@ -661,7 +655,6 @@ def mariposas(celda=int):
         shtData.range('Q'+str(celda)).value = ''
 # FIN de MARIPOSAS ---------------------------------------------
 
-
 while True:
     try:
         if str(shtData.range('A1').value) != 'symbol': ilRulo()
@@ -675,7 +668,7 @@ while True:
             print(time.strftime("%H:%M:%S"), 'Mercado local cerrado, continua ADR. ')
             shtData.range('Q1').value = 'PRECIOS'
             shtData.range('X1').value = 'STOP'
-            shtData.range('Z1').value = 0.001
+            shtData.range('Z1').value = 0.005
     try: 
         if not shtData.range('Q1').value and esFinde == False:
             shtData.range('A30').options(index=False, headers=False).value = df_datos
