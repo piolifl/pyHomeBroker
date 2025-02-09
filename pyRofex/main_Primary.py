@@ -14,7 +14,7 @@ shtData = wb.sheets('MATRIZ OMS')
 shtData.range('A1').value = 'symbol'
 shtData.range('Q1').value = 'PRECIOS'
 shtData.range('S1').value = 'ADR'
-shtData.range('W1').value = 'REC'
+shtData.range('W1').value = 'R'
 shtData.range('X1').value = 'STOP'
 shtData.range('Y1').value = 'VETA'
 shtData.range('Z1').value = 0.0015
@@ -423,10 +423,10 @@ def stokDisponible(nroCelda):
 def buscoOperaciones(inicio,fin):
     for valor in shtData.range('P'+str(inicio)+':'+'U'+str(fin)).value:
         try:
-            if not valor[5]:  pass
+            if not valor[5] or valor[5] == 0:  pass
             else: 
-                vendido = 'si' if valor[5] < 0 else 'no'
-                trailingStop('A'+str((int(valor[0]+1))),cantidadAuto(valor[0]+1),int(valor[0]),vendido)
+                opcionDescubierta = True if valor[5] < 0 else False
+                trailingStop('A'+str((int(valor[0]+1))),cantidadAuto(valor[0]+1),int(valor[0]),opcionDescubierta)
         except: pass
 
 
@@ -477,31 +477,38 @@ def buscoOperaciones(inicio,fin):
             shtData.range('T'+str(int(valor[0]+1))).value = ''
 
 def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
-    global reCompra
+    global reCompra, descubierto
     nombre = str(shtData.range(str(symbol)).value).split()
+    precio = shtData.range(str(price)).value
+    gastos = float(shtData.range('AB1').value)
+
     if len(nombre) == 2: symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[1]) # Es caucho
 
     elif len(nombre) > 2: 
-        symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])   # Son bonos
+        symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])   # Son bonos / acciones / letras
         if reCompra == True:
             precio *= 1 - ganancia * 3
-            precio = round(precio, 2)
-            print(f'ReCOMPRA al -% {ganancia * 103} ',end='')
+            precio = round(precio, -1)
+            print('Re-COMPRA lo vendido - %', ganancia*3, end='')
+            reCompra = False
     else : 
         symbol = "MERV - XMEV - " + str(nombre[0]) + ' - 24hs' # Son opciones
         if reCompra == True:
-            precio *= 1 - ganancia * 30
-            precio = round(precio, -1)
-            print(f'ReCOMPRA al -% {ganancia * 130} ',end='')
-
-    precio = shtData.range(str(price)).value
-    gastos = float(shtData.range('AB1').value/100)
+            if descubierto == False : 
+                precio *= 1 - ganancia * 5
+                print('COMPRA el DESCUBIERTO - %', ganancia * 5, end='')
+            else: 
+                precio *= 1 + ganancia * 5
+                print('VENDE en DESCUBIERTO - %', ganancia * 5, end='')
+                descubierto = False
+            precio = round(precio, 3)
+            reCompra = False
 
     if tipo.lower() == 'buy': 
         try: 
             if esFinde == False:
                 pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(size)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
-                print(f'______/ BUY   + {int(size)} {symbol} // precio: {precio}') 
+            print(f'______/ BUY   + {int(size)} {symbol} // precio: {precio}') 
         except: 
             shtData.range('Q'+str(int(celda+1))+':'+'R'+str(int(celda+1))).value = ''
             print(f'______/ ERROR en COMPRA. {symbol} // precio: {precio} // + {int(size)}')
@@ -510,8 +517,8 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
         try:
             if esFinde == False: 
                 pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(size)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
-                print(f'______/ SELL  - {int(size)} {symbol} // precio: {precio}')
-                gastos /= -1
+            print(f'______/ SELL  - {int(size)} {symbol} // precio: {precio}')
+            gastos /= -1
         except:
             shtData.range('S'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
             print(f'______/ ERROR en VENTA. {symbol} // precio: {precio} // {int(size)}')
@@ -519,10 +526,10 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     if str(nombre[0]).upper() == 'GGAL' or str(nombre[0]).upper() == 'GGALD' or len(nombre) < 2 :
         shtData.range('X'+str(int(celda+1))).value = precio * (1 + gastos)
     else: shtData.range('X'+str(int(celda+1))).value = (precio / 100) * (1 + gastos)
-    reCompra = False
+    
 
-def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
-    global ganancia, reCompra
+def trailingStop(nombre=str,cantidad=int,nroCelda=int,opcionDescubierta=bool):
+    global ganancia, reCompra, descubierto
     try:
         costo = shtData.range('X'+str(int(nroCelda+1))).value 
         if not costo or costo == None or costo == 'None': soloContinua()
@@ -539,43 +546,46 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
 
         if not last or last == None or last == 'None': soloContinua()
 
-        ppc = shtData.range('X'+str(int(nroCelda+1))).value
-        ppc = 0 if not ppc else ppc
-
         stock = stokDisponible(int(nroCelda+1))
 
         if len(nombre) < 2: # Ingresa si son OPCIONES ///////////////////////////////////////////////////////////////////////////
+            
             ganancia = shtData.range('Z1').value * 30
             if not ganancia: ganancia = 0.0015 * 30
 
-            if vendido == 'no': # OPCIONES COMPRADAS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            if opcionDescubierta == False :
                 if bid > abs(costo) * (1 + (ganancia)):
                     shtData.range('X'+str(int(nroCelda+1))).value = bid
                     print(f'BUYTRAIL {time.strftime("%H:%M:%S")} {nombre[0]} bid {bid} objetivo {bid * (1+(ganancia))}')
-                else: shtData.range('W'+str(int(nroCelda+1))).value = round((bid-ppc)*stock*100,2)
+                else: shtData.range('W'+str(int(nroCelda+1))).value = round((bid-costo)*stock*100,2)
                     
                 if not shtData.range('X1').value:
                     if last <= abs(costo) * (1 - (ganancia)) and bid >= last: 
                         if shtData.range('Z'+str(int(nroCelda+1))).value : 
+                            try: shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
+                            except: pass
                             print('STOP     ',end='')
                             enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
                             if not shtData.range('W1').value: 
+                                descubierto = False
                                 reCompra = True
                                 enviarOrden('buy','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
 
-
-            else: # OPCIONES VENDIDAS -------------------------------
+            else: 
                 if ask < abs(costo) * (1 - (ganancia)):
                     shtData.range('X'+str(int(nroCelda+1))).value = ask
                     print(f'SELLTRAIL {time.strftime("%H:%M:%S")} {nombre[0]} ask {ask} objetivo {ask * (1-(ganancia))}')
-                else: shtData.range('W'+str(int(nroCelda+1))).value = round((ask-ppc)*(stock)*-100,2)
+                else: shtData.range('W'+str(int(nroCelda+1))).value = round((ask-costo)*(stock)*-100,2)
                     
                 if not shtData.range('X1').value:  
                     if last >= abs(costo) * (1 + (ganancia)) and ask <= last: 
                         if shtData.range('Z'+str(int(nroCelda+1))).value : 
+                            try: shtData.range('U'+str(int(nroCelda+1))).value += abs(cantidad)
+                            except: pass
                             print('STOP     ',end='')
                             enviarOrden('buy','A'+str((int(nroCelda)+1)),'D'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)                    
                             if not shtData.range('W1').value: 
+                                descubierto = True
                                 reCompra = True
                                 enviarOrden('sell','A'+str((int(nroCelda)+1)),'D'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
 
@@ -595,7 +605,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
             if bid > abs(costo) * (1 + ganancia):     
                 shtData.range('X'+str(int(nroCelda+1))).value = bid   
                 print(f'TRAILING {time.strftime("%H:%M:%S")} {nombre[0]} {last} objetivo {bid * (1+(ganancia))}')     
-            else: shtData.range('W'+str(int(nroCelda+1))).value = round((bid-ppc)*stock,2)
+            else: shtData.range('W'+str(int(nroCelda+1))).value = round((bid-costo)*stock,2)
                 
             if not shtData.range('X1').value:
                 if last <= abs(costo) * (1 - ganancia) and bid >= last:
@@ -603,8 +613,8 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
                         tengoStok = stokDisponible(nroCelda+1)
                         if tengoStok < 1: soloContinua()
                         elif cantidad > tengoStok: cantidad = tengoStok
-                        shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
-                        shtData.range('W'+str(int(nroCelda+1))).value = ''
+                        try: shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
+                        except: pass
                         print('STOP     ',end='')
                         enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
                         if not shtData.range('W1').value: 
@@ -681,7 +691,7 @@ while True:
         if time.strftime("%H:%M:%S") < '17:00:35':
             print(time.strftime("%H:%M:%S"), 'Mercado local cerrado, continua ADR. ')
             shtData.range('Q1').value = 'PRECIOS'
-            shtData.range('W1').value = 'REC'
+            shtData.range('W1').value = 'R'
             shtData.range('X1').value = 'STOP'
             shtData.range('Z1').value = 0.0015
     else:
