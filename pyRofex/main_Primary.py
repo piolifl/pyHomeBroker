@@ -17,7 +17,7 @@ shtData.range('S1').value = 'ADR'
 shtData.range('W1').value = 'R'
 shtData.range('X1').value = 'STOP'
 shtData.range('Y1').value = 'VETA'
-shtData.range('Z1').value = 0.0015
+shtData.range('Z1').value = 0.001
 rangoDesde = '26'
 rangoHasta = '74'
 hoyEs = time.strftime("%A")
@@ -600,7 +600,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,opcionDescubierta=bool):
                 else: soloContinua()
 
             ganancia = shtData.range('Z1').value
-            if not ganancia: ganancia = 0.0015
+            if not ganancia: ganancia = 0.001
 
             if bid > abs(costo) * (1 + ganancia):     
                 shtData.range('X'+str(int(nroCelda+1))).value = bid   
@@ -693,7 +693,7 @@ while True:
             shtData.range('Q1').value = 'PRECIOS'
             shtData.range('W1').value = 'R'
             shtData.range('X1').value = 'STOP'
-            shtData.range('Z1').value = 0.0015
+            shtData.range('Z1').value = 0.001
     else:
         try: 
             if not shtData.range('Q1').value and esFinde == False:
