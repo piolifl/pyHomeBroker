@@ -17,7 +17,7 @@ shtData.range('S1').value = 'ADR'
 shtData.range('W1').value = 'R'
 shtData.range('X1').value = 'STOP'
 shtData.range('Y1').value = 'VETA'
-shtData.range('Z1').value = 0.001
+shtData.range('Z1').value = 0.0035
 rangoDesde = '26'
 rangoHasta = '74'
 hoyEs = time.strftime("%A")
@@ -487,19 +487,19 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     elif len(nombre) > 2: 
         symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])   # Son bonos / acciones / letras
         if reCompra == True:
-            precio *= 1 - ganancia * 3
+            precio *= 1 - ganancia
             precio = round(precio, -1)
-            print('Re-COMPRA lo vendido - %', ganancia*3, end='')
+            print('Re-COMPRA lo vendido - %',end='')
             reCompra = False
     else : 
         symbol = "MERV - XMEV - " + str(nombre[0]) + ' - 24hs' # Son opciones
         if reCompra == True:
             if descubierto == False : 
                 precio *= 1 - ganancia * 5
-                print('COMPRA el DESCUBIERTO - %', ganancia * 5, end='')
+                print('COMPRA el DESCUBIERTO - %', end='')
             else: 
                 precio *= 1 + ganancia * 5
-                print('VENDE en DESCUBIERTO - %', ganancia * 5, end='')
+                print('VENDE en DESCUBIERTO - %', end='')
                 descubierto = False
             precio = round(precio, 3)
             reCompra = False
@@ -550,8 +550,8 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,opcionDescubierta=bool):
 
         if len(nombre) < 2: # Ingresa si son OPCIONES ///////////////////////////////////////////////////////////////////////////
             
-            ganancia = shtData.range('Z1').value * 30
-            if not ganancia: ganancia = 0.0015 * 30
+            ganancia = shtData.range('Z1').value * 3
+            if not ganancia: ganancia = 0.0035 * 3
 
             if opcionDescubierta == False :
                 if bid > abs(costo) * (1 + (ganancia)):
@@ -600,7 +600,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,opcionDescubierta=bool):
                 else: soloContinua()
 
             ganancia = shtData.range('Z1').value
-            if not ganancia: ganancia = 0.001
+            if not ganancia: ganancia = 0.0035
 
             if bid > abs(costo) * (1 + ganancia):     
                 shtData.range('X'+str(int(nroCelda+1))).value = bid   
@@ -686,14 +686,13 @@ while True:
 
     buscoOperaciones(rangoDesde,rangoHasta)
 
-    if time.strftime("%H:%M:%S") > '17:00:30': 
-        
-        if time.strftime("%H:%M:%S") < '17:00:35':
+    if time.strftime("%H:%M:%S") > '16:56:30': 
+        if time.strftime("%H:%M:%S") < '16:56:55':
             print(time.strftime("%H:%M:%S"), 'Mercado local cerrado, continua ADR. ')
             shtData.range('Q1').value = 'PRECIOS'
             shtData.range('W1').value = 'R'
             shtData.range('X1').value = 'STOP'
-            shtData.range('Z1').value = 0.001
+            shtData.range('Z1').value = 0.0035
     else:
         try: 
             if not shtData.range('Q1').value and esFinde == False:
@@ -724,6 +723,8 @@ while True:
     #shtOperaciones.range('AI63').options(index=False, headers=False).value = operaciones
 
     time.sleep(3)
+    
+a = exit()
 '''
 import yfinance as yf
 
