@@ -495,10 +495,10 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
         symbol = "MERV - XMEV - " + str(nombre[0]) + ' - 24hs' # Son opciones
         if reCompra == True:
             if descubierto == False : 
-                precio *= 1 - ganancia * 5
+                precio *= 1 - ganancia * 15
                 print('COMPRA el DESCUBIERTO - %', end='')
             else: 
-                precio *= 1 + ganancia * 5
+                precio *= 1 + ganancia * 15
                 print('VENDE en DESCUBIERTO - %', end='')
                 descubierto = False
             precio = round(precio, 3)
@@ -550,8 +550,8 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,opcionDescubierta=bool):
 
         if len(nombre) < 2: # Ingresa si son OPCIONES ///////////////////////////////////////////////////////////////////////////
             
-            ganancia = shtData.range('Z1').value * 3
-            if not ganancia: ganancia = 0.0035 * 3
+            ganancia = shtData.range('Z1').value * 50
+            if not ganancia: ganancia = 0.0035 * 50
 
             if opcionDescubierta == False :
                 if bid > abs(costo) * (1 + (ganancia)):
