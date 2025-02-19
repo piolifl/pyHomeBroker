@@ -17,7 +17,7 @@ shtData.range('S1').value = 'ADR'
 shtData.range('W1').value = 'R'
 shtData.range('X1').value = 'STOP'
 shtData.range('Y1').value = 'VETA'
-shtData.range('Z1').value = 0.0035
+shtData.range('Z1').value = 0.0025
 rangoDesde = '26'
 rangoHasta = '74'
 hoyEs = time.strftime("%A")
@@ -495,10 +495,10 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
         symbol = "MERV - XMEV - " + str(nombre[0]) + ' - 24hs' # Son opciones
         if reCompra == True:
             if descubierto == False : 
-                precio *= 1 - ganancia * 15
+                precio *= 1 - ganancia * 2
                 print('COMPRA el DESCUBIERTO - %', end='')
             else: 
-                precio *= 1 + ganancia * 15
+                precio *= 1 + ganancia * 2
                 print('VENDE en DESCUBIERTO - %', end='')
                 descubierto = False
             precio = round(precio, 3)
@@ -600,7 +600,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,opcionDescubierta=bool):
                 else: soloContinua()
 
             ganancia = shtData.range('Z1').value
-            if not ganancia: ganancia = 0.0035
+            if not ganancia: ganancia = 0.0025
 
             if bid > abs(costo) * (1 + ganancia):     
                 shtData.range('X'+str(int(nroCelda+1))).value = bid   
@@ -692,7 +692,7 @@ while True:
             shtData.range('Q1').value = 'PRECIOS'
             shtData.range('W1').value = 'R'
             shtData.range('X1').value = 'STOP'
-            shtData.range('Z1').value = 0.0035
+            shtData.range('Z1').value = 0.0025
     else:
         try: 
             if not shtData.range('Q1').value and esFinde == False:
@@ -720,6 +720,9 @@ while True:
                     break
             else: vuelta += 1
         except: pass
+    else: 
+        shtData.range('Z71').value = shtData.range('F72').value
+        shtData.range('Z73').value = shtData.range('F74').value
     #shtOperaciones.range('AI63').options(index=False, headers=False).value = operaciones
 
     time.sleep(3)
