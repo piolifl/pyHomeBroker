@@ -489,17 +489,17 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
         if reCompra == True:
             precio *= 1 - ganancia
             precio = round(precio, -1)
-            print('Re-COMPRA lo vendido - %',end='')
+            print('Re-COMPRA lo vendido ',end='')
             reCompra = False
     else : 
         symbol = "MERV - XMEV - " + str(nombre[0]) + ' - 24hs' # Son opciones
         if reCompra == True:
             if descubierto == False : 
                 precio *= 1 - ganancia * 2
-                print('COMPRA el DESCUBIERTO - %', end='')
+                print('COMPRA el DESCUBIERTO ', end='')
             else: 
                 precio *= 1 + ganancia * 2
-                print('VENDE en DESCUBIERTO - %', end='')
+                print('VENDE en DESCUBIERTO ', end='')
                 descubierto = False
             precio = round(precio, 3)
             reCompra = False
