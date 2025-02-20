@@ -534,6 +534,8 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,opcionDescubierta=bool):
         costo = shtData.range('X'+str(int(nroCelda+1))).value 
         if not costo or costo == None or costo == 'None': soloContinua()
         nombre = str(shtData.range(str(nombre)).value).split()
+        stop = shtData.range('X1').value
+        r = shtData.range('W1').value
 
         if str(nombre[0]).upper() == 'GGAL' or str(nombre[0]).upper() == 'GGALD' or len(nombre) < 2: 
             bid = shtData.range('C'+str(int(nroCelda+1))).value
@@ -559,14 +561,14 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,opcionDescubierta=bool):
                     print(f'BUYTRAIL {time.strftime("%H:%M:%S")} {nombre[0]} bid {bid} objetivo {bid * (1+(ganancia))}')
                 else: shtData.range('W'+str(int(nroCelda+1))).value = round((bid-costo)*stock*100,2)
                     
-                if not shtData.range('X1').value:
+                if not stop:
                     if last <= abs(costo) * (1 - (ganancia)) and bid >= last: 
                         if shtData.range('Z'+str(int(nroCelda+1))).value : 
                             try: shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
                             except: pass
                             print('STOP     ',end='')
                             enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
-                            if not shtData.range('W1').value: 
+                            if not r: 
                                 descubierto = False
                                 reCompra = True
                                 enviarOrden('buy','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
@@ -577,14 +579,14 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,opcionDescubierta=bool):
                     print(f'SELLTRAIL {time.strftime("%H:%M:%S")} {nombre[0]} ask {ask} objetivo {ask * (1-(ganancia))}')
                 else: shtData.range('W'+str(int(nroCelda+1))).value = round((ask-costo)*(stock)*-100,2)
                     
-                if not shtData.range('X1').value:  
+                if not stop:  
                     if last >= abs(costo) * (1 + (ganancia)) and ask <= last: 
                         if shtData.range('Z'+str(int(nroCelda+1))).value : 
                             try: shtData.range('U'+str(int(nroCelda+1))).value += abs(cantidad)
                             except: pass
                             print('STOP     ',end='')
                             enviarOrden('buy','A'+str((int(nroCelda)+1)),'D'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)                    
-                            if not shtData.range('W1').value: 
+                            if not r: 
                                 descubierto = True
                                 reCompra = True
                                 enviarOrden('sell','A'+str((int(nroCelda)+1)),'D'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
@@ -602,12 +604,17 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,opcionDescubierta=bool):
             ganancia = shtData.range('Z1').value
             if not ganancia: ganancia = 0.0025
 
-            if bid > abs(costo) * (1 + ganancia):     
+            if bid > abs(costo) * (1 + ganancia): 
+                if not stop:    
+                    enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
+                    if not r: 
+                            reCompra = True
+                            enviarOrden('buy','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
                 shtData.range('X'+str(int(nroCelda+1))).value = bid   
                 print(f'TRAILING {time.strftime("%H:%M:%S")} {nombre[0]} {last} objetivo {bid * (1+(ganancia))}')     
             else: shtData.range('W'+str(int(nroCelda+1))).value = round((bid-costo)*stock,2)
                 
-            if not shtData.range('X1').value:
+            if not stop:
                 if last <= abs(costo) * (1 - ganancia) and bid >= last:
                     if shtData.range('Z'+str(int(nroCelda+1))).value : 
                         tengoStok = stokDisponible(nroCelda+1)
@@ -617,7 +624,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,opcionDescubierta=bool):
                         except: pass
                         print('STOP     ',end='')
                         enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
-                        if not shtData.range('W1').value: 
+                        if not r: 
                             reCompra = True
                             enviarOrden('buy','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
     except: soloContinua()
