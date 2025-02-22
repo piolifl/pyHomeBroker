@@ -21,7 +21,6 @@ shtData.range('Z1').value = 0.0025
 rangoDesde = '26'
 rangoHasta = '74'
 hoyEs = time.strftime("%A")
-vueltaRec = 0
 reCompra = False
     
 def diaLaboral():
@@ -36,9 +35,8 @@ else:
 
 pyRofex._set_environment_parameter("url", "https://api.veta.xoms.com.ar/", pyRofex.Environment.LIVE)
 pyRofex._set_environment_parameter("ws", "wss://api.veta.xoms.com.ar/", pyRofex.Environment.LIVE)
-
 pyRofex.initialize(user="20263866623", password="Bordame01!", account="47352", environment=pyRofex.Environment.LIVE)
-print(("online VETA OMS 47352"), time.strftime("%H:%M:%S"))
+print(("online VETA OMS cuenta: 47352"), time.strftime("%H:%M:%S"))
 
 def loguinHB():
     from pyhomebroker import HomeBroker  
@@ -50,7 +48,7 @@ def loguinHB():
             user='piolifl',  
             password='Bordame01',
             raise_exception=True)
-        print(("online VETA HOME BROKER 47352"), time.strftime("%H:%M:%S"))
+        print(("online VETA HB cuenta: 47352"), time.strftime("%H:%M:%S"))
     except: 
         print(("    NO se pudo loguear en VETA HOME BROKER 47352    * "), time.strftime("%H:%M:%S"))
         pass
@@ -391,13 +389,13 @@ def ilRulo():
         celda +=1
     cargoXplazo(tikers)
 
-vuelta = 0
-def traerADR():
-    global galiciaADR, ypfADR
-    galiciaADR= yf.download('GGAL',period='1d',interval='1d')['Close'].values
-    ypfADR = yf.download('YPF',period='1d',interval='1d')['Close'].values
-    return galiciaADR[0], ypfADR[0]
 
+def traerADR():
+    valorAdr = yf.download(['GGAL','YPF'],period='1d',interval='1d',auto_adjust=False)['Close'].values
+    shtData.range('Z71').value = valorAdr[0][0]
+    shtData.range('Z73').value = valorAdr[0][1]
+    shtData.range('Y72').value = time.strftime("%H:%M:%S")
+    
 def ruloAutomatico(celda):
     shtData.range('Q'+str(int(celda+1))).value = ""
     if celda+1 == 2 or celda+1 == 6 or celda+1 == 8 or celda+1 == 14 or celda+1 == 18 or celda+1 == 22:
@@ -618,7 +616,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,opcionDescubierta=bool):
 
             if bid > abs(costo) * (1 + ganancia): 
                 if not stop:    
-                    enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
+                    enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad/2),nroCelda)
                     if not r: 
                             reCompra = True
                             enviarOrden('buy','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
@@ -697,68 +695,52 @@ def mariposas(celda=int):
         shtData.range('Q'+str(celda)).value = ''
 # FIN de MARIPOSAS ---------------------------------------------
 
+vuelta = 0
+vueltaPortfolio = 0
 while True:
+
     try:
         if str(shtData.range('A1').value) != 'symbol': ilRulo()
     except:
         shtData.range('A1').value = 'symbol'
 
     buscoOperaciones(rangoDesde,rangoHasta)
+
     if time.strftime("%H:%M:%S") > '16:56:30': 
-        if time.strftime("%H:%M:%S") < '16:56:55':
+        if time.strftime("%H:%M:%S") < '16:56:45':
             print(time.strftime("%H:%M:%S"), 'Mercado local cerrado')
             shtData.range('Q1').value = 'PRECIOS'
-            shtData.range('S1').value = 'ADR'
             shtData.range('W1').value = 'R'
             shtData.range('X1').value = 'STOP'
             shtData.range('Z1').value = 0.0025
-            pyRofex.close_websocket_connection()
-            hb.online.disconnect()
-            break
     else:
         try: 
             if not shtData.range('Q1').value and esFinde == False:
-                shtData.range('A30').options(index=False, headers=False).value = df_datos
-                if vueltaRec > 30 : 
-                    vueltaRec = 0
-                    getPortfolioHB(hb,'47352',2) 
-                else: vueltaRec += 1
+                shtData.range('A30').options(index=False, headers=False).value = df_datos   
         except: print('Hubo un error al actualizar excel')
-
     
-    '''if not shtData.range('S1').value and esFinde == False:
+    if vueltaPortfolio > 30 : 
+        vueltaPortfolio = 0
+        try: getPortfolioHB(hb,'47352',2) 
+        except: pass
+    else: vueltaPortfolio += 1
+
+    if time.strftime("%H:%M:%S") > '17:30:05':
+        shtData.range('S1').value = 'ADR'
+        print(time.strftime("%H:%M:%S"), 'ADR cerrado. ')
+        pyRofex.close_websocket_connection()
+        hb.online.disconnect()
+        break
+
+    if not shtData.range('S1').value:
         try:
             if vuelta > 5: 
-                valorAdr = traerADR()
-                shtData.range('Z71').value = valorAdr[0]
-                shtData.range('Z73').value = valorAdr[1]
-                shtData.range('Y72').value = time.strftime("%H:%M:%S")
+                traerADR()
                 vuelta = 0
-                if time.strftime("%H:%M:%S") > '17:30:20':
-                    shtData.range('S1').value = 'ADR'
-                    print(time.strftime("%H:%M:%S"), 'ADR cerrado. ')
-                    pyRofex.close_websocket_connection()
-                    hb.online.disconnect()
-                    break
             else: vuelta += 1
-        except: pass
-    else: 
-        shtData.range('Z71').value = shtData.range('F72').value
-        shtData.range('Z73').value = shtData.range('F74').value'''
+        except:
+            shtData.range('Z71').value = shtData.range('F72').value
+            shtData.range('Z73').value = shtData.range('F74').value
     #shtOperaciones.range('AI63').options(index=False, headers=False).value = operaciones
-
-    time.sleep(3)
-    
+    time.sleep(2)
 a = exit()
-'''
-import yfinance as yf
-
-tickers = ["BBAR", "BMA", "CEPU", "CRESY", "EDN", "GGAL", "LOMA", "PAM", "SUPV", "TEO", "TGS", "YPF"]
-df = yf.download(tickers, interval='5m', period='1d', prepost=False, progress=False).iloc[-13:].Close
-pct_chg = (df.iloc[-1].divide(df.iloc[0])).sub(1).mul(100)
-print("Qué % tienen que moverse las acciones para compensar el movimiento de la ultima hora en EEUU el dia anterior")
-pct_chg.round(2).to_dict()
-
-
-
-'''

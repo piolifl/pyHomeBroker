@@ -1,5 +1,8 @@
 import yfinance as yf
 
-galiciaADR= yf.download('GGAL',period='1d',interval='1d')['Close'].values
+def adr():
+    galiciaADR= yf.download(['GGAL','YPF'],period='1d',interval='1d',auto_adjust=False)['Close'].values
+    return 'GGAL'+ galiciaADR[0][0] , galiciaADR[0][1]
 
-print(galiciaADR)
+
+adr()
