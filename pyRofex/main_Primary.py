@@ -697,8 +697,11 @@ def mariposas(celda=int):
 
 vuelta = 0
 vueltaPortfolio = 0
+
 while True:
 
+    shtData.range('U1').value = time.strftime("%H:%M:%S")
+    
     try:
         if str(shtData.range('A1').value) != 'symbol': ilRulo()
     except:
