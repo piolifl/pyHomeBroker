@@ -17,7 +17,7 @@ shtData.range('S1').value = 'ADR'
 shtData.range('W1').value = 'R'
 shtData.range('X1').value = 'STOP'
 shtData.range('Y1').value = 'VETA'
-shtData.range('Z1').value = 0.0025
+shtData.range('Z1').value = 0.0005
 rangoDesde = '26'
 rangoHasta = '74'
 hoyEs = time.strftime("%A")
@@ -48,7 +48,7 @@ def loguinHB():
             user='piolifl',  
             password='Bordame01',
             raise_exception=True)
-        print(("online VETA HB cuenta: 47352"), time.strftime("%H:%M:%S"))
+        print(("online VETA HB  cuenta: 47352"), time.strftime("%H:%M:%S"))
     except: 
         print(("    NO se pudo loguear en VETA HOME BROKER 47352    * "), time.strftime("%H:%M:%S"))
         pass
@@ -485,7 +485,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     elif len(nombre) > 2: 
         symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])   # Son bonos / acciones / letras
         if reCompra == True:
-            precio *= 1 - ganancia
+            precio *= 1 - ganancia * 1.5
             precio = round(precio, -1)
             print('Re-COMPRA lo vendido ',end='')
             reCompra = False
@@ -493,10 +493,10 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
         symbol = "MERV - XMEV - " + str(nombre[0]) + ' - 24hs' # Son opciones
         if reCompra == True:
             if descubierto == False : 
-                precio *= 1 - ganancia * 2
+                precio *= 1 - ganancia * 6
                 print('COMPRA el DESCUBIERTO ', end='')
             else: 
-                precio *= 1 + ganancia * 2
+                precio *= 1 + ganancia * 6
                 print('VENDE en DESCUBIERTO ', end='')
                 descubierto = False
             precio = round(precio, 3)
@@ -522,8 +522,8 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
             print(f'______/ ERROR en VENTA. {symbol} // precio: {precio} // {int(size)}')
 
     if str(nombre[0]).upper() == 'GGAL' or str(nombre[0]).upper() == 'GGALD' or len(nombre) < 2 :
-        shtData.range('X'+str(int(celda+1))).value = precio * (1 + gastos)
-    else: shtData.range('X'+str(int(celda+1))).value = (precio / 100) * (1 + gastos)
+        shtData.range('X'+str(int(celda+1))).value = precio
+    else: shtData.range('X'+str(int(celda+1))).value = (precio / 100)
     
 
 def trailingStop(nombre=str,cantidad=int,nroCelda=int,opcionDescubierta=bool):
@@ -551,7 +551,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,opcionDescubierta=bool):
         if len(nombre) < 2: # Ingresa si son OPCIONES ///////////////////////////////////////////////////////////////////////////
             
             ganancia = shtData.range('Z1').value * 50
-            if not ganancia: ganancia = 0.0025 * 50
+            if not ganancia: ganancia = 0.0005 * 50
 
             if opcionDescubierta == False :
                 if bid > abs(costo) * (1 + (ganancia)):
@@ -612,11 +612,11 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,opcionDescubierta=bool):
                 else: soloContinua()
 
             ganancia = shtData.range('Z1').value
-            if not ganancia: ganancia = 0.0025
+            if not ganancia: ganancia = 0.0005
 
             if bid > abs(costo) * (1 + ganancia): 
                 if not stop:    
-                    enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad/2),nroCelda)
+                    enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
                     if not r: 
                             reCompra = True
                             enviarOrden('buy','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
@@ -715,7 +715,7 @@ while True:
             shtData.range('Q1').value = 'PRECIOS'
             shtData.range('W1').value = 'R'
             shtData.range('X1').value = 'STOP'
-            shtData.range('Z1').value = 0.0025
+            shtData.range('Z1').value = 0.0005
     else:
         try: 
             if not shtData.range('Q1').value and esFinde == False:
@@ -728,7 +728,7 @@ while True:
         except: pass
     else: vueltaPortfolio += 1
 
-    if time.strftime("%H:%M:%S") > '17:30:05':
+    if time.strftime("%H:%M:%S") > '17:30:05' and esFinde == False:
         shtData.range('S1').value = 'ADR'
         print(time.strftime("%H:%M:%S"), 'ADR cerrado. ')
         pyRofex.close_websocket_connection()
