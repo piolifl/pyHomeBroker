@@ -390,8 +390,8 @@ def ilRulo():
 
 def traerADR():
     valorAdr = yf.download(['GGAL','YPF'],period='1d',interval='1d',auto_adjust=False)['Close'].values
-    shtData.range('Z71').value = valorAdr[0][0]
-    shtData.range('Z73').value = valorAdr[0][1]
+    shtData.range('Z61').value = valorAdr[0][0]
+    shtData.range('Z62').value = valorAdr[0][1]
     shtData.range('Y72').value = time.strftime("%H:%M:%S")
     
 def ruloAutomatico(celda): # Rulo automatico para HOME BROKER
@@ -419,7 +419,7 @@ def cantidadRulo(nroCelda):
 
 def stokDisponible(nroCelda):
     stok = shtData.range('U'+str(int(nroCelda))).value
-    stok = 0 if not stok or stok == None or stok == 'None' else stok
+    stok = 0 if not stok or stok == None or stok == 'None' else stok        
     return int(stok)
 
 def buscoOperaciones(inicio,fin):
@@ -493,7 +493,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     elif len(nombre) > 2: 
         symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])   # Son bonos / acciones / letras
         if reCompra == True:
-            precio *= 1 - ganancia * 2
+            precio *= 1 - ganancia
             precio = round(precio, -1)
             print('Re-COMPRA lo vendido ',end='')
             reCompra = False
@@ -547,7 +547,6 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool):
         nombre = str(shtData.range(str(nombre)).value).split()
         stop = shtData.range('X1').value
         r = shtData.range('W1').value
-
         if str(nombre[0]).upper() == 'GGAL' or str(nombre[0]).upper() == 'GGALD' or len(nombre) < 2: 
             bid = shtData.range('C'+str(int(nroCelda+1))).value
             ask = shtData.range('D'+str(int(nroCelda+1))).value
@@ -556,13 +555,12 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool):
             bid = shtData.range('C'+str(int(nroCelda+1))).value / 100
             ask = shtData.range('D'+str(int(nroCelda+1))).value / 100
             last = shtData.range('F'+str(int(nroCelda+1))).value / 100
-
         if not last or last == None or last == 'None': soloContinua()
-        stock = stokDisponible(int(nroCelda+1))
 
         if len(nombre) < 2: # Ingresa si son OPCIONES ///////////////////////////////////////////////////////////////////////////
             ganancia = shtData.range('Z1').value * 50
             if not ganancia: ganancia = 0.0005 * 50
+            stock = stokDisponible(int(nroCelda+1))
 
             if nominalDescubierto == False :
                 if bid > abs(costo) * (1 + (ganancia)):
@@ -588,7 +586,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool):
                                 descubierto = False
                                 reCompra = True
                                 enviarOrden('buy','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
-            else: 
+            else: # Opcion vendida descubierta
                 if ask < abs(costo) * (1 - (ganancia)):
                     if not stop and stock < 0:
                         print('TOMA de ganancia ',end=' ')
@@ -617,17 +615,22 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool):
             if time.strftime("%H:%M:%S") > '16:24:00' and str(nombre[2]).lower() == 'CI': 
                 if time.strftime("%H:%M:%S") > '17:01:00': pass
                 else: pass
-                    
             if time.strftime("%H:%M:%S") > '16:56:00' and str(nombre[2]).lower() == '24hs': 
                 if time.strftime("%H:%M:%S") > '17:01:00': pass
                 else: soloContinua()
             ganancia = shtData.range('Z1').value
             if not ganancia: ganancia = 0.0005
+            stock = stokDisponible(int(nroCelda+1))
+
+            if stock > 300: # Cuida el stock de nominales
+                stock -= 300
+                if cantidad > stock: cantidad = stock
+            else: soloContinua()
 
             if bid > abs(costo) * (1 + ganancia): 
-                if not stop and stock > 100:  
+                if not stop:  
                     print('TOMA ganancia ',end=' ')  
-                    enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
+                    enviarOrden('sell','A'+str((int(nroCelda)+1)),'D'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
                     if not r: 
                         reCompra = True
                         enviarOrden('buy','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
@@ -635,7 +638,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool):
                 print(f'TRAILING {time.strftime("%H:%M:%S")} {nombre[0]} {last} objetivo {bid * (1+(ganancia))}')     
             else: shtData.range('V'+str(int(nroCelda+1))).value = round((bid-costo)*stock,2)
                     
-            if not stop and stock > 100:
+            if not stop:
                 if last <= abs(costo) * (1 - ganancia) and bid >= last:
                     if cantidad > 0 :
                         try: shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
@@ -713,7 +716,7 @@ while True:
         shtData.range('A1').value = 'symbol'
 
     buscoOperaciones(rangoDesde,rangoHasta)
-
+    
     if time.strftime("%H:%M:%S") > '16:56:30': 
         if time.strftime("%H:%M:%S") < '16:56:45':
             print(time.strftime("%H:%M:%S"), 'Mercado local cerrado')
@@ -723,7 +726,7 @@ while True:
             shtData.range('Z1').value = 0.0005
     else:
         try: 
-            if not shtData.range('Q1').value and esFinde == False:
+            if not shtData.range('Q1').value:
                 shtData.range('A30').options(index=False, headers=False).value = df_datos   
         except: print('Hubo un error al actualizar excel')
     
@@ -734,7 +737,7 @@ while True:
             except: pass
         else: vueltaPortfolio += 1
 
-    if time.strftime("%H:%M:%S") > '17:30:05' and esFinde == False:
+    if time.strftime("%H:%M:%S") > '17:30:05':
         if time.strftime("%H:%M:%S") < '17:30:15':
             print(time.strftime("%H:%M:%S"), 'ADR cerrado. ')
             shtData.range('S1').value = 'ADR'
@@ -750,8 +753,8 @@ while True:
                 vuelta = 0
             else: vuelta += 1
         except:
-            shtData.range('Z71').value = shtData.range('F72').value
-            shtData.range('Z73').value = shtData.range('F74').value
+            shtData.range('Z61').value = shtData.range('F62').value
+            shtData.range('Z63').value = shtData.range('F64').value
     #shtOperaciones.range('AI63').options(index=False, headers=False).value = operaciones
     time.sleep(2)
 a = exit()
