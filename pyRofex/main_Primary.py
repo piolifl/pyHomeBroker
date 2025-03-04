@@ -8,33 +8,29 @@ import requests
 wb = xw.Book('D:\\pyHomeBroker\\epgb.xlsb')
 shtTickers = wb.sheets('pyRofex')
 shtData = wb.sheets('MATRIZ OMS')
-#shtData = wb.sheets('Hoja1')
-#shtOperaciones = wb.sheets('MATRIZ OMS')
 shtData.range('A1').value = 'symbol'
 shtData.range('Q1').value = 'PRECIOS'
 shtData.range('S1').value = 'ADR'
 shtData.range('W1').value = 'R'
 shtData.range('X1').value = 'STOP'
 shtData.range('Y1').value = 'VETA'
-shtData.range('Z1').value = 0.0005
+shtData.range('Z1').value = 0.0006
 rangoDesde = '26'
 rangoHasta = '60'
-hoyEs = time.strftime("%A")
 reCompra = False
+esFinde = False
     
 def diaLaboral():
+    global esFinde
+    hoyEs = time.strftime("%A")
     if hoyEs == 'Saturday' or hoyEs == 'Sunday':
-        return 'Fin de semana'
-
-if diaLaboral():
-    print('Es FIN DE SEMANA, no se actualizan los precios locales y no se envian ordenes al broker.')
-    esFinde = True
-else: 
-    esFinde = False
+        print('FIN DE SEMANA, no se actualizan los precios locales y no se envian ordenes al broker.')
+        esFinde = True
 
 pyRofex._set_environment_parameter("url", "https://api.veta.xoms.com.ar/", pyRofex.Environment.LIVE)
 pyRofex._set_environment_parameter("ws", "wss://api.veta.xoms.com.ar/", pyRofex.Environment.LIVE)
 pyRofex.initialize(user="20263866623", password="Bordame01!", account="47352", environment=pyRofex.Environment.LIVE)
+diaLaboral()
 print(("online VETA OMS cuenta: 47352"), time.strftime("%H:%M:%S"))
 
 def loguinHB():
@@ -51,7 +47,6 @@ def loguinHB():
     except: 
         print(("    NO se pudo loguear en VETA HOME BROKER 47352    * "), time.strftime("%H:%M:%S"))
         pass
-
 loguinHB()
 
 rng = shtTickers.range('A2:C2').expand() # OPCIONES
@@ -540,8 +535,8 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     
 def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool):
     global ganancia, reCompra, descubierto
-    
     try:
+        ultimoGatillo = shtData.range('Y'+str(int(nroCelda+1))).value
         costo = shtData.range('W'+str(int(nroCelda+1))).value 
         if not costo or costo == None or costo == 'None': soloContinua()
         nombre = str(shtData.range(str(nombre)).value).split()
@@ -559,12 +554,12 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool):
 
         if len(nombre) < 2: # Ingresa si son OPCIONES ///////////////////////////////////////////////////////////////////////////
             ganancia = shtData.range('Z1').value * 50
-            if not ganancia: ganancia = 0.0005 * 50
+            if not ganancia: ganancia = 0.0006 * 50
             stock = stokDisponible(int(nroCelda+1))
 
             if nominalDescubierto == False :
                 if bid > abs(costo) * (1 + (ganancia)):
-                    if not stop and stock > 0:   
+                    if not stop and stock > 0 and ultimoGatillo:   
                         print('TOMA de ganancia ',end=' ')
                         enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda) 
                         if not r: 
@@ -575,20 +570,20 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool):
                     print(f'BUYTRAIL {time.strftime("%H:%M:%S")} {nombre[0]} bid {bid} objetivo {bid * (1+(ganancia))}')
                 else: shtData.range('V'+str(int(nroCelda+1))).value = round((bid-costo)*stock*100,2)
                     
-                if not stop and stock > 0:
+                if not stop and stock > 0 and ultimoGatillo and cantidad > 0:
                     if last <= abs(costo) * (1 - (ganancia)) and bid >= last: 
-                        if cantidad > 0 : 
-                            try: shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
-                            except: pass
-                            print('STOP salida por baja ',end=' ')
-                            enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
-                            if not r: 
-                                descubierto = False
-                                reCompra = True
-                                enviarOrden('buy','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
+                        try: shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
+                        except: pass
+                        print('STOP salida por baja ',end=' ')
+                        enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
+                        if not r: 
+                            descubierto = False
+                            reCompra = True
+                            enviarOrden('buy','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
+
             else: # Opcion vendida descubierta
                 if ask < abs(costo) * (1 - (ganancia)):
-                    if not stop and stock < 0:
+                    if not stop and stock < 0 and ultimoGatillo:
                         print('TOMA de ganancia ',end=' ')
                         enviarOrden('buy','A'+str((int(nroCelda)+1)),'D'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
                         if not r: 
@@ -599,17 +594,16 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool):
                     print(f'SELLTRAIL {time.strftime("%H:%M:%S")} {nombre[0]} ask {ask} objetivo {ask * (1-(ganancia))}')
                 else: shtData.range('V'+str(int(nroCelda+1))).value = round((ask-costo)*(stock)*-100,2)
                     
-                if not stop and stock < 0:  
+                if not stop and stock < 0 and ultimoGatillo and cantidad > 0:  
                     if last >= abs(costo) * (1 + (ganancia)) and ask <= last: 
-                        if cantidad > 0 : 
-                            try: shtData.range('U'+str(int(nroCelda+1))).value += abs(cantidad)
-                            except: pass
-                            print('STOP salida por suba ',end=' ')
-                            enviarOrden('buy','A'+str((int(nroCelda)+1)),'D'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)                    
-                            if not r: 
-                                descubierto = True
-                                reCompra = True
-                                enviarOrden('sell','A'+str((int(nroCelda)+1)),'D'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
+                        try: shtData.range('U'+str(int(nroCelda+1))).value += abs(cantidad)
+                        except: pass
+                        print('STOP salida por suba ',end=' ')
+                        enviarOrden('buy','A'+str((int(nroCelda)+1)),'D'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)                    
+                        if not r: 
+                            descubierto = True
+                            reCompra = True
+                            enviarOrden('sell','A'+str((int(nroCelda)+1)),'D'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
         
         else: # Ingresa si son BONOS / LETRAS / ON / CEDEARS ////////////////////////////////////////////////////////////////////
             if time.strftime("%H:%M:%S") > '16:24:00' and str(nombre[2]).lower() == 'CI': 
@@ -618,17 +612,13 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool):
             if time.strftime("%H:%M:%S") > '16:56:00' and str(nombre[2]).lower() == '24hs': 
                 if time.strftime("%H:%M:%S") > '17:01:00': pass
                 else: soloContinua()
-            ganancia = shtData.range('Z1').value
-            if not ganancia: ganancia = 0.0005
-            stock = stokDisponible(int(nroCelda+1))
 
-            if stock > 300: # Cuida el stock de nominales
-                stock -= 300
-                if cantidad > stock: cantidad = stock
-            else: soloContinua()
+            stock = stokDisponible(int(nroCelda+1))
+            ganancia = shtData.range('Z1').value
+            if not ganancia: ganancia = 0.0006
 
             if bid > abs(costo) * (1 + ganancia): 
-                if not stop:  
+                if not stop and ultimoGatillo and cantidad > 0:  
                     print('TOMA ganancia ',end=' ')  
                     enviarOrden('sell','A'+str((int(nroCelda)+1)),'D'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
                     if not r: 
@@ -638,16 +628,15 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool):
                 print(f'TRAILING {time.strftime("%H:%M:%S")} {nombre[0]} {last} objetivo {bid * (1+(ganancia))}')     
             else: shtData.range('V'+str(int(nroCelda+1))).value = round((bid-costo)*stock,2)
                     
-            if not stop:
+            if not stop and ultimoGatillo and cantidad > 0:
                 if last <= abs(costo) * (1 - ganancia) and bid >= last:
-                    if cantidad > 0 :
-                        try: shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
-                        except: pass
-                        print('STOP salida por baja ',end=' ')
-                        enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
-                        if not r: 
-                            reCompra = True
-                            enviarOrden('buy','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
+                    try: shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
+                    except: pass
+                    print('STOP salida por baja ',end=' ')
+                    enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
+                    if not r: 
+                        reCompra = True
+                        enviarOrden('buy','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
     except: pass
 
 # OPCIONES: estrategia tipo MARIPOSA ------------------------
@@ -723,7 +712,7 @@ while True:
             shtData.range('Q1').value = 'PRECIOS'
             shtData.range('W1').value = 'R'
             shtData.range('X1').value = 'STOP'
-            shtData.range('Z1').value = 0.0005
+            shtData.range('Z1').value = 0.0006
     else:
         try: 
             if not shtData.range('Q1').value:
