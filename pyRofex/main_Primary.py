@@ -420,7 +420,7 @@ def stokDisponible(nroCelda):
 def buscoOperaciones(inicio,fin):
     for valor in shtData.range('P'+str(inicio)+':'+'U'+str(fin)).value:
         try:
-            if (not valor[5] or valor[5] == 0) and time.strftime("%H:%M:%S") > '11:01:00': pass
+            if (not valor[5] or valor[5] == 0) and time.strftime("%H:%M:%S") < '11:01:00': pass
             else: 
                 nominalDescubierto = True if valor[5] < 0 else False
                 cantidad = cantidadAuto(valor[0]+1)
@@ -536,9 +536,10 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
 def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool):
     global ganancia, reCompra, descubierto
     try:
-        ultimoGatillo = shtData.range('Y'+str(int(nroCelda+1))).value
         costo = shtData.range('W'+str(int(nroCelda+1))).value 
         if not costo or costo == None or costo == 'None': soloContinua()
+
+        ultimoGatillo = shtData.range('Y'+str(int(nroCelda+1))).value
         nombre = str(shtData.range(str(nombre)).value).split()
         stop = shtData.range('X1').value
         r = shtData.range('W1').value
@@ -618,7 +619,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool):
             if not ganancia: ganancia = 0.0006
 
             if bid > abs(costo) * (1 + ganancia): 
-                if not stop and ultimoGatillo and cantidad > 0:  
+                if not stop and ultimoGatillo:  
                     print('TOMA ganancia ',end=' ')  
                     enviarOrden('sell','A'+str((int(nroCelda)+1)),'D'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
                     if not r: 
