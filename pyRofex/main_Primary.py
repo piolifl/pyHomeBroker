@@ -420,7 +420,8 @@ def stokDisponible(nroCelda):
 def buscoOperaciones(inicio,fin):
     for valor in shtData.range('P'+str(inicio)+':'+'U'+str(fin)).value:
         try:
-            if (not valor[5] or valor[5] == 0) and time.strftime("%H:%M:%S") < '11:01:00': pass
+            if (not valor[5] or valor[5] == 0):
+                if time.strftime("%H:%M:%S") < '11:05:00': pass
             else: 
                 nominalDescubierto = True if valor[5] < 0 else False
                 cantidad = cantidadAuto(valor[0]+1)
@@ -490,7 +491,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
         if reCompra == True:
             precio *= 1 - ganancia
             precio = round(precio, -1)
-            print('Re-COMPRA lo vendido ',end='')
+            print('Re-COMPRA ',end='')
             reCompra = False
     else : 
         symbol = "MERV - XMEV - " + str(nombre[0]) + ' - 24hs' # Son opciones
@@ -617,27 +618,42 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool):
             stock = stokDisponible(int(nroCelda+1))
             ganancia = shtData.range('Z1').value
             if not ganancia: ganancia = 0.0006
-
+            symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])
             if bid > abs(costo) * (1 + ganancia): 
                 if not stop and ultimoGatillo:  
-                    print('TOMA ganancia ',end=' ')  
-                    enviarOrden('sell','A'+str((int(nroCelda)+1)),'D'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
+                    #print('TOMA ganancia ',end=' ')  
+                    #enviarOrden('sell','A'+str((int(nroCelda)+1)),'D'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
+                    print(f'TOMA ganancia //______/ SELL - {int(cantidad)} {symbol} // precio: {ask}' )
+                    pyRofex.send_order(ticker=int(symbol), side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(ask),order_type=pyRofex.OrderType.LIMIT)
                     if not r: 
-                        reCompra = True
-                        enviarOrden('buy','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
-                shtData.range('W'+str(int(nroCelda+1))).value = bid   
-                print(f'TRAILING {time.strftime("%H:%M:%S")} {nombre[0]} {last} objetivo {bid * (1+(ganancia))}')     
+                        #reCompra = True
+                        #enviarOrden('buy','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
+                        bid *= 1 - ganancia
+                        bid = round(bid, -1)
+                        print(f'Re-COMPRA la toma //______/ BUY + {int(cantidad)} {symbol} // precio: {bid}')
+                        pyRofex.send_order(ticker=int(symbol), side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
+                
+                shtData.range('W'+str(int(nroCelda+1))).value = bid 
+
             else: shtData.range('V'+str(int(nroCelda+1))).value = round((bid-costo)*stock,2)
                     
             if not stop and ultimoGatillo and cantidad > 0:
                 if last <= abs(costo) * (1 - ganancia) and bid >= last:
                     try: shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
                     except: pass
-                    print('STOP salida por baja ',end=' ')
-                    enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
+                    #print('STOP salida por baja ',end=' ')
+                    #enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
+                    print(f'STOP salida //______/ SELL - {int(cantidad)} {symbol} // precio: {bid}' )
+                    shtData.range('W'+str(int(nroCelda+1))).value = bid
+                    pyRofex.send_order(ticker=int(symbol), side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
                     if not r: 
-                        reCompra = True
-                        enviarOrden('buy','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
+                        #reCompra = True
+                        #enviarOrden('buy','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
+                        bid *= 1 - ganancia
+                        bid = round(bid, -1)
+                        print(f'Re-COMPRA el stop //______/ BUY + {int(cantidad)} {symbol} // precio: {bid}')
+                        pyRofex.send_order(ticker=int(symbol), side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
+                
     except: pass
 
 # OPCIONES: estrategia tipo MARIPOSA ------------------------
