@@ -433,15 +433,13 @@ def hacerTasa(celda,ladoCompra,ladoVenta):
                 else: pass
         else: pass
 
-def scalping(celda,lado,tipo):
+def scalping(celda,lado,tipo,stock=int,nominales=int):
     try: 
         nombre = str(shtData.range('A'+str(int(celda+1))).value).split()
-        nominales = cantidadAuto(celda+1)
-        stock = stokDisponible(celda+1)
         precio = shtData.range(str(lado)+str(int(celda+1))).value
         if len(nombre) < 2: 
             symbol = "MERV - XMEV - " + str(nombre[0]) + ' - 24hs'
-            ganancia = shtData.range('Z1').value * 5
+            ganancia = shtData.range('Z1').value * 10
         else: 
             symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])
             ganancia = shtData.range('Z1').value * 100
@@ -478,10 +476,9 @@ def scalping(celda,lado,tipo):
             print(f'___/ BUY /___ + {nominales} {nombre[0]} // precio: {precio}')   
     except: pass
 
-def operacionRapida(celda,lado,tipo):
+def operacionRapida(celda,lado,tipo, stock=int, nominales=int):
     try: 
         nombre = str(shtData.range('A'+str(int(celda+1))).value).split()
-        nominales = cantidadAuto(celda+1)
         precio = shtData.range(str(lado)+str(int(celda+1))).value
         if len(nombre) < 2: symbol = "MERV - XMEV - " + str(nombre[0]) + ' - 24hs'
         else: symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])
@@ -491,7 +488,6 @@ def operacionRapida(celda,lado,tipo):
             if esFinde == False:
                 pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
         else:
-            stock = stokDisponible(celda+1)
             if abs(stock) < nominales: nominales = abs(stock)
             print(f'//___/ SELL /___// - {nominales} {nombre[0]} // precio: {precio}')
             if esFinde == False:
@@ -557,48 +553,50 @@ def buscoOperaciones(inicio,fin):
                 nominalDescubierto = True if valor[5] < 0 else False
                 cantidad = cantidadAuto(valor[0]+1)
                 if cantidad != 0:
-                    trailingStop('A'+str((int(valor[0]+1))),cantidad,int(valor[0]),nominalDescubierto)
-                else: pass
+                    trailingStop('A'+str((int(valor[0]+1))),cantidad,int(valor[0]),nominalDescubierto,valor[5])
+                
         except: pass
 
         if valor[1]: # # Columna Q en el excel /////////////////////////////////////////////////////////////////////////////////
+            cantidad = cantidadAuto(valor[0]+1)
             if str(valor[1]).lower() == 'p': getPortfolioHB(hb,'47352',1)
             elif str(valor[1]).lower() == 'r': haceRulo(valor[0]+1)
             elif str(valor[1]).lower() == 'm': baseEjercible(valor[0])
             elif str(valor[1]).lower() == 'sm': verificaMariposa(valor[0])
             elif str(valor[1]).lower() == 't': hacerTasa(valor[0],'C','D')
-            elif valor[1] == '+': operacionRapida(valor[0],'C','BUY')
-            elif str(valor[1]).lower() == 's': scalping(valor[0],'C','BUY')
+            elif valor[1] == '+': operacionRapida(valor[0],'C','BUY',valor[5], cantidad)
+            elif str(valor[1]).lower() == 's': scalping(valor[0],'C','BUY', valor[5], cantidad)
             else: 
                 try: enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0]) # Compra Bid
                 except: shtData.range('Q'+str(int(valor[0]+1))).value = ''
-
             shtData.range('Q'+str(int(valor[0]+1))).value = ''
 
-
         if valor[2]: #  Columna R en el excel //////////////////////////////////////////////////////////////////////////////////
+            cantidad = cantidadAuto(valor[0]+1)
             if str(valor[2]).lower() == 'p': getPortfolioHB(hb,'47352',1)
             elif str(valor[2]).lower() == 't': hacerTasa(valor[0],'D','D')
-            elif valor[2] == '+': operacionRapida(valor[0],'D','BUY')
-            elif str(valor[2]).lower() == 's': scalping(valor[0],'D','BUY')
+            elif valor[2] == '+': operacionRapida(valor[0],'D','BUY', valor[5], cantidad)
+            elif str(valor[2]).lower() == 's': scalping(valor[0],'D','BUY', valor[5], cantidad)
             else: 
                 try: enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[2],valor[0]) # Compra Ask
                 except: shtData.range('R'+str(int(valor[0]+1))).value = ''
             shtData.range('R'+str(int(valor[0]+1))).value = ''
         
         if valor[3]: # Columna S en el excel ///////////////////////////////////////////////////////////////////////////////////
+            cantidad = cantidadAuto(valor[0]+1)
             if str(valor[3]).lower() == 'p': getPortfolioHB(hb,'47352',1)
-            elif valor[3] == '-': operacionRapida(valor[0],'C','SELL')
-            elif str(valor[3]).lower() == 's': scalping(valor[0],'C','SELL')
+            elif valor[3] == '-': operacionRapida(valor[0],'C','SELL', valor[5], cantidad)
+            elif str(valor[3]).lower() == 's': scalping(valor[0],'C','SELL', valor[5], cantidad)
             else: 
                 try: enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[3],valor[0]) # Vendo Bid
                 except: shtData.range('S'+str(int(valor[0]+1))).value = ''
             shtData.range('S'+str(int(valor[0]+1))).value = ''
 
         if valor[4]: # Columna T en el excel //////////////////////////////////////////////////////////////////////////////////
+            cantidad = cantidadAuto(valor[0]+1)
             if str(valor[4]).lower() == 'p': getPortfolioHB(hb,'47352',1)
-            elif valor[4] == '-': operacionRapida(valor[0],'D','SELL')
-            elif str(valor[4]).lower() == 's': scalping(valor[0],'D','SELL')
+            elif valor[4] == '-': operacionRapida(valor[0],'D','SELL', valor[5], cantidad)
+            elif str(valor[4]).lower() == 's': scalping(valor[0],'D','SELL', valor[5], cantidad)
             else: 
                 try: enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[4],valor[0]) # Vendo Ask
                 except: shtData.range('T'+str(int(valor[0]+1))).value = ''
@@ -660,12 +658,14 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
         shtData.range('W'+str(int(celda+1))).value = precio
     else: shtData.range('W'+str(int(celda+1))).value = (precio / 100)
     
-def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool):
+def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,stock=int):
     global ganancia, reCompra, descubierto
+    dolar = 'NO'
     try:
+        last = shtData.range('F'+str(int(nroCelda+1))).value
+        if not last or last == None or last == 'None': soloContinua()
         costo = shtData.range('W'+str(int(nroCelda+1))).value 
         if not costo or costo == None or costo == 'None': soloContinua()
-        ultimoGatillo = shtData.range('Y'+str(int(nroCelda+1))).value
         nombre = str(shtData.range(str(nombre)).value).split()
         stop = shtData.range('X1').value
         r = shtData.range('W1').value
@@ -673,29 +673,28 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool):
         else : symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])
         bid = shtData.range('C'+str(int(nroCelda+1))).value
         ask = shtData.range('D'+str(int(nroCelda+1))).value
-        last = shtData.range('F'+str(int(nroCelda+1))).value
-
-        if not last or last == None or last == 'None': soloContinua()
-
+        
         if len(nombre) < 2: # Ingresa si son OPCIONES ///////////////////////////////////////////////////////////////////////////
             ganancia = shtData.range('Z1').value 
             if not ganancia: ganancia = 2
-            stock = stokDisponible(int(nroCelda+1))
+            #stock = stokDisponible(int(nroCelda+1))
             if nominalDescubierto == False :
                 if  bid > abs(costo) + ganancia: shtData.range('W'+str(int(nroCelda+1))).value = bid
                 shtData.range('V'+str(int(nroCelda+1))).value = round((bid-costo)*abs(stock)*100,2)
-                if not stop and stock > 0 and ultimoGatillo and cantidad > 0:
+                if not stop and stock > 0 and cantidad > 0:
                     if last <= abs(costo) - (ganancia) and bid >= last: 
 
                         if not r: print(f'//___/ SELL STOP /___// - {cantidad} {nombre[0]} // precio: {bid} ',end=' ')
                         else: print(f'//___/ SELL STOP /___// - {cantidad} {nombre[0]} // precio: {bid} ')
-                        pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
+                        if esFinde == False:
+                            pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
                         shtData.range('W'+str(int(nroCelda+1))).value = shtData.range('C'+str(int(nroCelda+1))).value
                         if not r: 
                             bid -= ganancia 
                             bid = round(bid, -1)
                             print(f'____/ BUY STOP /___  + {cantidad} {nombre[0]} // precio: {bid}')
-                            pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
+                            if esFinde == False:
+                                pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
                         try: 
                             shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
                         except: pass
@@ -711,18 +710,20 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool):
                 if ask < abs(costo) - ganancia: shtData.range('W'+str(int(nroCelda+1))).value = ask
                 shtData.range('V'+str(int(nroCelda+1))).value = round((ask-costo)*abs(stock)*-100,2)
 
-                if not stop and stock < 0 and ultimoGatillo and cantidad > 0:  
+                if not stop and stock < 0 and cantidad < 0:  
                     if last >= abs(costo)+ (ganancia) and ask <= last: 
 
                         if not r: print(f'//___/ BUY STOP /___// + {cantidad} {nombre[0]} // precio: {ask}',end=' ')
                         else: print(f'//___/ BUY STOP /___// + {cantidad} {nombre[0]} // precio: {ask} ')
-                        pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(ask),order_type=pyRofex.OrderType.LIMIT)
+                        if esFinde == False:
+                            pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(ask),order_type=pyRofex.OrderType.LIMIT)
                         shtData.range('W'+str(int(nroCelda+1))).value = shtData.range('D'+str(int(nroCelda+1))).value
                         if not r: 
                             ask += ganancia 
                             ask = round(ask, -1)
                             print(f'____/ SELL STOP /___  + {cantidad} {nombre[0]} // precio: {ask}')
-                            pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(ask),order_type=pyRofex.OrderType.LIMIT)
+                            if esFinde == False:
+                                pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(ask),order_type=pyRofex.OrderType.LIMIT)
                         try: 
                             shtData.range('U'+str(int(nroCelda+1))).value += abs(cantidad)
                         except: pass
@@ -741,31 +742,38 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool):
             if time.strftime("%H:%M:%S") > '16:56:00' and str(nombre[2]).lower() == '24hs': 
                 if time.strftime("%H:%M:%S") > '17:01:00': pass
                 else: soloContinua()
-
-            stock = stokDisponible(int(nroCelda+1))
+            
+            # stock = stokDisponible(int(nroCelda+1))
             ganancia = shtData.range('Z1').value
             if not ganancia: ganancia = 0.5
 
-            if bid / 100 > abs(costo) * 0.3: 
+            if nombre[0][-1:] == 'D' or nombre[0][-1:] == 'C':
+                ganancia /= 100
+                dolar = 'SI'
+
+            if bid / 100 > abs(costo) + ganancia: 
                 shtData.range('W'+str(int(nroCelda+1))).value = bid/100
             shtData.range('V'+str(int(nroCelda+1))).value = round(((bid/100)-costo)*stock,2)
                     
-            if not stop and ultimoGatillo and cantidad > 0:
+            if not stop and cantidad > 0:
                 if last/100 <= abs(costo) - ganancia and bid/100 >= last/100:
-                    if not r: print(f'//___/ SELL STOP /___// - {cantidad} {nombre[0]} // precio: {bid} ',end=' ')
-                    else: print(f'//___/ SELL STOP /___// - {cantidad} {nombre[0]} // precio: {bid} ')
-                    pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
+                    if not r: 
+                        print(f'//___/ SELL x STOP /___ - {cantidad} {nombre[0]} // precio: {bid} ',end=' ')
+                    else: 
+                        print(f'//___/ SELL x STOP /___ - {cantidad} {nombre[0]} // precio: {bid} ') 
+                    if esFinde == False:
+                        pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
                     try:
                         shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad) 
                     except: pass
                     shtData.range('W'+str(int(nroCelda+1))).value = shtData.range('C'+str(int(nroCelda+1))).value / 100
                     if not r: 
-                        if nombre[0][-1:] == 'D' or nombre[0][-1:] == 'C': bid -= ganancia * 10
-                        else: bid -= ganancia * 1000
-                        #bid -= ganancia * 1000
+                        if dolar == 'SI': bid -= ganancia * 10
+                        else: bid -= ganancia * 200
                         bid = round(bid, -1)
-                        print(f'____/ BUY STOP /___  + {cantidad} {nombre[0]} // precio: {bid}')
-                        pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
+                        print(f'____/ BUY x STOP /___  + {cantidad} {nombre[0]} // precio: {bid}')
+                        if esFinde == False:
+                            pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
     except: pass
 
 # OPCIONES: estrategia tipo MARIPOSA ------------------------
@@ -875,8 +883,7 @@ while True:
     else:
         if not shtData.range('Q1').value:
             try:
-                if esFinde == False: 
-                    shtData.range('A30').options(index=False, headers=False).value = df_datos   
+                if esFinde == False: shtData.range('A30').options(index=False, headers=False).value = df_datos   
             except: print('Hubo un error al actualizar excel')
 
             if not shtData.range('X1').value:
