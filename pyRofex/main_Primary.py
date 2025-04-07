@@ -72,21 +72,19 @@ tickers = pd.concat([opciones, acc, bonos,cedear,ons,letras, caucion ])
 listLength = len(opciones) + len(acc) + 31
 allLength = 30 + len(tickers) - len(acc)  - len(caucion)
 
-if esFinde == False:
+instruments_2 = pyRofex.get_detailed_instruments()
+data = pd.DataFrame(instruments_2['instruments'])
+df = pd.DataFrame.from_dict(dict(data['instrumentId']), orient='index')
+df = df['symbol'].to_list()
+tickers['remove'] = tickers['ticker'].isin(df).astype(int)
+tickers = tickers[tickers['remove'] !=0]
+instruments = tickers['ticker'].to_list()
+df_datos = pd.DataFrame({'ticker': tickers['ticker'].to_list(),'symbol': tickers['symbol'].to_list()}, columns=[
+    'ticker', 'symbol', 'bidsize', 'bid', 'ask', 'asksize', 'last', 'close','open', 'high', 'low', 'volume','lastupdate','nominal','trade'])
+df_datos = df_datos.set_index('ticker')
+thisData = pd.DataFrame(columns=['ticker','symbol', 'bidsize', 'bid', 'ask', 'asksize', 'last', 'close','open', 'high', 'low', 'volume', 'lastupdate','nominal','trade'])
 
-    instruments_2 = pyRofex.get_detailed_instruments()
-    data = pd.DataFrame(instruments_2['instruments'])
 
-    df = pd.DataFrame.from_dict(dict(data['instrumentId']), orient='index')
-    df = df['symbol'].to_list()
-    tickers['remove'] = tickers['ticker'].isin(df).astype(int)
-    tickers = tickers[tickers['remove'] !=0]
-    instruments = tickers['ticker'].to_list()
-    df_datos = pd.DataFrame({'ticker': tickers['ticker'].to_list(),'symbol': tickers['symbol'].to_list()}, columns=[
-        'ticker', 'symbol', 'bidsize', 'bid', 'ask', 'asksize', 'last', 'close','open', 'high', 'low', 'volume','lastupdate','nominal','trade'])
-    df_datos = df_datos.set_index('ticker')
-    thisData = pd.DataFrame(columns=['ticker','symbol', 'bidsize', 'bid', 'ask', 'asksize', 'last', 'close','open', 'high', 'low', 'volume', 'lastupdate','nominal','trade'])
-else: df_datos=[]
 #operaciones = pd.DataFrame(columns=['orderId', 'ticker', 'Tipo', 'Precio', 'Cant', 'Status', 'Cant Acum', 'Cant Rest', 'Px Prom'])
 #operaciones = operaciones.set_index('orderId')
 
@@ -153,24 +151,23 @@ def order_error_handler(message):
 def order_exception_handler(e):
     print("Exception Occurred: {0}".format(e.message))
 
-if esFinde == False: 
-    pyRofex.init_websocket_connection(market_data_handler=market_data_handler,
-                                  error_handler=error_handler,
-                                  exception_handler=exception_handler,
-                                  #order_report_handler=order_report_handler
-                                  )
-    entries = [pyRofex.MarketDataEntry.BIDS,
-           pyRofex.MarketDataEntry.OFFERS,
-           pyRofex.MarketDataEntry.LAST,
-           pyRofex.MarketDataEntry.OPENING_PRICE,
-           pyRofex.MarketDataEntry.CLOSING_PRICE,
-           pyRofex.MarketDataEntry.HIGH_PRICE,
-           pyRofex.MarketDataEntry.LOW_PRICE,
-           pyRofex.MarketDataEntry.TRADE_VOLUME,
-           pyRofex.MarketDataEntry.NOMINAL_VOLUME,
-           pyRofex.MarketDataEntry.TRADE_EFFECTIVE_VOLUME]
-    pyRofex.market_data_subscription(tickers=instruments, entries=entries, depth=1)
-    #pyRofex.order_report_subscription()
+pyRofex.init_websocket_connection(market_data_handler=market_data_handler,
+                                error_handler=error_handler,
+                                exception_handler=exception_handler,
+                                #order_report_handler=order_report_handler
+                                )
+entries = [pyRofex.MarketDataEntry.BIDS,
+        pyRofex.MarketDataEntry.OFFERS,
+        pyRofex.MarketDataEntry.LAST,
+        pyRofex.MarketDataEntry.OPENING_PRICE,
+        pyRofex.MarketDataEntry.CLOSING_PRICE,
+        pyRofex.MarketDataEntry.HIGH_PRICE,
+        pyRofex.MarketDataEntry.LOW_PRICE,
+        pyRofex.MarketDataEntry.TRADE_VOLUME,
+        pyRofex.MarketDataEntry.NOMINAL_VOLUME,
+        pyRofex.MarketDataEntry.TRADE_EFFECTIVE_VOLUME]
+pyRofex.market_data_subscription(tickers=instruments, entries=entries, depth=1)
+#pyRofex.order_report_subscription()
 
 def getPortfolioHB(hb, comitente, tipo):
     try:
@@ -424,7 +421,7 @@ def hacerTasa(celda,ladoCompra,ladoVenta):
                     if esFinde == False:
                         pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
 
-                    ask = shtData.range(str(ladoVenta)+str(int(celda))).value + 40
+                    ask = shtData.range(str(ladoVenta)+str(int(celda))).value + 20
                     symbol = "MERV - XMEV - " + str(vende[0]) + ' - ' + str(vende[2])
                     if abs(stock) < nominales: nominales = abs(stock)
                     print(f'___/ SELL - {int(nominales)} {vende[0]} {vende[2]} {ask}')
@@ -440,9 +437,12 @@ def scalping(celda,lado,tipo,stock=int,nominales=int):
         if len(nombre) < 2: 
             symbol = "MERV - XMEV - " + str(nombre[0]) + ' - 24hs'
             ganancia = shtData.range('Z1').value * 10
+            if str(tipo).upper() == 'BUY': shtData.range('W'+str(int(celda+1))).value = precio
         else: 
             symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])
             ganancia = shtData.range('Z1').value * 100
+            if str(tipo).upper() == 'BUY': shtData.range('W'+str(int(celda+1))).value = precio / 100
+            
         if str(tipo).upper() == 'BUY':
             print(f'//___/ SCALPING BUY  /___ + {nominales} {nombre[0]} // precio: {precio}', end=' | ')
             if esFinde == False:
@@ -480,8 +480,12 @@ def operacionRapida(celda,lado,tipo, stock=int, nominales=int):
     try: 
         nombre = str(shtData.range('A'+str(int(celda+1))).value).split()
         precio = shtData.range(str(lado)+str(int(celda+1))).value
-        if len(nombre) < 2: symbol = "MERV - XMEV - " + str(nombre[0]) + ' - 24hs'
-        else: symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])
+        if len(nombre) < 2: 
+            symbol = "MERV - XMEV - " + str(nombre[0]) + ' - 24hs'
+            if str(tipo).upper() == 'BUY': shtData.range('W'+str(int(celda+1))).value = precio
+        else: 
+            symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])
+            if str(tipo).upper() == 'BUY': shtData.range('W'+str(int(celda+1))).value = precio / 100
         
         if str(tipo).upper() == 'BUY':
             print(f'//___/ BUY  /___// + {nominales} {nombre[0]} // precio: {precio}')
@@ -492,6 +496,7 @@ def operacionRapida(celda,lado,tipo, stock=int, nominales=int):
             print(f'//___/ SELL /___// - {nominales} {nombre[0]} // precio: {precio}')
             if esFinde == False:
                 pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
+            
     except: pass
 
 def haceRulo(celda=int):
