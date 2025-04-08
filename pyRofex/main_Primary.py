@@ -756,7 +756,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                 ganancia /= 100
                 dolar = 'SI'
 
-            if bid / 100 > abs(costo) + ganancia: 
+            if bid / 100 > abs(costo) + ganancia / 2: 
                 shtData.range('W'+str(int(nroCelda+1))).value = bid/100
             shtData.range('V'+str(int(nroCelda+1))).value = round(((bid/100)-costo)*stock,2)
                     
@@ -867,15 +867,16 @@ vuelta = 0
 vueltaPortfolio = 0
 
 while True:
+    hora = time.strftime("%H:%M:%S")
     try:
         if str(shtData.range('A1').value) != 'symbol': preparaRulo()
     except:
         shtData.range('A1').value = 'symbol'
 
     buscoOperaciones(rangoDesde,rangoHasta)
-    
-    if time.strftime("%H:%M:%S") > '16:56:30': 
-        if time.strftime("%H:%M:%S") < '16:56:45' and esFinde == False:
+
+    if hora > '16:56:30' : 
+        if hora < '16:56:45' and esFinde == False:
             print(time.strftime("%H:%M:%S"), 'Mercado local cerrado')
             shtData.range('Q1').value = 'PRECIOS'
             shtData.range('S1').value = 'ADR'
@@ -885,31 +886,31 @@ while True:
             shtData.range('Z1').value = 0.5
             pyRofex.close_websocket_connection()
             hb.online.disconnect()
-    else:
-        if not shtData.range('Q1').value:
-            try:
-                if esFinde == False: shtData.range('A30').options(index=False, headers=False).value = df_datos   
-            except: print('Hubo un error al actualizar excel')
+        else:
+            if not shtData.range('Q1').value:
+                try:
+                    if esFinde == False: shtData.range('A30').options(index=False, headers=False).value = df_datos   
+                except: print('Hubo un error al actualizar excel')
 
-            if not shtData.range('X1').value:
-                if vueltaPortfolio > 20 : 
-                    vueltaPortfolio = 0
-                    try: 
-                        getPortfolioHB(hb,'47352',2) 
-                    except: 
-                        print('Hubo un error al traer datos del portafolio')
-                else: vueltaPortfolio += 1
-            
-        if not shtData.range('S1').value:
-            try:
-                if vuelta > 5: 
-                    shtData.range('U1').value = time.strftime("%H:%M:%S")
-                    traerADR()
-                    vuelta = 0
-                else: vuelta += 1
-            except:
-                shtData.range('Z61').value = shtData.range('F62').value
-                shtData.range('Z63').value = shtData.range('F64').value
+                if not shtData.range('X1').value:
+                    if vueltaPortfolio > 20 : 
+                        vueltaPortfolio = 0
+                        try: 
+                            getPortfolioHB(hb,'47352',2) 
+                        except: 
+                            print('Hubo un error al traer datos del portafolio')
+                    else: vueltaPortfolio += 1
+                
+            if not shtData.range('S1').value:
+                try:
+                    if vuelta > 5: 
+                        shtData.range('U1').value = time.strftime("%H:%M:%S")
+                        traerADR()
+                        vuelta = 0
+                    else: vuelta += 1
+                except:
+                    shtData.range('Z61').value = shtData.range('F62').value
+                    shtData.range('Z63').value = shtData.range('F64').value
     #shtOperaciones.range('AI63').options(index=False, headers=False).value = operaciones
     time.sleep(2)
 
