@@ -48,7 +48,7 @@ if esFinde == False:
     pyRofex._set_environment_parameter("url", "https://api.veta.xoms.com.ar/", pyRofex.Environment.LIVE)
     pyRofex._set_environment_parameter("ws", "wss://api.veta.xoms.com.ar/", pyRofex.Environment.LIVE)
     pyRofex.initialize(user="20263866623", password="Bordame01!", account="47352", environment=pyRofex.Environment.LIVE)
-    print("online VETA OMS cuenta: 47352", end=' ')
+    print("online VETA OMS cuenta: 47352", end=' || ')
     loguinHB()
 else: print('FIN DE SEMANA, no se actualizan los precios locales y no se envian ordenes al broker.')
 
@@ -553,7 +553,7 @@ def buscoOperaciones(inicio,fin):
 
     for valor in shtData.range('P'+str(inicio)+':'+'U'+str(fin)).value:
         try:
-            if not valor[5] or valor[5] == 0 or hora <= '11:02:00': pass  
+            if not valor[5] or valor[5] == 0 or hora <= '11:01:00': pass  
             else: 
                 nominalDescubierto = True if valor[5] < 0 else False
                 cantidad = cantidadAuto(valor[0]+1)
@@ -682,13 +682,16 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
         if len(nombre) < 2: # Ingresa si son OPCIONES ///////////////////////////////////////////////////////////////////////////
             ganancia = shtData.range('Z1').value 
             if not ganancia: ganancia = 2
-            #stock = stokDisponible(int(nroCelda+1))
             if nominalDescubierto == False :
-                if  bid > abs(costo) + ganancia: shtData.range('W'+str(int(nroCelda+1))).value = bid
+                if not stop:
+                    if bid >= abs(costo) + ganancia:                         
+                        shtData.range('W'+str(int(nroCelda+1))).value = bid
+                else:
+                    if bid <= abs(costo) + ganancia: 
+                        shtData.range('W'+str(int(nroCelda+1))).value = bid
                 shtData.range('V'+str(int(nroCelda+1))).value = round((bid-costo)*abs(stock)*100,2)
                 if not stop and stock > 0 and cantidad > 0:
                     if last <= abs(costo) - (ganancia) and bid >= last: 
-
                         if not r: print(f'//___/ SELL STOP /___// - {cantidad} {nombre[0]} // precio: {bid} ',end=' ')
                         else: print(f'//___/ SELL STOP /___// - {cantidad} {nombre[0]} // precio: {bid} ')
                         if esFinde == False:
@@ -704,20 +707,16 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                             shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
                         except: pass
 
-                        '''print('STOP salida por baja ',end=' ')
-                        enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
-                        if not r: 
-                            descubierto = False
-                            reCompra = True
-                            enviarOrden('buy','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)'''
-
             else: # OPCION VENDIDA EN DESCUBIERTO
-                if ask < abs(costo) - ganancia: shtData.range('W'+str(int(nroCelda+1))).value = ask
+                if not stop:
+                    if ask <= abs(costo) - ganancia / 2: 
+                        shtData.range('W'+str(int(nroCelda+1))).value = ask
+                else:
+                    if ask >= abs(costo) - ganancia / 2: 
+                        shtData.range('W'+str(int(nroCelda+1))).value = ask
                 shtData.range('V'+str(int(nroCelda+1))).value = round((ask-costo)*abs(stock)*-100,2)
-
                 if not stop and stock < 0 and cantidad < 0:  
                     if last >= abs(costo)+ (ganancia) and ask <= last: 
-
                         if not r: print(f'//___/ BUY STOP /___// + {cantidad} {nombre[0]} // precio: {ask}',end=' ')
                         else: print(f'//___/ BUY STOP /___// + {cantidad} {nombre[0]} // precio: {ask} ')
                         if esFinde == False:
@@ -732,13 +731,6 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                         try: 
                             shtData.range('U'+str(int(nroCelda+1))).value += abs(cantidad)
                         except: pass
-
-                        '''print('STOP salida por suba ',end=' ')
-                        enviarOrden('buy','A'+str((int(nroCelda)+1)),'D'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)                    
-                        if not r: 
-                            descubierto = True
-                            reCompra = True
-                            enviarOrden('sell','A'+str((int(nroCelda)+1)),'D'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)'''
         
         else: # Ingresa si son BONOS / LETRAS / ON / CEDEARS ////////////////////////////////////////////////////////////////////
             if time.strftime("%H:%M:%S") > '16:24:00' and str(nombre[2]).lower() == 'CI': 
@@ -747,8 +739,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
             if time.strftime("%H:%M:%S") > '16:56:00' and str(nombre[2]).lower() == '24hs': 
                 if time.strftime("%H:%M:%S") > '17:01:00': pass
                 else: soloContinua()
-            
-            # stock = stokDisponible(int(nroCelda+1))
+
             ganancia = shtData.range('Z1').value
             if not ganancia: ganancia = 0.5
 
@@ -886,31 +877,31 @@ while True:
             shtData.range('Z1').value = 0.5
             pyRofex.close_websocket_connection()
             hb.online.disconnect()
-        else:
-            if not shtData.range('Q1').value:
-                try:
-                    if esFinde == False: shtData.range('A30').options(index=False, headers=False).value = df_datos   
-                except: print('Hubo un error al actualizar excel')
+    else:
+        if not shtData.range('Q1').value:
+            try:
+                if esFinde == False: shtData.range('A30').options(index=False, headers=False).value = df_datos   
+            except: print('Hubo un error al actualizar excel')
 
-                if not shtData.range('X1').value:
-                    if vueltaPortfolio > 20 : 
-                        vueltaPortfolio = 0
-                        try: 
-                            getPortfolioHB(hb,'47352',2) 
-                        except: 
-                            print('Hubo un error al traer datos del portafolio')
-                    else: vueltaPortfolio += 1
-                
-            if not shtData.range('S1').value:
-                try:
-                    if vuelta > 5: 
-                        shtData.range('U1').value = time.strftime("%H:%M:%S")
-                        traerADR()
-                        vuelta = 0
-                    else: vuelta += 1
-                except:
-                    shtData.range('Z61').value = shtData.range('F62').value
-                    shtData.range('Z63').value = shtData.range('F64').value
+            
+            if vueltaPortfolio > 20 : 
+                vueltaPortfolio = 0
+                try: 
+                    getPortfolioHB(hb,'47352',2) 
+                except: 
+                    print('Hubo un error al traer datos del portafolio')
+            else: vueltaPortfolio += 1
+            
+        if not shtData.range('S1').value:
+            try:
+                if vuelta > 5: 
+                    shtData.range('U1').value = time.strftime("%H:%M:%S")
+                    traerADR()
+                    vuelta = 0
+                else: vuelta += 1
+            except:
+                shtData.range('Z61').value = shtData.range('F62').value
+                shtData.range('Z63').value = shtData.range('F64').value
     #shtOperaciones.range('AI63').options(index=False, headers=False).value = operaciones
     time.sleep(2)
 
