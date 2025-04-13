@@ -35,7 +35,7 @@ def loguinHB():
         hb.auth.login(
             dni='26386662', 
             user='piolifl',  
-            password='Bordame01',
+            password='Bordame02',
             raise_exception=True)
         print("online VETA HB  cuenta: 47352", time.strftime("%H:%M:%S"))
     except: 
