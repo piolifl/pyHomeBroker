@@ -25,7 +25,6 @@ def diaLaboral():
     global esFinde
     hoyEs = time.strftime("%A")
     if hoyEs == 'Saturday' or hoyEs == 'Sunday':
-        
         esFinde = True
 def loguinHB():
     from pyhomebroker import HomeBroker  
@@ -297,7 +296,7 @@ def cargoXplazo(dicc):
     mepCcl = namesMep(dicc['cclCI'][0],' - CI')
     mepCcl24 = namesMep(dicc['ccl24'][0],' - 24hs')
 
-    if mejorMep == 'AL30D - ci': shtData.range('A2:A5').value = ''
+    '''if mejorMep == 'AL30D - ci': shtData.range('A2:A5').value = ''
     else: 
         shtData.range('A2').value = mejorMep
         shtData.range('A3').value = 'AL30D - CI'
@@ -309,7 +308,7 @@ def cargoXplazo(dicc):
         shtData.range('A6').value = mejorMep24
         shtData.range('A7').value = 'AL30D - 24hs'
         shtData.range('A8').value = 'AL30 - 24hs'
-        shtData.range('A9').value = namesArs(dicc['mep24'][0],' - 24hs')
+        shtData.range('A9').value = namesArs(dicc['mep24'][0],' - 24hs')'''
     
     if mejorMep == mepArs: shtData.range('A10:A13').value = ''
     else:
@@ -503,7 +502,7 @@ def operacionRapida(celda,lado,tipo, stock=int, nominales=int):
             
     except: pass
 
-def haceRulo(celda=int):
+def sellRoll(celda=int):
     try:
         nominales = cantidadAuto(celda)
         nombre = str(shtData.range('A'+str(int(celda))).value).split()
@@ -544,12 +543,54 @@ def haceRulo(celda=int):
             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
     except: pass
 
+def buyRoll(celda=int):
+    try:
+        nominales = cantidadAuto(celda)
+        nombre = str(shtData.range('A'+str(int(celda))).value).split()
+        precio = shtData.range('D'+str(int(celda))).value
+        symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])
+        print(f'//___/ BUY ROLL /___ + {nominales} {nombre[0]} {precio} ', end='|')
+        if esFinde == False: 
+            pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
+    except: pass
+
+    try:
+        nominales = cantidadAuto(celda+1)
+        nombre = str(shtData.range('A'+str(int(celda+1))).value).split()
+        precio = shtData.range('C'+str(int(celda+1))).value
+        symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])
+        print(f' - {nominales} {nombre[0]} {precio} ', end='|')
+        if esFinde == False:
+            pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
+    except: pass
+
+    try:
+        nominales = cantidadAuto(celda+2)
+        nombre = str(shtData.range('A'+str(int(celda+2))).value).split()
+        precio = shtData.range('D'+str(int(celda+2))).value
+        symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])
+        print(f' + {nominales} {nombre[0]} {precio} ', end='|')
+        if esFinde == False:
+            pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
+    except: pass
+
+    try:
+        nominales = cantidadAuto(celda+3)
+        nombre = str(shtData.range('A'+str(int(celda+3))).value).split()
+        precio = shtData.range('C'+str(int(celda+3))).value
+        symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])
+        print(f' - {nominales} {nombre[0]} {precio} ___//')
+        if esFinde == False:
+            pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
+    except: pass
+
+
 def roll():
     celda = 2
     for i in shtData.range('O2:O25').value:
             if str(i).upper() == 'R':
                 if celda==2 or celda==6 or celda==8 or celda==10 or celda==14 or celda==18 or celda==22:
-                    haceRulo(celda)
+                    sellRoll(celda)
             celda += 1
     shtData.range('T1').value = 'ROLL'
 
@@ -571,7 +612,7 @@ def buscoOperaciones(inicio,fin):
         except: pass
 
         if valor[1]: # # Columna Q en el excel /////////////////////////////////////////////////////////////////////////////////
-            if str(valor[1]).lower() == 'r' and posicionRulo(valor[0]+1) == 'ok': haceRulo(valor[0]+1)
+            if str(valor[1]).lower() == 'r' and posicionRulo(valor[0]+1) == 'ok': buyRoll(valor[0]+1)
             elif str(valor[1]).lower() == 'p': getPortfolioHB(hb,'47352',1)
             elif str(valor[1]).lower() == 'm': baseEjercible(valor[0])
             elif str(valor[1]).lower() == 'sm': verificaMariposa(valor[0])
@@ -588,7 +629,7 @@ def buscoOperaciones(inicio,fin):
             shtData.range('Q'+str(int(valor[0]+1))).value = ''
 
         if valor[2]: #  Columna R en el excel //////////////////////////////////////////////////////////////////////////////////
-            if str(valor[2]).lower() == 'r' and posicionRulo(valor[0]+1) == 'ok': haceRulo(valor[0]+1)
+            if str(valor[2]).lower() == 'r' and posicionRulo(valor[0]+1) == 'ok': buyRoll(valor[0]+1)
             elif str(valor[2]).lower() == 'p': getPortfolioHB(hb,'47352',1)
             elif str(valor[2]).lower() == 't': hacerTasa(valor[0],'D','D')
             elif valor[2] == '+': 
@@ -603,7 +644,7 @@ def buscoOperaciones(inicio,fin):
             shtData.range('R'+str(int(valor[0]+1))).value = ''
         
         if valor[3]: # Columna S en el excel ///////////////////////////////////////////////////////////////////////////////////
-            if str(valor[3]).lower() == 'r' and posicionRulo(valor[0]+1) == 'ok': haceRulo(valor[0]+1)
+            if str(valor[3]).lower() == 'r' and posicionRulo(valor[0]+1) == 'ok': buyRoll(valor[0]+1)
             elif str(valor[3]).lower() == 'p': getPortfolioHB(hb,'47352',1)
             elif valor[3] == '-': 
                 cantidad = cantidadAuto(valor[0]+1)
@@ -617,7 +658,7 @@ def buscoOperaciones(inicio,fin):
             shtData.range('S'+str(int(valor[0]+1))).value = ''
 
         if valor[4]: # Columna T en el excel //////////////////////////////////////////////////////////////////////////////////
-            if str(valor[4]).lower() == 'r' and posicionRulo(valor[0]+1) == 'ok': haceRulo(valor[0]+1)
+            if str(valor[4]).lower() == 'r' and posicionRulo(valor[0]+1) == 'ok': buyRoll(valor[0]+1)
             elif str(valor[4]).lower() == 'p': getPortfolioHB(hb,'47352',1)
             elif valor[4] == '-': 
                 cantidad = cantidadAuto(valor[0]+1)
