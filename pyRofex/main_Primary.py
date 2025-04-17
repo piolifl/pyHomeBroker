@@ -896,16 +896,14 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
             else:
 
                 if dolar == 'SI' and bid / 100 != abs(costo):
-                    # cantidad /= 10
                     shtData.range('W'+str(int(nroCelda+1))).value = bid/100
                     print(f'____/ BUY SCALPING USD /___  + {cantidad} {nombre[0]} // precio: {bid}',end=' ')
                     if esFinde == False and noMatriz == False: 
                         pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
-                    bid += ganancia * 20
+                    bid += round(ganancia * 60, 2)
                     print(f'//___/ SELL /___ - {cantidad} {nombre[0]} // precio: {bid} ')
                     if esFinde == False and noMatriz == False:
-                        pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
-                    
+                        pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)       
 
             if not stop:
                 if last/100 <= abs(costo) - ganancia and bid/100 >= last/100:
