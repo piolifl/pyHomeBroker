@@ -40,7 +40,6 @@ def loguinHB():
         print("online VETA HB  cuenta: 47352 || ", time.strftime("%H:%M:%S"))
     except: 
         print("    NO se pudo loguear en VETA HOME BROKER 47352    * ", time.strftime("%H:%M:%S"))
-        pass
 diaLaboral()
 
 if esFinde == False:
@@ -185,35 +184,29 @@ def getPortfolioHB(hb, comitente, tipo):
         'comitenteMana': None}
         portfolio = requests.post("https://cuentas.vetacapital.com.ar/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
         try: 
-            shtData.range('M1').value = portfolio['Result']['Activos'][0]['Subtotal'][0]['IMPO']
-            print('Total:', portfolio['Result']['Activos'][0]['Subtotal'][0]['IMPO'], end='  ')
-        except: pass
+            shtData.range('M1').value = portfolio['Result']['Activos'][0]['Subtotal'][0]['APERTURA'][1]['ACUM']
+            print('ARS:', portfolio['Result']['Activos'][0]['Subtotal'][0]['APERTURA'][1]['ACUM'], end=' || ')
+        except: shtData.range('M1').value = 'S/D'
         try: 
-            print('Disponible:',portfolio['Result']['Activos'][0]['Subtotal'][0]['Detalle'][0]['IMPO'], end='  ')
-        except: pass
-
-        for i in portfolio['Result']['Activos'][0]['Subtotal'][0]['APERTURA']:
-            if i['IMPO'] != None: print(i['DETA'],':',i['IMPO'], end='  ' )
-        print('||',time.strftime("%H:%M:%S"))
+            shtData.range('O1').value = portfolio['Result']['Activos'][0]['Subtotal'][1]['APERTURA'][1]['ACUM']
+            print('USD MEP:', portfolio['Result']['Activos'][0]['Subtotal'][1]['APERTURA'][1]['ACUM'], ' || ',time.strftime("%H:%M:%S") )
+        except: shtData.range('O1').value = 'S/D'
 
         subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
 
         for i in subtotal[0:]:
             if i[0]['NERE'] != 'Pesos':  
                 subtotal = [ ( x['NERE'],x['CAN0'],x['CANT']) for x in i[0:] if x['CANT'] != None]
-
                 for x in subtotal:
-
                     for valor in shtData.range('A'+str(rangoDesde)+':P'+str(rangoHasta)).value:
-
                         if not valor[0]: continue
                         ticker = str(valor[0]).split()
                         if ticker[0][-1:] == 'D' or ticker[0][-1:] == 'C':  
                             if x[0] == ticker[0][:-1]: 
-                                shtData.range('U'+str(int(valor[15]+1))).value = float(x[2])
+                                shtData.range('U'+str(int(valor[15]+1))).value = int(x[2])
                         else:
                             if x[0] == ticker[0]: 
-                                shtData.range('U'+str(int(valor[15]+1))).value = float(x[2])
+                                shtData.range('U'+str(int(valor[15]+1))).value = int(x[2])
                                 if tipo == 1:
                                     if len(ticker) < 2: 
                                         shtData.range('X'+str(int(valor[15]+1))).value = float(x[1])
@@ -833,9 +826,6 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
             if nominalDescubierto == False :
                 if bid >= abs(costo) + ganancia:                         
                     shtData.range('W'+str(int(nroCelda+1))).value = bid
-
-                #shtData.range('V'+str(int(nroCelda+1))).value = round((bid-apertura)*abs(stock)*100,2)
-
                 if not stop and stock > 0 and cantidad > 0:
                     if last <= abs(costo) - (ganancia) and bid >= last: 
                         print(f'//___/ SELL STOP /___// - {cantidad} {nombre[0]} // precio: {bid} ',end=' ')
@@ -852,11 +842,8 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                         except: pass
 
             else: # OPCION VENDIDA EN DESCUBIERTO
-
                 if ask <= abs(costo) - ganancia / 2: 
                     shtData.range('W'+str(int(nroCelda+1))).value = ask
-
-                #shtData.range('V'+str(int(nroCelda+1))).value = round((ask-apertura)*abs(stock)*-100,2)
                 if not stop and stock < 0 and cantidad < 0:  
                     if last >= abs(costo)+ (ganancia) and ask <= last: 
                         print(f'//___/ BUY STOP /___// + {cantidad} {nombre[0]} // precio: {ask}',end=' ')
@@ -1027,7 +1014,7 @@ while True:
 
     buscoOperaciones(rangoDesde,rangoHasta)
 
-    if hora > '17:00:30' : 
+    if hora > '22:00:30' : 
         if esFinde == False and noMatriz == False:
             print(time.strftime("%H:%M:%S"), 'Mercado local cerrado')
             shtData.range('Q1').value = 'PRECIOS'
@@ -1064,3 +1051,55 @@ while True:
                 shtData.range('Z63').value = shtData.range('F64').value
     #shtOperaciones.range('AI63').options(index=False, headers=False).value = operaciones
     time.sleep(2)
+
+
+
+
+
+'''
+portfolio = {'Success': True, 
+    'Error': {'Codigo': 0, 'Descripcion': None}, 
+    'Result': {'Totales': 
+               {'TotalPosicion': '1082540.1624925', 
+                'Detalle': [
+                    {'DETA': 'Tenencia a Liquidar', 'IMPO': '76660', 'TIPO': '1', 'Hora': 'Pesos', 'CANT': None, 'TCAM': '1'}, 
+                    {'DETA': 'Cuenta Corriente $', 'IMPO': '443749.58', 'TIPO': '1', 'Hora': 'Pesos', 'CANT': None, 'TCAM': '1'}, 
+                    {'DETA': 'Cuenta Corriente USD MEP', 'IMPO': '562130.5824925', 'TIPO': '1', 'Hora': 'USD MEP', 'CANT': '482.13', 'TCAM': '1165.9315589'}]}, 
+                'Activos': [{'GTOS': '0', 'IMPO': '1005880.1624925', 'ESPE': 'Subtotal Cuenta Corriente', 'TIPO': '11', 'Hora': '', 
+                            'Subtotal': [
+                                {'IMPO': '443749.58', 'ESPE': '', 
+                                    'APERTURA': [
+                                        {'DETA': 'Vencido', 'IMPO': '497506.59', 'GTIA': None, 'ACUM': '497506.59'}, 
+                                        {'DETA': '24 Hs. 21/04/25', 'IMPO': '-53757.01', 'GTIA': None, 'ACUM': '443749.58'}, 
+                                        {'DETA': '48 Hs. 22/04/25', 'IMPO': None, 'GTIA': None, 'ACUM': '443749.58'}, 
+                                        {'DETA': '72 Hs. 23/04/25', 'IMPO': None, 'GTIA': None, 'ACUM': '443749.58'}, 
+                                        {'DETA': '+ de 72 Hs.', 'IMPO': None, 'GTIA': None, 'ACUM': '443749.58'}, 
+                                        {'DETA': 'Gtia.Opciones', 'IMPO': None, 'GTIA': None, 'ACUM': '443749.58'}], 
+                                'Detalle': [
+                                    {'DETA': 'Disponible', 'IMPO': '497506.59', 'CANT': None, 'PCIO': '1'}, 
+                                    {'DETA': 'A Liq', 'IMPO': '-53757.01', 'CANT': None, 'PCIO': '1'}], 
+                                    'TESP': '8', 'NERE': 'Pesos', 'GTOS': '0', 'DETA': 'Total', 'TIPO': '11', 'Hora': 'Pesos', 
+                                    'AMPL': '', 'DIVI': '1', 'TICK': 'Pesos', 'CANT': None, 'PCIO': '1', 'CAN3': '0', 'CAN2': '0', 'CAN0': '0'}, 
+                            
+                                {'IMPO': '562130.58', 'ESPE': '', 
+                                    'APERTURA': [
+                                        {'DETA': 'Vencido', 'IMPO': '415.75', 'GTIA': None, 'ACUM': '415.75'}, 
+                                        {'DETA': '24 Hs. 21/04/25', 'IMPO': '66.38', 'GTIA': None, 'ACUM': '482.13'}, 
+                                        {'DETA': '48 Hs. 22/04/25', 'IMPO': None, 'GTIA': None, 'ACUM': '482.13'}, 
+                                        {'DETA': '72 Hs. 23/04/25', 'IMPO': None, 'GTIA': None, 'ACUM': '482.13'}, 
+                                        {'DETA': '+ de 72 Hs.', 'IMPO': None, 'GTIA': None, 'ACUM': '482.13'}, 
+                                        {'DETA': 'Gtia.Opciones', 'IMPO': None, 'GTIA': None, 'ACUM': '482.13'}], 
+                                        
+                                'Detalle': [
+                                    {'DETA': 'Disponible', 'IMPO': '484736.05', 'CANT': '415.75', 'PCIO': '1165.9315589'}, 
+                                    {'DETA': 'A Liq', 'IMPO': '77394.54', 'CANT': '66.38', 'PCIO': '1165.9315589'}], 
+                                    
+                                    'TESP': '8', 'NERE': 'USD MEP', 'GTOS': '0', 'DETA': 'Total', 'TIPO': '11', 'Hora': 'USD MEP', 
+                                    'AMPL': '', 'DIVI': '1', 'TICK': 'USD MEP', 'CANT': '482.13', 'PCIO': '1165.9315589', 'CAN3': '0', 'CAN2': '0', 'CAN0': '0'}], 
+                                    'CANT': None, 'TCAM': '1', 'CAN2': '92.91850754'}, 
+                                    {'GTOS': '-317.695', 'IMPO': '76660', 'ESPE': 'Subtotal Titulos Publicos','TIPO': '1', 'Hora': '', 
+                                    'Subtotal': [{'IMPO': '76660', 'ESPE': '05921', 'TESP': '8', 'NERE': 'AL30', 'GTOS': '-317.695', 'DETA': 'A Liq', 'TIPO': '1', 
+                                                'Hora': 'ANTERIOR', 'AMPL': 'BONO REP. ARGENTINA USD STEP UP 2030', 'DIVI': '.01', 'TICK': 'AL30', 'CANT': '100', 
+                                                'PCIO': '76660', 'CAN3': '-.41271046', 'CAN2': '7.08149246', 'CAN0': '76977.695'}], 'CANT': None, 'TCAM': '1', 'CAN2': '7.0814925'}]}}
+
+'''
