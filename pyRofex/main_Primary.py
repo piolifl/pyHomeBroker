@@ -548,6 +548,7 @@ def buyRoll(celda=int):
         print(f'//___/ BUY ROLL /___ + {nominales} {nombre[0]} {precio} ', end='|')
         if esFinde == False and noMatriz == False:
             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
+            time.sleep(3)
     except: pass
 
     try:
