@@ -53,7 +53,8 @@ if esFinde == False:
         print("No fue posible el logueo con MATRIZ OMS, sigue loguin en HB ... ", end=' || ')
 else: print('FIN DE SEMANA, no se actualizan los precios locales y no se envian ordenes al broker.')
 
-loguinHB()
+if esFinde == False: loguinHB()
+else: hb = ''
 
 rng = shtTickers.range('A2:C2').expand() # OPCIONES
 opciones = pd.DataFrame(rng.value, columns=['ticker', 'symbol', 'strike'])
@@ -293,45 +294,50 @@ def cargoXplazo(dicc):
 
     if mejorMep == 'AL30D - CI': shtData.range('A2:A5').value = ''
     else: 
-        shtData.range('A2').value = mejorMep
-        shtData.range('A3').value = 'AL30D - CI'
-        shtData.range('A4').value = 'AL30 - CI'
-        shtData.range('A5').value = namesArs(dicc['mepCI'][0],' - CI')
-
+        shtData.range('A2').value = namesArs(dicc['mepCI'][0],' - CI')
+        shtData.range('A3').value = mejorMep
+        shtData.range('A4').value = 'AL30D - CI'
+        shtData.range('A5').value = 'AL30 - CI'
+        
     if mejorMep24 == 'AL30D - 24hs': shtData.range('A6:A9').value = ''
     else: 
-        shtData.range('A6').value = mejorMep24
-        shtData.range('A7').value = 'AL30D - 24hs'
-        shtData.range('A8').value = 'AL30 - 24hs'
-        shtData.range('A9').value = namesArs(dicc['mep24'][0],' - 24hs')
+        shtData.range('A6').value = namesArs(dicc['mep24'][0],' - 24hs')
+        shtData.range('A7').value = mejorMep24
+        shtData.range('A8').value = 'AL30D - 24hs'
+        shtData.range('A9').value = 'AL30 - 24hs'
+        
     
     if mejorMep == mepArs: shtData.range('A10:A13').value = ''
     else:
-        shtData.range('A10').value = mejorMep
-        shtData.range('A11').value = mepArs
-        shtData.range('A12').value = dicc['arsCImep'][0]
-        shtData.range('A13').value = namesArs(dicc['mepCI'][0],' - CI')
+        shtData.range('A10').value = namesArs(dicc['mepCI'][0],' - CI')
+        shtData.range('A11').value = mejorMep
+        shtData.range('A12').value = mepArs
+        shtData.range('A13').value = dicc['arsCImep'][0]
+        
 
     if mejorMep24 == mepArs24: shtData.range('A14:A17').value = ''
     else:
-        shtData.range('A14').value = mejorMep24
-        shtData.range('A15').value = mepArs24
-        shtData.range('A16').value = dicc['ars24mep'][0]
-        shtData.range('A17').value = namesArs(dicc['mep24'][0],' - 24hs')
+        shtData.range('A14').value = namesArs(dicc['mep24'][0],' - 24hs')
+        shtData.range('A15').value = mejorMep24
+        shtData.range('A16').value = mepArs24
+        shtData.range('A17').value = dicc['ars24mep'][0]
+        
 
     if mejorMep == mepCcl:  shtData.range('A18:A21').value = ''
     else:
-        shtData.range('A18').value = mejorMep
-        shtData.range('A19').value = mepCcl
-        shtData.range('A20').value = dicc['cclCI'][0]
-        shtData.range('A21').value = namesCcl(dicc['mepCI'][0],' - CI')
+        shtData.range('A18').value = namesCcl(dicc['mepCI'][0],' - CI')
+        shtData.range('A19').value = mejorMep
+        shtData.range('A20').value = mepCcl
+        shtData.range('A21').value = dicc['cclCI'][0]
+        
 
     if mejorMep24 == mepCcl24: shtData.range('A22:A25').value = ''
     else:
-        shtData.range('A22').value = mejorMep24
-        shtData.range('A23').value = mepCcl24
-        shtData.range('A24').value = dicc['ccl24'][0]
-        shtData.range('A25').value = namesCcl(dicc['mep24'][0],' - 24hs')
+        shtData.range('A22').value = namesCcl(dicc['mep24'][0],' - 24hs')
+        shtData.range('A23').value = mejorMep24
+        shtData.range('A24').value = mepCcl24
+        shtData.range('A25').value = dicc['ccl24'][0]
+        
 
     shtData.range('A1').value = 'symbol'
 
@@ -506,6 +512,7 @@ def sellRoll(celda=int):
         print(f'//___/ SELL ROLL /___// - {nominales} {nombre[0]} {precio} ', end='|')
         if esFinde == False and noMatriz == False: 
             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
+            time.sleep(1)
     except: pass
 
     try:
@@ -516,6 +523,7 @@ def sellRoll(celda=int):
         print(f' + {nominales} {nombre[0]} {precio} ', end='|')
         if esFinde == False and noMatriz == False:
             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
+            time.sleep(1)
     except: pass
 
     try:
@@ -526,6 +534,7 @@ def sellRoll(celda=int):
         print(f' - {nominales} {nombre[0]} {precio} ', end='|')
         if esFinde == False and noMatriz == False:
             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
+            time.sleep(1)
     except: pass
 
     try:
@@ -536,59 +545,52 @@ def sellRoll(celda=int):
         print(f' + {nominales} {nombre[0]} {precio}')
         if esFinde == False and noMatriz == False:
             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
+            time.sleep(1)
     except: pass
 
 def buyRoll(celda=int):
     try:
-        nominales = cantidadAuto(celda+3)
-        nombre = str(shtData.range('A'+str(int(celda+3))).value).split()
-        precio = shtData.range('D'+str(int(celda+3))).value
+        nominales = cantidadAuto(celda)
+        nombre = str(shtData.range('A'+str(int(celda))).value).split()
+        precio = shtData.range('D'+str(int(celda))).value
         symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])
-        shtData.range('U'+str(int(celda))).value = nominales
         print(f'//___/ BUY ROLL /___ + {nominales} {nombre[0]} {precio} ', end='|')
         if esFinde == False and noMatriz == False:
             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
-            time.sleep(3)
-    except: pass
-
-    try:
-        nominales = cantidadAuto(celda)
-        nombre = str(shtData.range('A'+str(int(celda))).value).split()
-        precio = shtData.range('C'+str(int(celda))).value
-        symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])
-        print(f'- {nominales} {nombre[0]} {precio} ', end='|')
-        if esFinde == False and noMatriz == False: 
-            pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
+            time.sleep(1)
     except: pass
 
     try:
         nominales = cantidadAuto(celda+1)
         nombre = str(shtData.range('A'+str(int(celda+1))).value).split()
-        precio = shtData.range('D'+str(int(celda+1))).value
+        precio = shtData.range('C'+str(int(celda+1))).value
         symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])
-        print(f' + {nominales} {nombre[0]} {precio} ', end='|')
-        if esFinde == False and noMatriz == False:
-            pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
+        print(f' - {nominales} {nombre[0]} {precio} ', end='|')
+        if esFinde == False and noMatriz == False: 
+            pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
+            time.sleep(1)
     except: pass
 
     try:
         nominales = cantidadAuto(celda+2)
         nombre = str(shtData.range('A'+str(int(celda+2))).value).split()
-        precio = shtData.range('C'+str(int(celda+2))).value
+        precio = shtData.range('D'+str(int(celda+2))).value
         symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])
-        print(f' - {nominales} {nombre[0]} {precio} ', end='|')
+        print(f' + {nominales} {nombre[0]} {precio} ', end='|')
         if esFinde == False and noMatriz == False:
-            pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
+            pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
+            time.sleep(1)
     except: pass
 
     try:
         nominales = cantidadAuto(celda+3)
         nombre = str(shtData.range('A'+str(int(celda+3))).value).split()
-        precio = shtData.range('D'+str(int(celda+3))).value
+        precio = shtData.range('C'+str(int(celda+3))).value
         symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])
-        print(f' + {nominales} {nombre[0]} {precio} ___//')
+        print(f' - {nominales} {nombre[0]} {precio} ')
         if esFinde == False and noMatriz == False:
-            pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
+            pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
+            time.sleep(1)
     except: pass
 
 def roll():
@@ -596,9 +598,8 @@ def roll():
     for i in shtData.range('O2:O25').value:
             if str(i).upper() == 'R':
                 if celda==2 or celda==6 or celda==8 or celda==10 or celda==14 or celda==18 or celda==22:
-                    sellRoll(celda)
+                    buyRoll(celda)
             celda += 1
-    shtData.range('T1').value = 'ROLL'
 
 def posicionRulo(celda):
     if celda==2 or celda==6 or celda==8 or celda==10 or celda==14 or celda==18 or celda==22:
@@ -606,8 +607,12 @@ def posicionRulo(celda):
 
 def buscoOperaciones(inicio,fin):
     hora = time.strftime("%H:%M:%S")
-    if not shtData.range('T1').value: roll() # RULO AUTOMATICO activado por columna O
+    if not shtData.range('T1').value: 
+        inicio,fin = 2,3
+        roll() # RULO AUTOMATICO activado por columna O
+
     if not shtData.range('W1').value: inicio,fin = 26,29 # RANGO para hacer scalping en AUTOMATICO
+
     for valor in shtData.range('P'+str(inicio)+':'+'U'+str(fin)).value:
         try:
             if not valor[5] or valor[5] == 0 or hora <= '11:01:00': pass  
@@ -619,8 +624,8 @@ def buscoOperaciones(inicio,fin):
         except: pass
 
         if valor[1]: # # Columna Q en el excel /////////////////////////////////////////////////////////////////////////////////
-            if str(valor[1]).lower() == 'r' and posicionRulo(valor[0]+1) == 'ok': sellRoll(valor[0]+1)
-            elif str(valor[1]).lower() == 'r+' and posicionRulo(valor[0]+1) == 'ok': buyRoll(valor[0]+1)
+            if str(valor[1]).lower() == 'r' and posicionRulo(valor[0]+1) == 'ok': buyRoll(valor[0]+1)
+            elif str(valor[1]).lower() == 'r-' and posicionRulo(valor[0]+1) == 'ok': sellRoll(valor[0]+1)
             elif str(valor[1]).lower() == 'p': getPortfolioHB(hb,'47352',1)
             elif str(valor[1]).lower() == 'm': baseEjercible(valor[0])
             elif str(valor[1]).lower() == 'sm': verificaMariposa(valor[0])
@@ -637,7 +642,7 @@ def buscoOperaciones(inicio,fin):
             shtData.range('Q'+str(int(valor[0]+1))).value = ''
 
         if valor[2]: #  Columna R en el excel //////////////////////////////////////////////////////////////////////////////////
-            if str(valor[2]).lower() == 'r' and posicionRulo(valor[0]+1) == 'ok': sellRoll(valor[0]+1)
+            if str(valor[2]).lower() == 'r' and posicionRulo(valor[0]+1) == 'ok': buyRoll(valor[0]+1)
             elif str(valor[2]).lower() == 'p': getPortfolioHB(hb,'47352',1)
             elif str(valor[2]).lower() == 't': hacerTasa(valor[0],'D','D')
             elif valor[2] == '+': 
@@ -652,7 +657,7 @@ def buscoOperaciones(inicio,fin):
             shtData.range('R'+str(int(valor[0]+1))).value = ''
         
         if valor[3]: # Columna S en el excel ///////////////////////////////////////////////////////////////////////////////////
-            if str(valor[3]).lower() == 'r' and posicionRulo(valor[0]+1) == 'ok': sellRoll(valor[0]+1)
+            if str(valor[3]).lower() == 'r' and posicionRulo(valor[0]+1) == 'ok': buyRoll(valor[0]+1)
             elif str(valor[3]).lower() == 'p': getPortfolioHB(hb,'47352',1)
             elif valor[3] == '-': 
                 cantidad = cantidadAuto(valor[0]+1)
@@ -965,7 +970,7 @@ while True:
                 if esFinde == False and noMatriz == False: shtData.range('A30').options(index=False, headers=False).value = df_datos   
             except: print('Hubo un error al actualizar excel')
 
-            if vueltaPortfolio > 20 : 
+            if shtData.range('T1').value and vueltaPortfolio > 20 : 
                 vueltaPortfolio = 0
                 try: 
                     getPortfolioHB(hb,'47352',2) 
