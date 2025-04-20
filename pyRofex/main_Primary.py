@@ -9,10 +9,10 @@ wb = xw.Book('D:\\pyHomeBroker\\epgb.xlsb')
 shtTickers = wb.sheets('pyRofex')
 shtData = wb.sheets('MATRIZ OMS')
 shtData.range('A1').value = 'symbol'
-shtData.range('Q1').value = 'PRECIOS'
+shtData.range('Q1').value = 'PRC'
 shtData.range('S1').value = 'ADR'
 shtData.range('T1').value = 'ROLL'
-shtData.range('W1').value = 'SCALPING'
+shtData.range('W1').value = 'SCALP'
 shtData.range('X1').value = 'STOP'
 shtData.range('Y1').value = 'VETA'
 shtData.range('Z1').value = 0.5
@@ -298,47 +298,36 @@ def cargoXplazo(dicc):
         shtData.range('A3').value = mejorMep
         shtData.range('A4').value = 'AL30D - CI'
         shtData.range('A5').value = 'AL30 - CI'
-        
     if mejorMep24 == 'AL30D - 24hs': shtData.range('A6:A9').value = ''
     else: 
         shtData.range('A6').value = namesArs(dicc['mep24'][0],' - 24hs')
         shtData.range('A7').value = mejorMep24
         shtData.range('A8').value = 'AL30D - 24hs'
         shtData.range('A9').value = 'AL30 - 24hs'
-        
-    
     if mejorMep == mepArs: shtData.range('A10:A13').value = ''
     else:
         shtData.range('A10').value = namesArs(dicc['mepCI'][0],' - CI')
         shtData.range('A11').value = mejorMep
         shtData.range('A12').value = mepArs
         shtData.range('A13').value = dicc['arsCImep'][0]
-        
-
     if mejorMep24 == mepArs24: shtData.range('A14:A17').value = ''
     else:
         shtData.range('A14').value = namesArs(dicc['mep24'][0],' - 24hs')
         shtData.range('A15').value = mejorMep24
         shtData.range('A16').value = mepArs24
         shtData.range('A17').value = dicc['ars24mep'][0]
-        
-
     if mejorMep == mepCcl:  shtData.range('A18:A21').value = ''
     else:
         shtData.range('A18').value = namesCcl(dicc['mepCI'][0],' - CI')
         shtData.range('A19').value = mejorMep
         shtData.range('A20').value = mepCcl
         shtData.range('A21').value = dicc['cclCI'][0]
-        
-
     if mejorMep24 == mepCcl24: shtData.range('A22:A25').value = ''
     else:
         shtData.range('A22').value = namesCcl(dicc['mep24'][0],' - 24hs')
         shtData.range('A23').value = mejorMep24
         shtData.range('A24').value = mepCcl24
         shtData.range('A25').value = dicc['ccl24'][0]
-        
-
     shtData.range('A1').value = 'symbol'
 
 def preparaRulo():
@@ -947,7 +936,9 @@ vueltaPortfolio = 0
 while True:
     hora = time.strftime("%H:%M:%S")
     try:
-        if not shtData.range('A1').value: preparaRulo()
+        if not shtData.range('A1').value: 
+            shtData.range('T1').value = 'ROLL'
+            preparaRulo()
     except:
         shtData.range('A1').value = 'symbol'
 
@@ -956,10 +947,10 @@ while True:
     if hora > '17:00:30' : 
         if esFinde == False and noMatriz == False:
             print(time.strftime("%H:%M:%S"), 'Mercado local cerrado')
-            shtData.range('Q1').value = 'PRECIOS'
+            shtData.range('Q1').value = 'PRC'
             shtData.range('S1').value = 'ADR'
             shtData.range('T1').value = 'ROLL'
-            shtData.range('W1').value = 'SCALPING'
+            shtData.range('W1').value = 'SCALP'
             shtData.range('X1').value = 'STOP'
             shtData.range('Z1').value = 0.5
             pyRofex.close_websocket_connection()
@@ -967,8 +958,10 @@ while True:
     else:
         if not shtData.range('Q1').value:
             try:
-                if esFinde == False and noMatriz == False: shtData.range('A30').options(index=False, headers=False).value = df_datos   
-            except: print('Hubo un error al actualizar excel')
+                if esFinde == False and noMatriz == False: 
+                    shtData.range('A30').options(index=False, headers=False).value = df_datos  
+                    shtData.range('U1').value = hora
+            except: print('Hubo un error al actualizar excel', hora)
 
             if shtData.range('T1').value and vueltaPortfolio > 20 : 
                 vueltaPortfolio = 0
@@ -981,13 +974,12 @@ while True:
         if not shtData.range('S1').value:
             try:
                 if vuelta > 5: 
-                    shtData.range('U1').value = time.strftime("%H:%M:%S")
                     traerADR()
                     vuelta = 0
                 else: vuelta += 1
             except:
-                shtData.range('Z61').value = shtData.range('F62').value
-                shtData.range('Z63').value = shtData.range('F64').value
+                shtData.range('Z61').value = 0
+                shtData.range('Z63').value = 0
     #shtOperaciones.range('AI63').options(index=False, headers=False).value = operaciones
     time.sleep(2)
 
