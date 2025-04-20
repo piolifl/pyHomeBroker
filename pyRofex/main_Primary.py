@@ -72,7 +72,7 @@ rng = shtTickers.range('T2:U2').expand() # CAUCHO
 caucion = pd.DataFrame(rng.value, columns=['ticker', 'symbol'])
 tickers = pd.concat([opciones, acc, bonos,cedear,ons,letras, caucion ])
 listLength = len(acc) + 31 + len(opciones)
-allLength = 28 + len(tickers) - len(acc)  - len(caucion)
+allLength = len(tickers) - len(acc)  - len(caucion) - 2
 
 if esFinde == False and noMatriz == False:
     instruments_2 = pyRofex.get_detailed_instruments()
@@ -292,7 +292,7 @@ def cargoXplazo(dicc):
     mepCcl = namesMep(dicc['cclCI'][0],' - CI')
     mepCcl24 = namesMep(dicc['ccl24'][0],' - 24hs')
 
-    '''if mejorMep == 'AL30D - CI': shtData.range('A2:A5').value = ''
+    if mejorMep == 'AL30D - CI': shtData.range('A2:A5').value = ''
     else: 
         shtData.range('A2').value = 'AL30 - CI'
         shtData.range('A3').value = 'AL30D - CI'
@@ -304,7 +304,7 @@ def cargoXplazo(dicc):
         shtData.range('A6').value = 'AL30 - 24hs'
         shtData.range('A7').value = 'AL30D - 24hs'
         shtData.range('A8').value = mejorMep24
-        shtData.range('A9').value = namesArs(dicc['mep24'][0],' - 24hs')'''
+        shtData.range('A9').value = namesArs(dicc['mep24'][0],' - 24hs')
         
     if mejorMep == mepArs: shtData.range('A10:A13').value = ''
     else:
@@ -945,11 +945,12 @@ while True:
             shtData.range('T1').value = 'ROLL'
             preparaRulo()
     except:
+        print('error al preparar los Rulos ')
         shtData.range('A1').value = 'symbol'
 
     buscoOperaciones(rangoDesde,rangoHasta)
 
-    if hora > '17:00:30' : 
+    if hora >= '17:00:30': 
         if esFinde == False and noMatriz == False:
             print(time.strftime("%H:%M:%S"), 'Mercado local cerrado')
             shtData.range('Q1').value = 'PRC'
