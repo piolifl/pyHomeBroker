@@ -292,18 +292,20 @@ def cargoXplazo(dicc):
     mepCcl = namesMep(dicc['cclCI'][0],' - CI')
     mepCcl24 = namesMep(dicc['ccl24'][0],' - 24hs')
 
-    if mejorMep == 'AL30D - CI': shtData.range('A2:A5').value = ''
+    '''if mejorMep == 'AL30D - CI': shtData.range('A2:A5').value = ''
     else: 
-        shtData.range('A2').value = namesArs(dicc['mepCI'][0],' - CI')
-        shtData.range('A3').value = mejorMep
-        shtData.range('A4').value = 'AL30D - CI'
-        shtData.range('A5').value = 'AL30 - CI'
+        shtData.range('A2').value = 'AL30 - CI'
+        shtData.range('A3').value = 'AL30D - CI'
+        shtData.range('A4').value = mejorMep
+        shtData.range('A5').value = namesArs(dicc['mepCI'][0],' - CI')
+
     if mejorMep24 == 'AL30D - 24hs': shtData.range('A6:A9').value = ''
     else: 
-        shtData.range('A6').value = namesArs(dicc['mep24'][0],' - 24hs')
-        shtData.range('A7').value = mejorMep24
-        shtData.range('A8').value = 'AL30D - 24hs'
-        shtData.range('A9').value = 'AL30 - 24hs'
+        shtData.range('A6').value = 'AL30 - 24hs'
+        shtData.range('A7').value = 'AL30D - 24hs'
+        shtData.range('A8').value = mejorMep24
+        shtData.range('A9').value = namesArs(dicc['mep24'][0],' - 24hs')'''
+        
     if mejorMep == mepArs: shtData.range('A10:A13').value = ''
     else:
         shtData.range('A10').value = namesArs(dicc['mepCI'][0],' - CI')
