@@ -284,7 +284,7 @@ def namesMep(nombre,plazo):
         else: return nombre[:1]+nombre[3:5]+'D'+plazo
     else: return nombre[:4]+'D'+plazo
 
-def cargoXplazo(dicc):
+def cargoXplazo(dicc,moneda):
     mejorMep = dicc['mepCI'][0]
     mejorMep24 = dicc['mep24'][0]
     mepArs = namesMep(dicc['arsCImep'][0],' - CI')
@@ -294,18 +294,31 @@ def cargoXplazo(dicc):
 
     if mejorMep == 'AL30D - CI': shtData.range('A2:A5').value = ''
     else: 
-        shtData.range('A2').value = 'AL30 - CI'
-        shtData.range('A3').value = 'AL30D - CI'
-        shtData.range('A4').value = mejorMep
-        shtData.range('A5').value = namesArs(dicc['mepCI'][0],' - CI')
+        if str(moneda).upper() == 'P':
+            shtData.range('A2').value = 'AL30 - CI'
+            shtData.range('A3').value = 'AL30D - CI'
+            shtData.range('A4').value = mejorMep
+            shtData.range('A5').value = namesArs(dicc['mepCI'][0],' - CI')
+        elif str(moneda).upper() == 'D':
+            shtData.range('A2').value = 'AL30D - CI'
+            shtData.range('A3').value = 'AL30 - CI'
+            shtData.range('A4').value = namesArs(dicc['mepCI'][0],' - CI')
+            shtData.range('A5').value = mejorMep
+        else: pass
 
     if mejorMep24 == 'AL30D - 24hs': shtData.range('A6:A9').value = ''
     else: 
-        shtData.range('A6').value = 'AL30 - 24hs'
-        shtData.range('A7').value = 'AL30D - 24hs'
-        shtData.range('A8').value = mejorMep24
-        shtData.range('A9').value = namesArs(dicc['mep24'][0],' - 24hs')
-        
+        if str(moneda).upper() == 'P':
+            shtData.range('A6').value = 'AL30 - 24hs'
+            shtData.range('A7').value = 'AL30D - 24hs'
+            shtData.range('A8').value = mejorMep24
+            shtData.range('A9').value = namesArs(dicc['mep24'][0],' - 24hs')
+        elif str(moneda).upper() == 'D':
+            shtData.range('A6').value = 'AL30D - 24hs'
+            shtData.range('A7').value = 'AL30 - 24hs'
+            shtData.range('A8').value = namesArs(dicc['mep24'][0],' - 24hs')
+            shtData.range('A9').value = mejorMep24
+
     if mejorMep == mepArs: shtData.range('A10:A13').value = ''
     else:
         shtData.range('A10').value = namesArs(dicc['mepCI'][0],' - CI')
@@ -335,7 +348,7 @@ def cargoXplazo(dicc):
         shtData.range('A25').value = dicc['ccl24'][0]
     shtData.range('A1').value = 'symbol'
 
-def preparaRulo():
+def preparaRulo(monedaInicial):
     celda,pesos,dolar = listLength,1000,0.01
     tikers = {'cclCI':['',dolar],'ccl24':['',dolar],'mepCI':['',dolar],'mep24':['',dolar],'arsCIccl':['',pesos],'ars24ccl':['',pesos],'arsCImep':['',pesos],'ars24mep':['',pesos]}
     for valor in shtData.range('A'+str(listLength)+':A'+str(allLength)).value:
@@ -373,7 +386,7 @@ def preparaRulo():
                 if not mep: mep = 0.01
                 if mep > tikers['mep24'][1]: tikers['mep24'] = [valor,mep]
         celda +=1 
-    cargoXplazo(tikers)
+    cargoXplazo(tikers,monedaInicial)
 
 def traerADR():
     valorAdr = yf.download(['GGAL','YPF'],period='1d',interval='1d',auto_adjust=False)['Close'].values
@@ -605,7 +618,8 @@ def buscoOperaciones(inicio,fin):
         inicio,fin = 2,25
         roll() # RULO AUTOMATICO activado por columna O
 
-    if not shtData.range('W1').value: inicio,fin = 26,29 # RANGO para hacer scalping en AUTOMATICO
+    if not shtData.range('W1').value: 
+        inicio,fin = 26,29 # RANGO para hacer scalping en AUTOMATICO
 
     for valor in shtData.range('P'+str(inicio)+':'+'U'+str(fin)).value:
         try:
@@ -802,23 +816,26 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
             if nombre[0][-1:] == 'D' or nombre[0][-1:] == 'C':
                 ganancia /= 100
                 dolar = 'SI'
+                hayMEP = shtData.range('O1').value
+            else: hayARS = shtData.range('M1').value
+            nominales = stokDisponible(nroCelda+1)
 
             if not scalp:
                 if dolar == 'SI' and bid / 100 != abs(costo):
-                    hayMEP = shtData.range('O1').value
+                    if (nominales >= 250 or nominales == 0) and str(nombre[2]).lower() == 'CI': hayMEP = 0
                     if hayMEP and hayMEP > 0:
                         shtData.range('W'+str(int(nroCelda+1))).value = bid/100
                         print(f'____/ BUY SCALPING USD /___  + {cantidad} {nombre[0]} // precio: {bid}',end=' ')
                         if esFinde == False and noMatriz == False: 
                             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
-                        bid += ganancia * 60
+                        bid += ganancia * 10
                         bid = round(bid, 2)
                         print(f'//___/ SELL /___ - {cantidad} {nombre[0]} // precio: {bid} ')
                         if esFinde == False and noMatriz == False:
                             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)       
                 else:
                     if bid / 100 != abs(costo):
-                        hayARS = shtData.range('M1').value
+                        if (nominales >= 500 or nominales == 0) and str(nombre[2]).lower() == 'CI': hayARS = 0
                         if hayARS and hayARS > 0:
                             shtData.range('W'+str(int(nroCelda+1))).value = bid/100
                             print(f'____/ BUY SCALPING PESOS /___  + {cantidad} {nombre[0]} // precio: {bid}',end=' ')
@@ -941,9 +958,10 @@ vueltaPortfolio = 0
 while True:
     hora = time.strftime("%H:%M:%S")
     try:
-        if not shtData.range('A1').value: 
+        preparar =  shtData.range('A1').value
+        if preparar != 'symbol': 
             shtData.range('T1').value = 'ROLL'
-            preparaRulo()
+            preparaRulo(preparar)
     except:
         print('error al preparar los Rulos ')
         shtData.range('A1').value = 'symbol'
@@ -972,7 +990,8 @@ while True:
             if shtData.range('T1').value and vueltaPortfolio > 20 : 
                 vueltaPortfolio = 0
                 try: 
-                    getPortfolioHB(hb,'47352',2) 
+                    if hora >= '16:30:30': pass
+                    else: getPortfolioHB(hb,'47352',2) 
                 except: 
                     print('Hubo un error al traer datos del portafolio')
             else: vueltaPortfolio += 1
