@@ -823,7 +823,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
 
             if not scalp:
                 if dolar == 'SI' and bid / 100 != abs(costo):
-                    if nominales >= 250 or nominales == 0: hayMEP = 0
+                    if nominales >= 350 or nominales == 0: hayMEP = 0
                     if hayMEP and hayMEP > 0:
                         shtData.range('W'+str(int(nroCelda+1))).value = bid/100
                         print(f'____/ BUY SCALPING USD /___  + {cantidad} {nombre[0]} // precio: {bid}',end=' ')
@@ -836,7 +836,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)       
                 else:
                     if bid / 100 != abs(costo):
-                        if nominales >= 500 or nominales == 0: hayARS = 0
+                        if nominales >= 550 or nominales == 0: hayARS = 0
                         if hayARS and hayARS > 0:
                             shtData.range('W'+str(int(nroCelda+1))).value = bid/100
                             print(f'____/ BUY SCALPING PESOS /___  + {cantidad} {nombre[0]} // precio: {bid}',end=' ')
