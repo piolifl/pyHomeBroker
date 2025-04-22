@@ -16,6 +16,7 @@ shtData.range('W1').value = 'SCALP'
 shtData.range('X1').value = 'STOP'
 shtData.range('Y1').value = 'VETA'
 shtData.range('Z1').value = 0.5
+shtData.range('V26:V29').value = 0
 rangoDesde = '2'
 rangoHasta = '50'
 reCompra = False
@@ -410,8 +411,13 @@ def cantidadAuto(nroCelda):
     cantidad = 0 if cantidad == None else cantidad
     return abs(int(cantidad))
 
-def stokDisponible(nroCelda):
+def stockU(nroCelda):
     stok = shtData.range('U'+str(int(nroCelda))).value
+    stok = 0 if not stok or stok == None or stok == 'None' else stok        
+    return int(stok)
+
+def stockV(nroCelda):
+    stok = shtData.range('V'+str(int(nroCelda))).value
     stok = 0 if not stok or stok == None or stok == 'None' else stok        
     return int(stok)
 
@@ -425,7 +431,7 @@ def hacerTasa(celda,ladoCompra,ladoVenta):
             else:
                 if vende[2] == '24hs':
                     nominales = cantidadAuto(celda)
-                    stock = stokDisponible(celda)
+                    stock = stockU(celda)
                     bid = shtData.range(str(ladoCompra)+str(int(celda+1))).value
                     symbol = "MERV - XMEV - " + str(compra[0]) + ' - ' + str(compra[2])
                     print(f'//___/ BUY TASA + {int(nominales)} {compra[0]} {compra[2]} {bid} ',end=' | ')
@@ -488,10 +494,15 @@ def scalping(celda,lado,tipo,stock=int,nominales=int):
     except: pass
 
 def operacionRapida(celda,lado,tipo, stock=int, nominales=int):
+    esCaucho = False
     try: 
         nombre = str(shtData.range('A'+str(int(celda+1))).value).split()
         precio = shtData.range(str(lado)+str(int(celda+1))).value
-        if len(nombre) < 2: 
+
+        if len(nombre) == 2: 
+            symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[1])
+            esCaucho = True
+        elif len(nombre) < 2: 
             symbol = "MERV - XMEV - " + str(nombre[0]) + ' - 24hs'
             if str(tipo).upper() == 'BUY': shtData.range('W'+str(int(celda+1))).value = precio
         else: 
@@ -503,11 +514,14 @@ def operacionRapida(celda,lado,tipo, stock=int, nominales=int):
             if esFinde == False and noMatriz == False:
                 pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
         else:
-            if abs(stock) < nominales: nominales = abs(stock)
+            if esCaucho == False: 
+                if abs(stock) < nominales: nominales = abs(stock)
+            else: 
+                print(f'Coloca CAUCION ... {nombre[0]} {nombre[1]} ', end='')
+                pass
             print(f'//___/ SELL /___// - {nominales} {nombre[0]} // precio: {precio}')
             if esFinde == False and noMatriz == False:
                 pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
-            
     except: pass
 
 def buyRollPlus(celda=int):
@@ -617,18 +631,31 @@ def buscoOperaciones(inicio,fin):
     if not shtData.range('T1').value: 
         inicio,fin = 2,25
         roll() # RULO AUTOMATICO activado por columna O
-
+    
     if not shtData.range('W1').value: 
+        scalp = 'SI'
         inicio,fin = 26,29 # RANGO para hacer scalping en AUTOMATICO
 
     for valor in shtData.range('P'+str(inicio)+':'+'U'+str(fin)).value:
         try:
-            if not valor[5] or valor[5] == 0 or hora <= '11:01:00': pass  
-            else: 
-                nominalDescubierto = True if valor[5] < 0 else False
-                cantidad = cantidadAuto(valor[0]+1)
-                if cantidad != 0:
-                    trailingStop('A'+str((int(valor[0]+1))),cantidad,int(valor[0]),nominalDescubierto,valor[5])
+            if hora <= '11:01:00': pass
+            else:
+                if not valor[5] or valor[5] == 0:
+                    pass  
+                else: 
+                    nominalDescubierto = True if valor[5] < 0 else False
+                    cantidad = cantidadAuto(valor[0]+1)
+                    if cantidad != 0:
+                        trailingStop('A'+str((int(valor[0]+1))),cantidad,int(valor[0]),nominalDescubierto,valor[5])
+
+                if scalp == 'SI':
+                    stockScalping = stockV(valor[0]+1)
+                    if stockScalping == 0: pass
+                    else:
+                        nominalDescubierto = True if stockScalping < 0 else False
+                        cantidad = cantidadAuto(valor[0]+1)
+                        if cantidad != 0:
+                            trailingStop('A'+str((int(valor[0]+1))),cantidad,int(valor[0]),nominalDescubierto,stockScalping)
         except: pass
 
         if valor[1]: # # Columna Q en el excel /////////////////////////////////////////////////////////////////////////////////
@@ -696,7 +723,7 @@ def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     global reCompra, descubierto
     nombre = str(shtData.range(str(symbol)).value).split()
     precio = shtData.range(str(price)).value
-    stock = stokDisponible(int(celda+1))
+    stock = stockU(int(celda+1))
 
     if len(nombre) == 2: symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[1]) # Es caucho
 
@@ -819,13 +846,17 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                 dolar = 'SI'
                 hayMEP = shtData.range('O1').value
             else: hayARS = shtData.range('M1').value
-            nominales = stokDisponible(nroCelda+1)
 
             if not scalp:
+                nominales = stockV(nroCelda+1)
                 if dolar == 'SI' and bid / 100 != abs(costo):
                     if nominales >= 350 or nominales == 0: hayMEP = 0
                     if hayMEP and hayMEP > 0:
                         shtData.range('W'+str(int(nroCelda+1))).value = bid/100
+
+                        try: shtData.range('V'+str(int(nroCelda+1))).value += cantidad
+                        except: pass
+
                         print(f'____/ BUY SCALPING USD /___  + {cantidad} {nombre[0]} // precio: {bid}',end=' ')
                         if esFinde == False and noMatriz == False: 
                             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
@@ -836,9 +867,13 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)       
                 else:
                     if bid / 100 != abs(costo):
-                        if nominales >= 550 or nominales == 0: hayARS = 0
+                        if nominales >= 1000 or nominales == 0: hayARS = 0
                         if hayARS and hayARS > 0:
                             shtData.range('W'+str(int(nroCelda+1))).value = bid/100
+
+                            try: shtData.range('V'+str(int(nroCelda+1))).value += cantidad
+                            except: pass
+
                             print(f'____/ BUY SCALPING PESOS /___  + {cantidad} {nombre[0]} // precio: {bid}',end=' ')
                             if esFinde == False and noMatriz == False: 
                                 pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
