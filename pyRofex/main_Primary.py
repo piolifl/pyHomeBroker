@@ -18,7 +18,7 @@ shtData.range('Y1').value = 'VETA'
 shtData.range('Z1').value = 0.5
 shtData.range('V26:V29').value = 0
 rangoDesde = '2'
-rangoHasta = '50'
+rangoHasta = '60'
 reCompra = False
 esFinde = False
 noMatriz = False
@@ -289,66 +289,65 @@ def namesMep(nombre,plazo):
 def cargoXplazo(dicc,moneda):
     mejorMep = dicc['mepCI'][0]
     mejorMep24 = dicc['mep24'][0]
+    mejorCcl = dicc['cclCI'][0]
+    mejorCcl24 = dicc['ccl24'][0]
     mepArs = namesMep(dicc['arsCImep'][0],' - CI')
     mepArs24 = namesMep(dicc['ars24mep'][0],' - 24hs')
     mepCcl = namesMep(dicc['cclCI'][0],' - CI')
     mepCcl24 = namesMep(dicc['ccl24'][0],' - 24hs')
-    hora = time.strftime("%H:%M:%S")
 
-    if mejorMep == 'AL30D - CI' or hora >= '16:25:00' : shtData.range('A2:A5').value = ''
-    else: 
-        if str(moneda).upper() == 'P':
-            shtData.range('A2').value = 'AL30 - CI'
-            shtData.range('A3').value = 'AL30D - CI'
-            shtData.range('A4').value = mejorMep
-            shtData.range('A5').value = namesArs(dicc['mepCI'][0],' - CI')
-        elif str(moneda).upper() == 'D':
-            shtData.range('A2').value = 'AL30D - CI'
-            shtData.range('A3').value = 'AL30 - CI'
-            shtData.range('A4').value = namesArs(dicc['mepCI'][0],' - CI')
-            shtData.range('A5').value = mejorMep
-        else: pass
+    if str(moneda).upper() == 'P':
+        shtData.range('A2').value = 'AL30 - CI'
+        shtData.range('A3').value = 'AL30D - CI'
+        shtData.range('A4').value = mejorMep
+        shtData.range('A5').value = namesArs(dicc['mepCI'][0],' - CI')
+    elif str(moneda).upper() == 'D':
+        shtData.range('A2').value = 'AL30D - CI'
+        shtData.range('A3').value = 'AL30 - CI'
+        shtData.range('A4').value = namesArs(dicc['mepCI'][0],' - CI')
+        shtData.range('A5').value = mejorMep
+    elif str(moneda).upper() == 'C':
+        shtData.range('A2').value = 'AL30D - CI'
+        shtData.range('A3').value = 'AL30C - CI'
+        shtData.range('A4').value = mejorCcl
+        shtData.range('A5').value = namesMep(dicc['cclCI'][0],' - CI')
 
-    if mejorMep24 == 'AL30D - 24hs': shtData.range('A6:A9').value = ''
-    else: 
-        if str(moneda).upper() == 'P':
-            shtData.range('A6').value = 'AL30 - 24hs'
-            shtData.range('A7').value = 'AL30D - 24hs'
-            shtData.range('A8').value = mejorMep24
-            shtData.range('A9').value = namesArs(dicc['mep24'][0],' - 24hs')
-        elif str(moneda).upper() == 'D':
-            shtData.range('A6').value = 'AL30D - 24hs'
-            shtData.range('A7').value = 'AL30 - 24hs'
-            shtData.range('A8').value = namesArs(dicc['mep24'][0],' - 24hs')
-            shtData.range('A9').value = mejorMep24
+    if str(moneda).upper() == 'P':
+        shtData.range('A6').value = 'AL30 - 24hs'
+        shtData.range('A7').value = 'AL30D - 24hs'
+        shtData.range('A8').value = mejorMep24
+        shtData.range('A9').value = namesArs(dicc['mep24'][0],' - 24hs')
+    elif str(moneda).upper() == 'D':
+        shtData.range('A6').value = 'AL30D - 24hs'
+        shtData.range('A7').value = 'AL30 - 24hs'
+        shtData.range('A8').value = namesArs(dicc['mep24'][0],' - 24hs')
+        shtData.range('A9').value = mejorMep24
+    elif str(moneda).upper() == 'C':
+        shtData.range('A6').value = 'AL30D - 24hs'
+        shtData.range('A7').value = 'AL30C - 24hs'
+        shtData.range('A8').value = mejorCcl24
+        shtData.range('A9').value = namesMep(dicc['ccl24'][0],' - 24hs')
+        
+    shtData.range('A10').value = namesArs(dicc['mepCI'][0],' - CI')
+    shtData.range('A11').value = mejorMep
+    shtData.range('A12').value = mepArs
+    shtData.range('A13').value = dicc['arsCImep'][0]
 
-    if mejorMep == mepArs or hora >= '16:25:00' : shtData.range('A10:A13').value = ''
-    else:
-        shtData.range('A10').value = namesArs(dicc['mepCI'][0],' - CI')
-        shtData.range('A11').value = mejorMep
-        shtData.range('A12').value = mepArs
-        shtData.range('A13').value = dicc['arsCImep'][0]
+    shtData.range('A14').value = namesArs(dicc['mep24'][0],' - 24hs')
+    shtData.range('A15').value = mejorMep24
+    shtData.range('A16').value = mepArs24
+    shtData.range('A17').value = dicc['ars24mep'][0]
 
-    if mejorMep24 == mepArs24: shtData.range('A14:A17').value = ''
-    else:
-        shtData.range('A14').value = namesArs(dicc['mep24'][0],' - 24hs')
-        shtData.range('A15').value = mejorMep24
-        shtData.range('A16').value = mepArs24
-        shtData.range('A17').value = dicc['ars24mep'][0]
+    shtData.range('A18').value = namesCcl(dicc['mepCI'][0],' - CI')
+    shtData.range('A19').value = mejorMep
+    shtData.range('A20').value = mepCcl
+    shtData.range('A21').value = dicc['cclCI'][0]
 
-    if mejorMep == mepCcl or hora >= '16:25:00' :  shtData.range('A18:A21').value = ''
-    else:
-        shtData.range('A18').value = namesCcl(dicc['mepCI'][0],' - CI')
-        shtData.range('A19').value = mejorMep
-        shtData.range('A20').value = mepCcl
-        shtData.range('A21').value = dicc['cclCI'][0]
+    shtData.range('A22').value = namesCcl(dicc['mep24'][0],' - 24hs')
+    shtData.range('A23').value = mejorMep24
+    shtData.range('A24').value = mepCcl24
+    shtData.range('A25').value = dicc['ccl24'][0]
 
-    if mejorMep24 == mepCcl24: shtData.range('A22:A25').value = ''
-    else:
-        shtData.range('A22').value = namesCcl(dicc['mep24'][0],' - 24hs')
-        shtData.range('A23').value = mejorMep24
-        shtData.range('A24').value = mepCcl24
-        shtData.range('A25').value = dicc['ccl24'][0]
     shtData.range('A1').value = 'symbol'
 
 def preparaRulo(monedaInicial):
@@ -637,7 +636,7 @@ def buscoOperaciones(inicio,fin):
     
     if not shtData.range('W1').value: 
         scalpi = True
-        inicio,fin = 26,29 # RANGO para hacer scalping en AUTOMATICO
+        
     else: scalpi = False
 
     if not shtData.range('X1').value: 
@@ -854,17 +853,17 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
             
             if scalpi == True:
                 if dolar == 'SI' and bid / 100 != abs(costo):
-                    if stock >= 350 or stock == 0: hayMEP = 0
-                    if hayMEP and hayMEP > 0:
+                    if stock >= 400 or stock == 0: hayMEP = 0
+                    if hayMEP and hayMEP != 0:
                         shtData.range('W'+str(int(nroCelda+1))).value = bid/100
 
                         try: shtData.range('V'+str(int(nroCelda+1))).value += cantidad
                         except: pass
 
-                        print(f'____/ BUY SCALPING USD /___  + {cantidad} {nombre[0]} // precio: {bid}',end=' ')
+                        print(f'____/ BUY SCALPING AUTO USD /___  + {cantidad} {nombre[0]} // precio: {bid}',end=' ')
                         if esFinde == False and noMatriz == False: 
                             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
-                        bid += ganancia * 10
+                        bid += ganancia * 20
                         bid = round(bid, 2)
                         print(f'//___/ SELL /___ - {cantidad} {nombre[0]} // precio: {bid} ', hora)
                         if esFinde == False and noMatriz == False:
@@ -878,7 +877,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                             try: shtData.range('V'+str(int(nroCelda+1))).value += cantidad
                             except: pass
 
-                            print(f'___BUY SCALPING PESOS___  + {cantidad} {nombre[0]} // {bid}',end=' ')
+                            print(f'___BUY SCALPING AUTO PESOS___  + {cantidad} {nombre[0]} // {bid}',end=' ')
                             if esFinde == False and noMatriz == False: 
                                 pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
                             bid += ganancia * 100
@@ -887,10 +886,11 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                             if esFinde == False and noMatriz == False:
                                 pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)       
     
-            if bid / 100 > abs(costo): 
+            elif bid / 100 > abs(costo): 
                 shtData.range('W'+str(int(nroCelda+1))).value = bid/100
 
             if not stop:
+                if dolar == 'SI': ganancia /= 10
                 if last/100 <= abs(costo) - ganancia and bid/100 >= last/100:
                     print(f'//___SELL x STOP___ - {cantidad} {nombre[0]} // {bid} ',end=' ') 
                     if esFinde == False and noMatriz == False:
@@ -900,7 +900,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                     except: pass
                     shtData.range('W'+str(int(nroCelda+1))).value = shtData.range('C'+str(int(nroCelda+1))).value / 100
                     if dolar == 'SI':
-                        bid -= ganancia * 100
+                        bid -= ganancia * 200
                         bid = round(bid, 2)
                     else: 
                         bid -= ganancia * 300
