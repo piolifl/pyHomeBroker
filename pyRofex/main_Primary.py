@@ -327,6 +327,7 @@ def cargoXplazo(dicc,moneda):
         shtData.range('A7').value = 'AL30C - 24hs'
         shtData.range('A8').value = mejorCcl24
         shtData.range('A9').value = namesMep(dicc['ccl24'][0],' - 24hs')
+
         
     shtData.range('A10').value = namesArs(dicc['mepCI'][0],' - CI')
     shtData.range('A11').value = mejorMep
@@ -634,9 +635,7 @@ def buscoOperaciones(inicio,fin):
         inicio,fin = 2,25
         roll() # RULO AUTOMATICO activado por columna O
     
-    if not shtData.range('W1').value: 
-        scalpi = True
-        
+    if not shtData.range('W1').value: scalpi = True
     else: scalpi = False
 
     if not shtData.range('X1').value: 
@@ -791,20 +790,26 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
         costo = shtData.range('W'+str(int(nroCelda+1))).value 
         if not costo or costo == None or costo == 'None': soloContinua()
         nombre = str(shtData.range(str(nombre)).value).split()
-        stop = shtData.range('X1').value
-        if len(nombre) < 2: symbol = "MERV - XMEV - " + str(nombre[0]) + ' - 24hs' 
-        else : symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])
         bid = shtData.range('C'+str(int(nroCelda+1))).value
         ask = shtData.range('D'+str(int(nroCelda+1))).value
-        
+        stop = shtData.range('X1').value
+        ganancia = shtData.range('Z1').value
+        if not ganancia: ganancia = 2
+        digitos = len(str(int(bid)))
+
         if len(nombre) < 2: # Ingresa si son OPCIONES ///////////////////////////////////////////////////////////////////////////
-            ganancia = shtData.range('Z1').value * 10
-            if not ganancia: ganancia = 2
+            symbol = "MERV - XMEV - " + str(nombre[0]) + ' - 24hs' 
+            if digitos >= 3: ganancia *= 30
+            elif digitos > 1: ganancia *= 2
+            else: ganancia /= 2
+            
             if nominalDescubierto == False :
-                if bid >= abs(costo) + ganancia:                         
+                if bid > abs(costo):                         
                     shtData.range('W'+str(int(nroCelda+1))).value = bid
-                if not stop and stock > 0 and cantidad > 0:
-                    if last <= abs(costo) - (ganancia) and bid >= last: 
+                    print('salida sera en ',bid, ganancia, bid - ganancia)
+
+                if not stop and stock > 0:
+                    if last <= abs(costo) - ganancia and bid >= last: 
                         print(f'//___/ SELL STOP /___// - {cantidad} {nombre[0]} // precio: {bid} ',end=' ')
                         if esFinde == False and noMatriz == False:
                             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
@@ -819,10 +824,11 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                         except: pass
 
             else: # OPCION VENDIDA EN DESCUBIERTO
-                if ask <= abs(costo) - ganancia / 2: 
+                if ask < abs(costo): 
                     shtData.range('W'+str(int(nroCelda+1))).value = ask
-                if not stop and stock < 0 and cantidad < 0:  
-                    if last >= abs(costo)+ (ganancia) and ask <= last: 
+
+                if not stop and stock < 0:  
+                    if last >= abs(costo) + ganancia and ask <= last: 
                         print(f'//___/ BUY STOP /___// + {cantidad} {nombre[0]} // precio: {ask}',end=' ')
                         if esFinde == False and noMatriz == False:
                             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(ask),order_type=pyRofex.OrderType.LIMIT)
@@ -837,6 +843,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                         except: pass
         
         else: # Ingresa si son BONOS / LETRAS / ON / CEDEARS ////////////////////////////////////////////////////////////////////
+            symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])
             if hora > '16:24:00' and str(nombre[2]).lower() == 'CI': 
                 if hora > '17:01:00': pass
                 else: soloContinua()
