@@ -806,41 +806,37 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
             if nominalDescubierto == False :
                 if bid > abs(costo):                         
                     shtData.range('W'+str(int(nroCelda+1))).value = bid
-                    print('salida sera en ',bid, ganancia, bid - ganancia)
-
                 if not stop and stock > 0:
                     if last <= abs(costo) - ganancia and bid >= last: 
-                        print(f'//___/ SELL STOP /___// - {cantidad} {nombre[0]} // precio: {bid} ',end=' ')
+                        print(f'//___/ SELL x STOP /___// - {cantidad} {nombre[0]} // precio: {bid} ',end=' ')
                         if esFinde == False and noMatriz == False:
                             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
-                        shtData.range('W'+str(int(nroCelda+1))).value = shtData.range('C'+str(int(nroCelda+1))).value
-                        bid -= ganancia
-                        bid = round(bid, -1)
-                        print(f'____/ BUY STOP /___  + {cantidad} {nombre[0]} // precio: {bid}', hora)
-                        if esFinde == False and noMatriz == False:
-                            pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
-                        try: 
-                            shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
+                        try: shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
                         except: pass
 
+                        bid -= ganancia
+                        bid = round(bid, -1)
+                        print(f'____/ BUY el STOP /___  + {cantidad} {nombre[0]} // precio: {bid}', hora)
+                        if esFinde == False and noMatriz == False:
+                            pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
+                        
             else: # OPCION VENDIDA EN DESCUBIERTO
                 if ask < abs(costo): 
                     shtData.range('W'+str(int(nroCelda+1))).value = ask
-
-                if not stop and stock < 0:  
+                if not stop and stock < 0:
                     if last >= abs(costo) + ganancia and ask <= last: 
-                        print(f'//___/ BUY STOP /___// + {cantidad} {nombre[0]} // precio: {ask}',end=' ')
+                        print(f'//___/ BUY x STOP /___// + {cantidad} {nombre[0]} // precio: {ask}',end=' ')
                         if esFinde == False and noMatriz == False:
                             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(ask),order_type=pyRofex.OrderType.LIMIT)
-                        shtData.range('W'+str(int(nroCelda+1))).value = shtData.range('D'+str(int(nroCelda+1))).value
+                        try: shtData.range('U'+str(int(nroCelda+1))).value += abs(cantidad)
+                        except: pass
+
                         ask += ganancia
                         ask = round(ask, -1)
-                        print(f'____/ SELL STOP /___  + {cantidad} {nombre[0]} // precio: {ask}', hora)
+                        print(f'____/ SELL el STOP /___  + {cantidad} {nombre[0]} // precio: {ask}', hora)
                         if esFinde == False and noMatriz == False:
                             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(ask),order_type=pyRofex.OrderType.LIMIT)
-                        try: 
-                            shtData.range('U'+str(int(nroCelda+1))).value += abs(cantidad)
-                        except: pass
+                        
         
         else: # Ingresa si son BONOS / LETRAS / ON / CEDEARS ////////////////////////////////////////////////////////////////////
             symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])
