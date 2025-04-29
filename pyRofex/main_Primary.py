@@ -2,8 +2,13 @@ import pyRofex
 import xlwings as xw
 import time , math
 import pandas as pd
+import os
+import environ
 import yfinance as yf
 import requests
+
+env = environ.Env()
+environ.Env.read_env()
 
 wb = xw.Book('D:\\pyHomeBroker\\epgb.xlsb')
 shtTickers = wb.sheets('pyRofex')
@@ -33,23 +38,28 @@ def loguinHB():
     from pyhomebroker import HomeBroker  
     global hb
     try:
-        hb = HomeBroker(int('284'))
-        hb.auth.login(
-            dni='26386662', 
-            user='piolifl',  
-            password='Bordame02',
-            raise_exception=True)
-        print("online VETA HB  cuenta: 47352 || ", time.strftime("%H:%M:%S"))
+        hb = HomeBroker(int(os.environ.get('broker')))
+        hb.auth.login(dni=str(os.environ.get('dni')), 
+        user=str(os.environ.get('user2')),  
+        password=str(os.environ.get('password2')),
+        raise_exception=True)
+        print("online VETA HB || ", time.strftime("%H:%M:%S"))
     except: 
-        print("    NO se pudo loguear en VETA HOME BROKER 47352    * ", time.strftime("%H:%M:%S"))
+        print(" *  NO se pudo loguear en VETA HOME BROKER  *", time.strftime("%H:%M:%S"))
 diaLaboral()
+
 
 if esFinde == False:
     try:
         pyRofex._set_environment_parameter("url", "https://api.veta.xoms.com.ar/", pyRofex.Environment.LIVE)
         pyRofex._set_environment_parameter("ws", "wss://api.veta.xoms.com.ar/", pyRofex.Environment.LIVE)
-        pyRofex.initialize(user="20263866623", password="Bordame01!", account="47352", environment=pyRofex.Environment.LIVE)
-        print("online VETA OMS cuenta: 47352", end=' || ')
+        pyRofex.initialize(
+            user=str(os.environ.get('user')), 
+            password=str(os.environ.get('password')), 
+            account=str(os.environ.get('account')), 
+            environment=pyRofex.Environment.LIVE)
+
+        print("online VETA OMS * ", end=' || ')
     except: 
         noMatriz = True
         print("No fue posible el logueo con MATRIZ OMS, sigue loguin en HB ... ", end=' || ')
@@ -420,7 +430,7 @@ def stockU(nroCelda):
 
 def stockV(nroCelda):
     stok = shtData.range('V'+str(int(nroCelda))).value
-    stok = 0 if not stok or stok == None or stok == 'None' else stok        
+    stok = 0 if not stok or stok == None or stok == 'None' else stok     
     return int(stok)
 
 def hacerTasa(celda,ladoCompra,ladoVenta):
@@ -639,7 +649,7 @@ def buscoOperaciones(inicio,fin):
     else: scalpi = False
 
     if not shtData.range('X1').value: 
-        inicio,fin = 26,50
+        inicio,fin = 26,60
 
     for valor in shtData.range('P'+str(inicio)+':'+'U'+str(fin)).value:
         try:
@@ -814,7 +824,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                         try: shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
                         except: pass
 
-                        bid -= ganancia
+                        bid -= ganancia * 4
                         bid = round(bid, -1)
                         print(f'____/ BUY el STOP /___  + {cantidad} {nombre[0]} // precio: {bid}', hora)
                         if esFinde == False and noMatriz == False:
@@ -831,7 +841,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                         try: shtData.range('U'+str(int(nroCelda+1))).value += abs(cantidad)
                         except: pass
 
-                        ask += ganancia
+                        ask += ganancia * 4
                         ask = round(ask, -1)
                         print(f'____/ SELL el STOP /___  + {cantidad} {nombre[0]} // precio: {ask}', hora)
                         if esFinde == False and noMatriz == False:
@@ -856,7 +866,9 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
             
             if scalpi == True:
                 if dolar == 'SI' and bid / 100 != abs(costo):
-                    if stock >= 400 or stock == 0: hayMEP = 0
+                    disponible = stockU(nroCelda+1)
+                    if stock > disponible: shtData.range('V'+str(int(nroCelda+1))).value = disponible
+                    if stock >= 500 or stock == 0: hayMEP = 0
                     if hayMEP and hayMEP != 0:
                         shtData.range('W'+str(int(nroCelda+1))).value = bid/100
 
@@ -873,7 +885,9 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)       
                 else:
                     if bid / 100 != abs(costo):
-                        if stock >= 1000 or stock == 0: hayARS = 0
+                        disponible = stockU(nroCelda+1)
+                        if stock > disponible: shtData.range('V'+str(int(nroCelda+1))).value = disponible
+                        if stock >= 500 or stock == 0: hayARS = 0
                         if hayARS:
                             shtData.range('W'+str(int(nroCelda+1))).value = bid/100
 
