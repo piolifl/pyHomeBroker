@@ -794,6 +794,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
     global ganancia, reCompra, descubierto
     dolar = 'NO'
     hora = time.strftime("%H:%M:%S")
+    disponible = stockU(nroCelda+1)
     try:
         last = shtData.range('F'+str(int(nroCelda+1))).value
         if not last or last == None or last == 'None': soloContinua()
@@ -809,10 +810,9 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
 
         if len(nombre) < 2: # Ingresa si son OPCIONES ///////////////////////////////////////////////////////////////////////////
             symbol = "MERV - XMEV - " + str(nombre[0]) + ' - 24hs' 
-            if digitos >= 3: ganancia *= 30
+            if digitos >= 3: ganancia *= 10
             elif digitos > 1: ganancia *= 2
             else: ganancia /= 2
-            
             if nominalDescubierto == False :
                 if bid > abs(costo):                         
                     shtData.range('W'+str(int(nroCelda+1))).value = bid
@@ -821,10 +821,15 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                         print(f'//___/ SELL x STOP /___// - {cantidad} {nombre[0]} // precio: {bid} ',end=' ')
                         if esFinde == False and noMatriz == False:
                             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
-                        try: shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
+                        try: 
+                            if disponible - abs(cantidad) == 0:
+                                shtData.range('U'+str(int(nroCelda+1))).value
+                                shtData.range('W'+str(int(nroCelda+1))).value  = ''
+                            else:
+                                shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
                         except: pass
 
-                        bid -= ganancia * 4
+                        bid -= ganancia * 10
                         bid = round(bid, -1)
                         print(f'____/ BUY el STOP /___  + {cantidad} {nombre[0]} // precio: {bid}', hora)
                         if esFinde == False and noMatriz == False:
@@ -838,10 +843,15 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                         print(f'//___/ BUY x STOP /___// + {cantidad} {nombre[0]} // precio: {ask}',end=' ')
                         if esFinde == False and noMatriz == False:
                             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(ask),order_type=pyRofex.OrderType.LIMIT)
-                        try: shtData.range('U'+str(int(nroCelda+1))).value += abs(cantidad)
+                        try: 
+                            if disponible + abs(cantidad) == 0:
+                                shtData.range('U'+str(int(nroCelda+1))).value
+                                shtData.range('W'+str(int(nroCelda+1))).value  = ''
+                            else:
+                                shtData.range('U'+str(int(nroCelda+1))).value += abs(cantidad)
                         except: pass
 
-                        ask += ganancia * 4
+                        ask += ganancia * 10
                         ask = round(ask, -1)
                         print(f'____/ SELL el STOP /___  + {cantidad} {nombre[0]} // precio: {ask}', hora)
                         if esFinde == False and noMatriz == False:
@@ -866,7 +876,6 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
             
             if scalpi == True:
                 if dolar == 'SI' and bid / 100 != abs(costo):
-                    disponible = stockU(nroCelda+1)
                     if stock > disponible: shtData.range('V'+str(int(nroCelda+1))).value = disponible
                     if stock >= 500 or stock == 0: hayMEP = 0
                     if hayMEP and hayMEP != 0:
@@ -885,7 +894,6 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)       
                 else:
                     if bid / 100 != abs(costo):
-                        disponible = stockU(nroCelda+1)
                         if stock > disponible: shtData.range('V'+str(int(nroCelda+1))).value = disponible
                         if stock >= 500 or stock == 0: hayARS = 0
                         if hayARS:
@@ -913,7 +921,11 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                     if esFinde == False and noMatriz == False:
                         pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
                     try:
-                        shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad) 
+                        if disponible - abs(cantidad) == 0:
+                                shtData.range('U'+str(int(nroCelda+1))).value
+                                shtData.range('W'+str(int(nroCelda+1))).value  = ''
+                        else:
+                            shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad) 
                     except: pass
                     shtData.range('W'+str(int(nroCelda+1))).value = shtData.range('C'+str(int(nroCelda+1))).value / 100
                     if dolar == 'SI':
