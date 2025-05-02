@@ -31,7 +31,7 @@ scalpi = False
     
 def diaLaboral():
     global esFinde
-    hoyEs = time.strftime("%A")
+    hoyEs =  time.strftime("%A")
     if hoyEs == 'Saturday' or hoyEs == 'Sunday':
         esFinde = True
 def loguinHB():
@@ -43,7 +43,7 @@ def loguinHB():
         user=str(os.environ.get('user2')),  
         password=str(os.environ.get('password2')),
         raise_exception=True)
-        print("online VETA HB || ", time.strftime("%H:%M:%S"))
+        print("*** online en HB VETA *** ", time.strftime("%H:%M:%S"))
     except: 
         print(" *  NO se pudo loguear en VETA HOME BROKER  *", time.strftime("%H:%M:%S"))
 diaLaboral()
@@ -59,7 +59,7 @@ if esFinde == False:
             account=str(os.environ.get('account')), 
             environment=pyRofex.Environment.LIVE)
 
-        print("online VETA OMS * ", end=' || ')
+        print("*** online en MATRIZ OMS VETA *** ", end=' || ')
     except: 
         noMatriz = True
         print("No fue posible el logueo con MATRIZ OMS, sigue loguin en HB ... ", end=' || ')
@@ -223,11 +223,14 @@ def getPortfolioHB(hb, comitente, tipo):
                                 shtData.range('U'+str(int(valor[15]+1))).value = int(x[2])
                                 if tipo == 1:
                                     if len(ticker) < 2: 
+                                        if shtData.range('W'+str(int(valor[15]+1))).value == '':
+                                            shtData.range('W'+str(int(valor[15]+1))).value = valor[5]
                                         shtData.range('X'+str(int(valor[15]+1))).value = float(x[1])
                                     else:
+                                        if shtData.range('W'+str(int(valor[15]+1))).value == '':
+                                            shtData.range('W'+str(int(valor[15]+1))).value = valor[5] / 100
                                         shtData.range('X'+str(int(valor[15]+1))).value = float(x[1]) / 100
 
-        #hb.online.disconnect()
     except: pass
 
 def cancelaCompraHB(celda):
@@ -811,7 +814,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
         if len(nombre) < 2: # Ingresa si son OPCIONES ///////////////////////////////////////////////////////////////////////////
             symbol = "MERV - XMEV - " + str(nombre[0]) + ' - 24hs' 
             if digitos >= 3: ganancia *= 10
-            elif digitos > 1: ganancia *= 2
+            elif digitos > 1: ganancia *= 20
             else: ganancia /= 2
             if nominalDescubierto == False :
                 if bid > abs(costo):                         
@@ -823,7 +826,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
                         try: 
                             if disponible - abs(cantidad) == 0:
-                                shtData.range('U'+str(int(nroCelda+1))).value
+                                shtData.range('U'+str(int(nroCelda+1))+':X'+str(int(nroCelda+1))).value = ''
                                 shtData.range('W'+str(int(nroCelda+1))).value  = ''
                             else:
                                 shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
@@ -845,7 +848,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(ask),order_type=pyRofex.OrderType.LIMIT)
                         try: 
                             if disponible + abs(cantidad) == 0:
-                                shtData.range('U'+str(int(nroCelda+1))).value
+                                shtData.range('U'+str(int(nroCelda+1))+':X'+str(int(nroCelda+1))).value = ''
                                 shtData.range('W'+str(int(nroCelda+1))).value  = ''
                             else:
                                 shtData.range('U'+str(int(nroCelda+1))).value += abs(cantidad)
@@ -922,7 +925,8 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                         pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
                     try:
                         if disponible - abs(cantidad) == 0:
-                                shtData.range('U'+str(int(nroCelda+1))).value
+                                shtData.range('U'+str(int(nroCelda+1))).value = ''
+                                shtData.range('W'+str(int(nroCelda+1))+':X'+str(int(nroCelda+1))).value = ''
                                 shtData.range('W'+str(int(nroCelda+1))).value  = ''
                         else:
                             shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad) 
