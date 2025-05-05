@@ -222,13 +222,12 @@ def getPortfolioHB(hb, comitente, tipo):
                             if x[0] == ticker[0]: 
                                 shtData.range('U'+str(int(valor[15]+1))).value = int(x[2])
                                 if tipo == 1:
+                                    limpiarW = shtData.range('W'+str(int(valor[15]+1))).value
                                     if len(ticker) < 2: 
-                                        if shtData.range('W'+str(int(valor[15]+1))).value == '':
-                                            shtData.range('W'+str(int(valor[15]+1))).value = valor[5]
+                                        if not limpiarW: shtData.range('W'+str(int(valor[15]+1))).value = valor[5]
                                         shtData.range('X'+str(int(valor[15]+1))).value = float(x[1])
                                     else:
-                                        if shtData.range('W'+str(int(valor[15]+1))).value == '':
-                                            shtData.range('W'+str(int(valor[15]+1))).value = valor[5] / 100
+                                        if not limpiarW: shtData.range('W'+str(int(valor[15]+1))).value = valor[5] / 100
                                         shtData.range('X'+str(int(valor[15]+1))).value = float(x[1]) / 100
 
     except: pass
@@ -647,12 +646,13 @@ def buscoOperaciones(inicio,fin):
     if not shtData.range('T1').value: 
         inicio,fin = 2,25
         roll() # RULO AUTOMATICO activado por columna O
-    
-    if not shtData.range('W1').value: scalpi = True
-    else: scalpi = False
 
     if not shtData.range('X1').value: 
         inicio,fin = 26,60
+    elif not shtData.range('W1').value:
+        inicio,fin = 26,29
+        scalpi = True
+    else: scalpi = False
 
     for valor in shtData.range('P'+str(inicio)+':'+'U'+str(fin)).value:
         try:
@@ -830,6 +830,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                                 shtData.range('W'+str(int(nroCelda+1))).value  = ''
                             else:
                                 shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
+                                shtData.range('W'+str(int(nroCelda+1))).value = bid
                         except: pass
 
                         bid -= ganancia * 10
@@ -852,6 +853,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                                 shtData.range('W'+str(int(nroCelda+1))).value  = ''
                             else:
                                 shtData.range('U'+str(int(nroCelda+1))).value += abs(cantidad)
+                                shtData.range('W'+str(int(nroCelda+1))).value = ask
                         except: pass
 
                         ask += ganancia * 10
@@ -880,16 +882,15 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
             if scalpi == True:
                 if dolar == 'SI' and bid / 100 != abs(costo):
                     if stock > disponible: shtData.range('V'+str(int(nroCelda+1))).value = disponible
-                    if stock >= 500 or stock == 0: hayMEP = 0
-                    if hayMEP and hayMEP != 0:
+                    if stock >= 200 or stock == 0: 
+                        hayMEP = False
+                    if hayMEP:
                         shtData.range('W'+str(int(nroCelda+1))).value = bid/100
-
-                        try: shtData.range('V'+str(int(nroCelda+1))).value += cantidad
-                        except: pass
-
                         print(f'____/ BUY SCALPING AUTO USD /___  + {cantidad} {nombre[0]} // precio: {bid}',end=' ')
                         if esFinde == False and noMatriz == False: 
                             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
+                        try: shtData.range('V'+str(int(nroCelda+1))).value += cantidad
+                        except: pass
                         bid += ganancia * 20
                         bid = round(bid, 2)
                         print(f'//___/ SELL /___ - {cantidad} {nombre[0]} // precio: {bid} ', hora)
@@ -898,7 +899,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                 else:
                     if bid / 100 != abs(costo):
                         if stock > disponible: shtData.range('V'+str(int(nroCelda+1))).value = disponible
-                        if stock >= 500 or stock == 0: hayARS = 0
+                        if stock >= 500 or stock == 0: hayARS = False
                         if hayARS:
                             shtData.range('W'+str(int(nroCelda+1))).value = bid/100
 
@@ -931,7 +932,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                         else:
                             shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad) 
                     except: pass
-                    shtData.range('W'+str(int(nroCelda+1))).value = shtData.range('C'+str(int(nroCelda+1))).value / 100
+                    shtData.range('W'+str(int(nroCelda+1))).value = bid / 100
                     if dolar == 'SI':
                         bid -= ganancia * 200
                         bid = round(bid, 2)
