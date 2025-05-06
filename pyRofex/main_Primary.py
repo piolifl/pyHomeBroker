@@ -977,7 +977,7 @@ def baseEjercible(celda=int):
 def verificaMariposa(celda=int):
     activo = shtData.range('AB30').value
     if str(activo).upper() == 'B':
-        valor = shtData.range('AB'+str(int(celda+1))).value
+        valor = shtData.range('Z'+str(int(celda+1))).value
         try:
             if valor > 10: 
                 mariposas(celda)
