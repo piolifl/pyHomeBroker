@@ -31,7 +31,7 @@ scalpi = False
     
 def diaLaboral():
     global esFinde
-    hoyEs =  time.strftime("%A")
+    hoyEs = time.strftime("%A")
     if hoyEs == 'Saturday' or hoyEs == 'Sunday':
         esFinde = True
 def loguinHB():
@@ -679,6 +679,7 @@ def buscoOperaciones(inicio,fin):
             elif str(valor[1]).lower() == 'rr' and posicionRulo(valor[0]+1) == 'ok': buyRollPlus(valor[0]+1)
             elif str(valor[1]).lower() == 'p': getPortfolioHB(hb,'47352',1)
             elif str(valor[1]).lower() == 'm': baseEjercible(valor[0])
+            elif str(valor[1]).lower() == 'cm': cerrarMariposa(valor[0])
             elif str(valor[1]).lower() == 'sm': verificaMariposa(valor[0])
             elif str(valor[1]).lower() == 't': hacerTasa(valor[0],'C','D')
             elif valor[1] == '+': 
@@ -1023,6 +1024,41 @@ def mariposas(celda=int):
     except:
         print('Falla al intentar una mariposa con: ', shtData.range('A'+str(celda)).value)
         shtData.range('Q'+str(celda)).value = ''
+
+def cerrarMariposa(celda=int):
+    nominales = 1
+    try: 
+        nombre = str(shtData.range('A'+str(int(celda+1))).value).split()
+        precio = shtData.range('D'+str(int(celda+1))).value
+        symbol = "MERV - XMEV - " + str(nombre[0]) + ' - 24hs'
+        print(f'___/ cierra MARIPOSA AUT /___ + {int(nominales)} {nombre[0]} {precio} ', end='|')
+        if esFinde == False and noMatriz == False: 
+            pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
+
+        nombre = str(shtData.range('A'+str(int(celda))).value).split()
+        precio = shtData.range('C'+str(int(celda))).value
+        symbol = "MERV - XMEV - " + str(nombre[0]) + ' - 24hs'
+        print(f' - {nominales} {nombre[0]} {precio} ', end='|')
+        if esFinde == False and noMatriz == False:
+            pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
+
+        nombre = str(shtData.range('A'+str(int(celda+1))).value).split()
+        precio = shtData.range('D'+str(int(celda+1))).value
+        symbol = "MERV - XMEV - " + str(nombre[0]) + ' - 24hs'
+        print(f' + {nominales} {nombre[0]} {precio} ', end='|')
+        if esFinde == False and noMatriz == False: 
+            pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
+
+        nombre = str(shtData.range('A'+str(int(celda+2))).value).split()
+        precio = shtData.range('C'+str(int(celda+2))).value
+        symbol = "MERV - XMEV - " + str(nombre[0]) + ' - 24hs'
+        print(f' - {nominales} {nombre[0]} {precio} ')
+        if esFinde == False and noMatriz == False:
+            pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
+    except:
+        print('Falla al intentar una mariposa con: ', shtData.range('A'+str(celda)).value)
+        shtData.range('Q'+str(celda)).value = ''
+
 # FIN de MARIPOSAS ---------------------------------------------
 
 vuelta = 0
