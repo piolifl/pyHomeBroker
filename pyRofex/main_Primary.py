@@ -28,6 +28,8 @@ reCompra = False
 esFinde = False
 noMatriz = False
 scalpi = False
+cantidad = 0
+nombre = ''
     
 def diaLaboral():
     global esFinde
@@ -260,6 +262,8 @@ def cancelarVentaHB(celda):
     shtData.range('AD'+str(int(celda+1))+':'+'AE'+str(int(celda+1))).value = ''
 
 def soloContinua():
+    global cantidad
+    cantidad = 0
     pass
 
 def namesArs(nombre,plazo): 
@@ -649,7 +653,10 @@ def buscoOperaciones(inicio,fin):
         roll() # RULO AUTOMATICO activado por columna O
 
     if not shtData.range('W1').value:
+        inicio += 24
         scalpi = True
+    elif not shtData.range('X1').value:
+        inicio += 24
     else: scalpi = False
 
     for valor in shtData.range('P'+str(inicio)+':'+'U'+str(fin)).value:
@@ -679,7 +686,7 @@ def buscoOperaciones(inicio,fin):
             elif str(valor[1]).lower() == 'rr' and posicionRulo(valor[0]+1) == 'ok': buyRollPlus(valor[0]+1)
             elif str(valor[1]).lower() == 'p': getPortfolioHB(hb,'47352',1)
             elif str(valor[1]).lower() == 'm': baseEjercible(valor[0])
-            elif str(valor[1]).lower() == 'cm': cerrarMariposa(valor[0])
+            elif str(valor[1]).lower() == 'c': cerrarMariposa(valor[0])
             elif str(valor[1]).lower() == 'sm': verificaMariposa(valor[0])
             elif str(valor[1]).lower() == 't': hacerTasa(valor[0],'C','D')
             elif valor[1] == '+': 
@@ -735,6 +742,7 @@ def buscoOperaciones(inicio,fin):
                 try: enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[4],valor[0]) # Vendo Ask
                 except: shtData.range('T'+str(int(valor[0]+1))).value = ''
             shtData.range('T'+str(int(valor[0]+1))).value = ''
+        
 
 def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     global reCompra, descubierto
@@ -941,8 +949,9 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                     print(f'___BUY el STOP___  + {cantidad} {nombre[0]} {nombre[2]} {int(bid)}', hora)
                     if esFinde == False and noMatriz == False:
                         pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
-
     except: pass
+    cantidad = 0
+    nombre = ''
 
 # OPCIONES: estrategia tipo MARIPOSA ------------------------
 def baseEjercible(celda=int):
