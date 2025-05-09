@@ -1,7 +1,8 @@
-import time
+import yfinance as yf
 
-hora1 = time.time()
-hora2 = 1745174819.5163105
-print(hora1)
-if hora2 <= hora1:
-    print(hora1+100)
+
+
+valorAdr = yf.download(['GGAL'],period='1d',interval='1d',auto_adjust=False)['Close'].values
+    #valorAdr = yf.download(['GGAL','YPF'],period='1d',interval='1d',auto_adjust=False)['Close'].values
+
+print(valorAdr[0][0])

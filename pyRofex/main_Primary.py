@@ -4,7 +4,7 @@ import time , math
 import pandas as pd
 import os
 import environ
-import yfinance as yf
+#import yfinance as yf
 import requests
 
 env = environ.Env()
@@ -408,11 +408,12 @@ def preparaRulo(monedaInicial):
     cargoXplazo(tikers,monedaInicial)
 
 def traerADR():
-    valorAdr = yf.download(['GGAL'],period='1d',interval='1d',auto_adjust=False)['Close'].values
+    pass
+    '''valorAdr = yf.download(['GGAL'],period='1d',interval='1d',auto_adjust=False)['Close'].values
     #valorAdr = yf.download(['GGAL','YPF'],period='1d',interval='1d',auto_adjust=False)['Close'].values
     shtData.range('Z61').value = valorAdr[0][0]
     #shtData.range('Z63').value = valorAdr[0][1]
-    shtData.range('Y62').value = time.strftime("%H:%M:%S")
+    shtData.range('Y62').value = time.strftime("%H:%M:%S")'''
     
 def ruloAutomatico(celda): # Rulo automatico para HOME BROKER
     if celda+1 == 2 or celda+1 == 6 or celda+1 == 8 or celda+1 == 14 or celda+1 == 18 or celda+1 == 22:
@@ -653,10 +654,10 @@ def buscoOperaciones(inicio,fin):
         roll() # RULO AUTOMATICO activado por columna O
 
     if not shtData.range('W1').value:
-        inicio += 24
+        inicio = 26
         scalpi = True
     elif not shtData.range('X1').value:
-        inicio += 24
+        inicio = 26
     else: scalpi = False
 
     for valor in shtData.range('P'+str(inicio)+':'+'U'+str(fin)).value:
@@ -889,7 +890,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
             if scalpi == True:
                 if dolar == 'SI' and bid / 100 != abs(costo):
                     if stock > disponible: shtData.range('V'+str(int(nroCelda+1))).value = disponible
-                    if stock >= 400 or stock == 0: 
+                    if stock >= 1000 or stock == 0: 
                         hayMEP = False
                     if hayMEP:
                         shtData.range('W'+str(int(nroCelda+1))).value = bid/100
@@ -906,7 +907,7 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                 else:
                     if bid / 100 != abs(costo):
                         if stock > disponible: shtData.range('V'+str(int(nroCelda+1))).value = disponible
-                        if stock >= 700 or stock == 0: hayARS = False
+                        if stock >= 2000 or stock == 0: hayARS = False
                         if hayARS:
                             shtData.range('W'+str(int(nroCelda+1))).value = bid/100
 
