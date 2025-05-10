@@ -4,8 +4,10 @@ import time , math
 import pandas as pd
 import os
 import environ
-#import yfinance as yf
 import requests
+
+#import yfinance as yf
+
 
 env = environ.Env()
 environ.Env.read_env()
@@ -651,12 +653,14 @@ def buscoOperaciones(inicio,fin):
     hora = time.strftime("%H:%M:%S")
     if not shtData.range('T1').value: 
         inicio,fin = 2,25
+        shtData.range('W1').value = 'SCALP'
+        shtData.range('X1').value = 'STOP'
         roll() # RULO AUTOMATICO activado por columna O
 
-    if not shtData.range('W1').value:
-        inicio = 26
+    if not shtData.range('W1').value: # SCALPING
+        inicio,fin = 26,29
         scalpi = True
-    elif not shtData.range('X1').value:
+    elif not shtData.range('X1').value: # STOP LOSS Y RECOMPRA
         inicio = 26
     else: scalpi = False
 
@@ -951,8 +955,6 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
                     if esFinde == False and noMatriz == False:
                         pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
     except: pass
-    cantidad = 0
-    nombre = ''
 
 # OPCIONES: estrategia tipo MARIPOSA ------------------------
 def baseEjercible(celda=int):
@@ -1117,7 +1119,7 @@ while True:
                     print('Hubo un error al traer datos del portafolio')
             else: vueltaPortfolio += 1
             
-        if not shtData.range('S1').value:
+        '''if not shtData.range('S1').value:
             try:
                 if vuelta > 25: 
                     traerADR()
@@ -1125,7 +1127,7 @@ while True:
                 else: vuelta += 1
             except:
                 shtData.range('Z61').value = 0
-                shtData.range('Z63').value = 0
+                shtData.range('Z63').value = 0'''
     #shtOperaciones.range('AI63').options(index=False, headers=False).value = operaciones
     time.sleep(2)
 
