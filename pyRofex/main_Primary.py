@@ -19,8 +19,8 @@ shtData.range('A1').value = 'symbol'
 shtData.range('Q1').value = 'PRC'
 shtData.range('S1').value = 'ADR'
 shtData.range('T1').value = 'ROLL'
-shtData.range('W1').value = 'SELL'
-shtData.range('X1').value = 'BUY'
+
+shtData.range('X1').value = 'STOP'
 shtData.range('Y1').value = 'VETA'
 shtData.range('Z1').value = 0.5
 shtData.range('V26:V29').value = 0
@@ -315,64 +315,143 @@ def cargoXplazo(dicc,moneda):
     mepCcl = namesMep(dicc['cclCI'][0],' - CI')
     mepCcl24 = namesMep(dicc['ccl24'][0],' - 24hs')
 
-    if str(moneda).upper() == 'P':
+    if str(moneda).upper() == 'PD':
         shtData.range('A2').value = namesArs(dicc['mepCI'][0],' - CI')
         shtData.range('A3').value = mejorMep
         shtData.range('A4').value = 'AL30D - CI'
         shtData.range('A5').value = 'AL30 - CI'
-    elif str(moneda).upper() == 'D':
-        shtData.range('A2').value = mejorMep
-        shtData.range('A3').value = namesArs(dicc['mepCI'][0],' - CI')
-        shtData.range('A4').value = 'AL30 - CI'
-        shtData.range('A5').value = 'AL30D - CI'
-    elif str(moneda).upper() == 'C':
-        shtData.range('A2').value = namesMep(dicc['cclCI'][0],' - CI')
-        shtData.range('A3').value = mejorCcl
-        shtData.range('A4').value = 'AL30C - CI'
-        shtData.range('A5').value = 'AL30D - CI'
-        
-    if str(moneda).upper() == 'P':
         shtData.range('A6').value = namesArs(dicc['mep24'][0],' - 24hs')
         shtData.range('A7').value = mejorMep24
         shtData.range('A8').value = 'AL30D - 24hs'
         shtData.range('A9').value = 'AL30 - 24hs'
-    elif str(moneda).upper() == 'D':
+        shtData.range('A10').value = namesArs(dicc['mepCI'][0],' - CI')
+        shtData.range('A11').value = mejorMep
+        shtData.range('A12').value = mepArs
+        shtData.range('A13').value = dicc['arsCImep'][0]
+        shtData.range('A14').value = namesArs(dicc['mep24'][0],' - 24hs')
+        shtData.range('A15').value = mejorMep24
+        shtData.range('A16').value = mepArs24
+        shtData.range('A17').value = dicc['ars24mep'][0]
+        # ---------------------------------------------------
+        shtData.range('A26').value = namesArs(dicc['mep24'][0],' - 24hs')
+        shtData.range('A27').value = mejorMep24
+        shtData.range('A28').value = 'AL30 - 24hs'
+        shtData.range('A29').value = 'AL30D - 24hs'
+        
+    elif str(moneda).upper() == 'PC':
+        shtData.range('A2').value = namesArs(dicc['cclCI'][0],' - CI')
+        shtData.range('A3').value = mejorCcl
+        shtData.range('A4').value = 'AL30C - CI'
+        shtData.range('A5').value = 'AL30 - CI'
+        shtData.range('A6').value = namesArs(dicc['ccl24'][0],' - 24hs')
+        shtData.range('A7').value = mejorCcl24
+        shtData.range('A8').value = 'AL30C - 24hs'
+        shtData.range('A9').value = 'AL30 - 24hs'
+        shtData.range('A10').value = namesArs(dicc['cclCI'][0],' - CI')
+        shtData.range('A11').value = mejorCcl
+        shtData.range('A12').value = namesCcl(dicc['arsCIccl'][0],' - CI')
+        shtData.range('A13').value = dicc['arsCIccl'][0]
+        shtData.range('A14').value = namesArs(dicc['ccl24'][0],' - 24hs')
+        shtData.range('A15').value = mejorCcl24
+        shtData.range('A16').value = namesCcl(dicc['ars24ccl'][0],' - 24hs')
+        shtData.range('A17').value = dicc['ars24ccl'][0]
+        # ---------------------------------------------------
+        shtData.range('A26').value = namesArs(dicc['ccl24'][0],' - 24hs')
+        shtData.range('A27').value = mejorCcl24
+        shtData.range('A28').value = 'AL30C - 24hs'
+        shtData.range('A29').value = 'AL30 - 24hs'
+
+    if str(moneda).upper() == 'DP':
+        shtData.range('A2').value = mejorMep
+        shtData.range('A3').value = namesArs(dicc['mepCI'][0],' - CI')
+        shtData.range('A4').value = 'AL30 - CI'
+        shtData.range('A5').value = 'AL30D - CI'
         shtData.range('A6').value = mejorMep24
         shtData.range('A7').value = namesArs(dicc['mep24'][0],' - 24hs')
         shtData.range('A8').value = 'AL30 - 24hs'
         shtData.range('A9').value = 'AL30D - 24hs'
-    elif str(moneda).upper() == 'C':
-        shtData.range('A6').value = namesMep(dicc['ccl24'][0],' - 24hs')
-        shtData.range('A7').value = mejorCcl24
+        shtData.range('A10').value = mejorMep
+        shtData.range('A11').value = namesArs(dicc['mepCI'][0],' - CI')
+        shtData.range('A12').value = dicc['arsCImep'][0]
+        shtData.range('A13').value = namesMep(dicc['arsCImep'][0],' - CI')
+        shtData.range('A14').value = mejorMep24
+        shtData.range('A15').value = namesArs(dicc['mep24'][0],' - 24hs')
+        shtData.range('A16').value = dicc['ars24mep'][0]
+        shtData.range('A17').value = namesMep(dicc['ars24mep'][0],' - 24hs')
+        # -------------------------------------------------------
+        shtData.range('A26').value = mejorMep24
+        shtData.range('A27').value = namesArs(dicc['mep24'][0],' - 24hs')
+        shtData.range('A28').value = 'AL30D - 24hs'
+        shtData.range('A29').value = 'AL30 - 24hs'
+
+
+    elif str(moneda).upper() == 'DC':
+        shtData.range('A2').value = mejorMep
+        shtData.range('A3').value = namesCcl(dicc['mepCI'][0],' - CI')
+        shtData.range('A4').value = 'AL30C - CI'
+        shtData.range('A5').value = 'AL30D - CI'
+        shtData.range('A6').value = mejorMep24
+        shtData.range('A7').value = namesCcl(dicc['mep24'][0],' - 24hs')
         shtData.range('A8').value = 'AL30C - 24hs'
         shtData.range('A9').value = 'AL30D - 24hs'
-        
-    shtData.range('A10').value = dicc['arsCImep'][0]
+        shtData.range('A10').value = mejorMep
+        shtData.range('A11').value = namesCcl(dicc['mepCI'][0],' - CI')
+        shtData.range('A12').value = mejorCcl
+        shtData.range('A13').value = namesMep(dicc['cclCI'][0],' - CI')
+        shtData.range('A14').value = mejorMep24
+        shtData.range('A15').value = namesCcl(dicc['mep24'][0],' - 24hs')
+        shtData.range('A16').value = mejorCcl24
+        shtData.range('A17').value = namesMep(dicc['ccl24'][0],' - 24hs')
+    
+    if str(moneda).upper() == 'CP':
+        shtData.range('A2').value = mejorCcl
+        shtData.range('A3').value = namesArs(dicc['cclCI'][0],' - CI')
+        shtData.range('A4').value = 'AL30 - CI'
+        shtData.range('A5').value = 'AL30C - CI'
+        shtData.range('A6').value = mejorCcl24
+        shtData.range('A7').value = namesArs(dicc['ccl24'][0],' - 24hs')
+        shtData.range('A8').value = 'AL30 - 24hs'
+        shtData.range('A9').value = 'AL30C - 24hs'
+        # --------------------------------------------------
+        shtData.range('A26').value = mejorCcl24
+        shtData.range('A27').value = namesArs(dicc['ccl24'][0],' - 24hs')
+        shtData.range('A28').value = 'AL30 - 24hs'
+        shtData.range('A29').value = 'AL30C - 24hs'
+
+    elif str(moneda).upper() == 'CD':
+        shtData.range('A2').value = mejorCcl
+        shtData.range('A3').value = namesMep(dicc['cclCI'][0],' - CI')
+        shtData.range('A4').value = 'AL30D - CI'
+        shtData.range('A5').value = 'AL30C - CI'
+        shtData.range('A6').value = mejorCcl24
+        shtData.range('A7').value = namesMep(dicc['ccl24'][0],' - 24hs')
+        shtData.range('A8').value = 'AL30D - 24hs'
+        shtData.range('A9').value = 'AL30C - 24hs'
+ 
+
+    '''shtData.range('A10').value = dicc['arsCImep'][0]
     shtData.range('A11').value = mepArs
     shtData.range('A12').value = mejorMep
     shtData.range('A13').value = namesArs(dicc['mepCI'][0],' - CI')
-    
     shtData.range('A14').value = dicc['ars24mep'][0]
     shtData.range('A15').value = mepArs24
     shtData.range('A16').value = mejorMep24
     shtData.range('A17').value = namesArs(dicc['mep24'][0],' - 24hs')
-    
     shtData.range('A18').value = dicc['cclCI'][0]
     shtData.range('A19').value = mepCcl
     shtData.range('A20').value = mejorMep
     shtData.range('A21').value = namesCcl(dicc['mepCI'][0],' - CI')
-    
     shtData.range('A22').value = dicc['ccl24'][0]
     shtData.range('A23').value = mepCcl24
     shtData.range('A24').value = mejorMep24
     shtData.range('A25').value = namesCcl(dicc['mep24'][0],' - 24hs')
 
-    # ---------------------------------------------------
-    shtData.range('A26').value = 'AL30 - 24hs'
-    shtData.range('A27').value = 'AL30D - 24hs'
-    shtData.range('A28').value = namesArs(dicc['mep24'][0],' - 24hs')
-    shtData.range('A29').value = mejorMep24
+    {'cclCI': ['AL30C - CI', 1156.071964017991], 'ccl24': ['AL30C - 24hs', 0.9878100531348846], 
+         'mepCI': ['AL41D - CI', 1.001461810048996], 'mep24': ['GD38D - 24hs', 1.0023826834418272], 
+         'arsCIccl': ['AL30 - CI', 1156.071964017991], 'ars24ccl': ['GD30 - 24hs', 1157.8330893118593], 
+         'arsCImep': ['AE38 - CI', 1143.4628975265018], 'ars24mep': ['AL35 - 24hs', 1145.8394160583941]}
     
+    '''
     shtData.range('A1').value = 'symbol'
 
 def preparaRulo(monedaInicial):
@@ -654,7 +733,7 @@ def posicionRulo(celda):
     if celda==2 or celda==6 or celda==8 or celda==10 or celda==14 or celda==18 or celda==22:
         return 'ok'
 
-def usdBuy(celda,ladoCompra,ladoVenta):
+def operaUsd(celda,ladoCompra,ladoVenta):
     compra = str(shtData.range('A'+str(int(celda))).value).split()
     if len(compra) < 2: pass
     else:
@@ -678,78 +757,29 @@ def usdBuy(celda,ladoCompra,ladoVenta):
                 else: pass
         else: pass
 
-def usdSell(celda,ladoCompra,ladoVenta):
-    compra = str(shtData.range('A'+str(int(celda))).value).split()
-    if len(compra) < 2: pass
-    else:
-        if compra[2] == '24hs': 
-            vende = str(shtData.range('A'+str(int(celda-1))).value).split()
-            if len(vende) < 2: pass
-            else:
-                if vende[2] == '24hs':
-                    nominales = cantidadAuto(celda)
-                    ask = shtData.range(str(ladoCompra)+str(int(celda))).value
-                    symbol = "MERV - XMEV - " + str(compra[0]) + ' - ' + str(compra[2])
-                    print(f'___/ sell USD + {int(nominales)} {compra[0]} {compra[2]} {ask} ',end=' | ')
-                    if esFinde == False and noMatriz == False:
-                        pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(ask),order_type=pyRofex.OrderType.LIMIT)
-
-                    bid = shtData.range(str(ladoVenta)+str(int(celda-1))).value
-                    symbol = "MERV - XMEV - " + str(vende[0]) + ' - ' + str(vende[2])
-                    print(f'___/ - {int(nominales)} {vende[0]} {vende[2]} {bid}')
-                    if esFinde == False and noMatriz == False:
-                        pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(nominales)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
-                else: pass
-        else: pass
-
 def buscoOperaciones(inicio,fin):
-    #global scalpi
     hora = time.strftime("%H:%M:%S")
     if hora <= '11:01:00': soloContinua()
-    precioDolar = shtData.range('AA1').value
     if not shtData.range('T1').value: 
         inicio,fin = 2,25
-        shtData.range('W1').value = 'SELL'
-        shtData.range('X1').value = 'BUY'
+        shtData.range('X1').value = 'STOP'
         roll() # RULO AUTOMATICO activado por columna O
 
-    '''if not shtData.range('W1').value: # SCALPING
-        inicio,fin = 26,29
-        scalpi = True
-    elif not shtData.range('X1').value: # STOP LOSS Y RECOMPRA
-        inicio = 26
-    else: scalpi = False'''
-
-
-
     for valor in shtData.range('P'+str(inicio)+':'+'U'+str(fin)).value:
-        '''
         try:
-            if hora <= '11:01:00': pass
-            else:
-                if scalpi == True:
-                    stockScalping = stockV(valor[0]+1)
-                    if stockScalping == 0: pass
-                    else:
-                        nominalDescubierto = True if stockScalping < 0 else False
-                        cantidad = cantidadAuto(valor[0]+1)
-                        if cantidad != 0:
-                            trailingStop('A'+str((int(valor[0]+1))),cantidad,int(valor[0]),nominalDescubierto,stockScalping)
-                            
-                elif not valor[5] or valor[5] == 0:
-                    pass  
-                else: 
-                    nominalDescubierto = True if valor[5] < 0 else False
-                    cantidad = cantidadAuto(valor[0]+1)
-                    if cantidad != 0:
-                        trailingStop('A'+str((int(valor[0]+1))),cantidad,int(valor[0]),nominalDescubierto,valor[5])
-        except: pass'''
+            if not valor[5] or valor[5] == 0:
+                pass  
+            else: 
+                nominalDescubierto = True if valor[5] < 0 else False
+                cantidad = cantidadAuto(valor[0]+1)
+                if cantidad != 0:
+                    trailingStop('A'+str((int(valor[0]+1))),cantidad,int(valor[0]),nominalDescubierto,valor[5])
+        except: pass
 
         if valor[1]: # # Columna Q en el excel /////////////////////////////////////////////////////////////////////////////////
             if str(valor[1]).lower() == 'r' and posicionRulo(valor[0]+1) == 'ok': buyRoll(valor[0]+1)
             elif str(valor[1]).lower() == 'rr' and posicionRulo(valor[0]+1) == 'ok': buyRollPlus(valor[0]+1)
-            elif str(valor[1]).lower() == 'b': usdBuy(valor[0]+1,'D','C')
-            elif str(valor[1]).lower() == 's': usdSell(valor[0]+1,'D','C')
+            elif str(valor[1]).lower() == 'c': operaUsd(valor[0]+1,'D','C')
             elif str(valor[1]).lower() == 'p': getPortfolioHB(hb,'47352',1)
             elif str(valor[1]).lower() == 'm': baseEjercible(valor[0])
             elif str(valor[1]).lower() == 'c': cerrarMariposa(valor[0])
@@ -768,6 +798,7 @@ def buscoOperaciones(inicio,fin):
 
         if valor[2]: #  Columna R en el excel //////////////////////////////////////////////////////////////////////////////////
             if str(valor[2]).lower() == 'r' and posicionRulo(valor[0]+1) == 'ok': buyRoll(valor[0]+1)
+            elif str(valor[2]).lower() == 'c': operaUsd(valor[0]+1,'C','D')
             elif str(valor[2]).lower() == 'p': getPortfolioHB(hb,'47352',1)
             elif str(valor[2]).lower() == 't': hacerTasa(valor[0],'D','D')
             elif valor[2] == '+': 
@@ -933,7 +964,6 @@ def bullOpciones(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,stock
                         if esFinde == False and noMatriz == False:
                             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(ask),order_type=pyRofex.OrderType.LIMIT)
     except: pass
-
 
 
 def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,stock=int):
