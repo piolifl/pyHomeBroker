@@ -208,7 +208,7 @@ def getPortfolioHB(hb, comitente, tipo):
         except: shtData.range('M1').value = 0
         try: 
             shtData.range('O1').value = portfolio['Result']['Activos'][0]['Subtotal'][1]['APERTURA'][1]['ACUM']
-            print('USD MEP:', portfolio['Result']['Activos'][0]['Subtotal'][1]['APERTURA'][1]['ACUM'], ' || ',time.strftime("%H:%M:%S") )
+            print('USD MEP:', portfolio['Result']['Activos'][0]['Subtotal'][2]['APERTURA'][1]['ACUM'], ' || ',time.strftime("%H:%M:%S") )
         except: shtData.range('O1').value = 0
 
         subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
@@ -217,7 +217,7 @@ def getPortfolioHB(hb, comitente, tipo):
             if i[0]['NERE'] != 'Pesos':  
                 subtotal = [ ( x['NERE'],x['CAN0'],x['CANT']) for x in i[0:] if x['CANT'] != None]
                 for x in subtotal:
-                    for valor in shtData.range('A'+str(rangoDesde)+':P'+str(rangoHasta)).value:
+                    for valor in shtData.range('A26:P'+str(rangoHasta)).value:
                         if not valor[0]: continue
                         ticker = str(valor[0]).split()
                         if ticker[0][-1:] == 'D' or ticker[0][-1:] == 'C':  
@@ -333,10 +333,11 @@ def cargoXplazo(dicc,moneda):
         shtData.range('A16').value = mepArs24
         shtData.range('A17').value = dicc['ars24mep'][0]
         # ---------------------------------------------------
-        shtData.range('A26').value = namesArs(dicc['mep24'][0],' - 24hs')
+        '''shtData.range('A26').value = namesArs(dicc['mep24'][0],' - 24hs')
         shtData.range('A27').value = mejorMep24
         shtData.range('A28').value = 'AL30 - 24hs'
         shtData.range('A29').value = 'AL30D - 24hs'
+        '''
         
     elif str(moneda).upper() == 'PC':
         shtData.range('A2').value = namesArs(dicc['cclCI'][0],' - CI')
@@ -356,11 +357,11 @@ def cargoXplazo(dicc,moneda):
         shtData.range('A16').value = namesCcl(dicc['ars24ccl'][0],' - 24hs')
         shtData.range('A17').value = dicc['ars24ccl'][0]
         # ---------------------------------------------------
-        shtData.range('A26').value = namesArs(dicc['ccl24'][0],' - 24hs')
+        '''shtData.range('A26').value = namesArs(dicc['ccl24'][0],' - 24hs')
         shtData.range('A27').value = mejorCcl24
         shtData.range('A28').value = 'AL30C - 24hs'
         shtData.range('A29').value = 'AL30 - 24hs'
-
+        '''
     if str(moneda).upper() == 'DP':
         shtData.range('A2').value = mejorMep
         shtData.range('A3').value = namesArs(dicc['mepCI'][0],' - CI')
@@ -379,11 +380,11 @@ def cargoXplazo(dicc,moneda):
         shtData.range('A16').value = dicc['ars24mep'][0]
         shtData.range('A17').value = namesMep(dicc['ars24mep'][0],' - 24hs')
         # -------------------------------------------------------
-        shtData.range('A26').value = mejorMep24
+        '''shtData.range('A26').value = mejorMep24
         shtData.range('A27').value = namesArs(dicc['mep24'][0],' - 24hs')
         shtData.range('A28').value = 'AL30D - 24hs'
         shtData.range('A29').value = 'AL30 - 24hs'
-
+        '''
 
     elif str(moneda).upper() == 'DC':
         shtData.range('A2').value = mejorMep
@@ -413,11 +414,11 @@ def cargoXplazo(dicc,moneda):
         shtData.range('A8').value = 'AL30 - 24hs'
         shtData.range('A9').value = 'AL30C - 24hs'
         # --------------------------------------------------
-        shtData.range('A26').value = mejorCcl24
+        '''shtData.range('A26').value = mejorCcl24
         shtData.range('A27').value = namesArs(dicc['ccl24'][0],' - 24hs')
         shtData.range('A28').value = 'AL30 - 24hs'
         shtData.range('A29').value = 'AL30C - 24hs'
-
+        '''
     elif str(moneda).upper() == 'CD':
         shtData.range('A2').value = mejorCcl
         shtData.range('A3').value = namesMep(dicc['cclCI'][0],' - CI')
@@ -733,15 +734,15 @@ def posicionRulo(celda):
     if celda==2 or celda==6 or celda==8 or celda==10 or celda==14 or celda==18 or celda==22:
         return 'ok'
 
-def operaUsd(celda,ladoCompra,ladoVenta):
+def compraUsd(celda,ladoCompra,ladoVenta):
     compra = str(shtData.range('A'+str(int(celda))).value).split()
     if len(compra) < 2: pass
     else:
-        if compra[2] == '24hs': 
+        if compra[2] == '24hs' or compra[2] == 'CI': 
             vende = str(shtData.range('A'+str(int(celda+1))).value).split()
             if len(vende) < 2: pass
             else:
-                if vende[2] == '24hs':
+                if vende[2] == '24hs'or vende[2] == 'CI':
                     nominales = cantidadAuto(celda)
                     ask = shtData.range(str(ladoCompra)+str(int(celda))).value
                     symbol = "MERV - XMEV - " + str(compra[0]) + ' - ' + str(compra[2])
@@ -750,6 +751,30 @@ def operaUsd(celda,ladoCompra,ladoVenta):
                         pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(ask),order_type=pyRofex.OrderType.LIMIT)
 
                     bid = shtData.range(str(ladoVenta)+str(int(celda+1))).value
+                    symbol = "MERV - XMEV - " + str(vende[0]) + ' - ' + str(vende[2])
+                    print(f'___/ - {int(nominales)} {vende[0]} {vende[2]} {bid}')
+                    if esFinde == False and noMatriz == False:
+                        pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(nominales)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
+                else: pass
+        else: pass
+
+def vendeUsd(celda,ladoCompra,ladoVenta):
+    compra = str(shtData.range('A'+str(int(celda+1))).value).split()
+    if len(compra) < 2: pass
+    else:
+        if compra[2] == '24hs' or compra[2] == 'CI': 
+            vende = str(shtData.range('A'+str(int(celda))).value).split()
+            if len(vende) < 2: pass
+            else:
+                if vende[2] == '24hs'or vende[2] == 'CI':
+                    nominales = cantidadAuto(celda)
+                    ask = shtData.range(str(ladoCompra)+str(int(celda+1))).value
+                    symbol = "MERV - XMEV - " + str(compra[0]) + ' - ' + str(compra[2])
+                    print(f'___/ buy USD + {int(nominales)} {compra[0]} {compra[2]} {ask} ',end=' | ')
+                    if esFinde == False and noMatriz == False:
+                        pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(ask),order_type=pyRofex.OrderType.LIMIT)
+
+                    bid = shtData.range(str(ladoVenta)+str(int(celda))).value
                     symbol = "MERV - XMEV - " + str(vende[0]) + ' - ' + str(vende[2])
                     print(f'___/ - {int(nominales)} {vende[0]} {vende[2]} {bid}')
                     if esFinde == False and noMatriz == False:
@@ -779,7 +804,8 @@ def buscoOperaciones(inicio,fin):
         if valor[1]: # # Columna Q en el excel /////////////////////////////////////////////////////////////////////////////////
             if str(valor[1]).lower() == 'r' and posicionRulo(valor[0]+1) == 'ok': buyRoll(valor[0]+1)
             elif str(valor[1]).lower() == 'rr' and posicionRulo(valor[0]+1) == 'ok': buyRollPlus(valor[0]+1)
-            elif str(valor[1]).lower() == 'c': operaUsd(valor[0]+1,'D','C')
+            elif str(valor[1]).lower() == 'c': compraUsd(valor[0]+1,'D','C')
+            elif str(valor[1]).lower() == 'v': vendeUsd(valor[0]+1,'D','C')
             elif str(valor[1]).lower() == 'p': getPortfolioHB(hb,'47352',1)
             elif str(valor[1]).lower() == 'm': baseEjercible(valor[0])
             elif str(valor[1]).lower() == 'c': cerrarMariposa(valor[0])
@@ -798,7 +824,8 @@ def buscoOperaciones(inicio,fin):
 
         if valor[2]: #  Columna R en el excel //////////////////////////////////////////////////////////////////////////////////
             if str(valor[2]).lower() == 'r' and posicionRulo(valor[0]+1) == 'ok': buyRoll(valor[0]+1)
-            elif str(valor[2]).lower() == 'c': operaUsd(valor[0]+1,'C','D')
+            elif str(valor[2]).lower() == 'c': compraUsd(valor[0]+1,'C','D')
+            elif str(valor[2]).lower() == 'v': vendeUsd(valor[0]+1,'C','D')
             elif str(valor[2]).lower() == 'p': getPortfolioHB(hb,'47352',1)
             elif str(valor[2]).lower() == 't': hacerTasa(valor[0],'D','D')
             elif valor[2] == '+': 
