@@ -740,14 +740,14 @@ def compraUsd(celda,ladoCompra,ladoVenta):
     if len(compra) < 2: pass
     else:
         if compra[2] == '24hs' or compra[2] == 'CI': 
-            vende = str(shtData.range('A'+str(int(celda))).value).split()
+            vende = str(shtData.range('M'+str(int(celda))).value).split()
             if len(vende) < 2: pass
             else:
                 if vende[2] == '24hs'or vende[2] == 'CI':
                     nominales = cantidadAuto(celda)
                     ask = shtData.range(str(ladoCompra)+str(int(celda))).value
                     symbol = "MERV - XMEV - " + str(compra[0]) + ' - ' + str(compra[2])
-                    print(f'___/ buy USD + {int(nominales)} {compra[0]} {compra[2]} {ask} ',end=' | ')
+                    print(f'___/ compra USD + {int(nominales)} {compra[0]} {compra[2]} {ask} ',end=' | ')
                     if esFinde == False and noMatriz == False:
                         pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(ask),order_type=pyRofex.OrderType.LIMIT)
 
@@ -762,7 +762,7 @@ def compraUsd(celda,ladoCompra,ladoVenta):
         else: pass
 
 def vendeUsd(celda,ladoCompra,ladoVenta):
-    compra = str(shtData.range('A'+str(int(celda))).value).split()
+    compra = str(shtData.range('M'+str(int(celda))).value).split()
     if len(compra) < 2: pass
     else:
         if compra[2] == '24hs' or compra[2] == 'CI': 
@@ -773,7 +773,7 @@ def vendeUsd(celda,ladoCompra,ladoVenta):
                     nominales = cantidadAuto(celda)
                     ask = shtData.range('J'+str(int(celda))).value
                     symbol = "MERV - XMEV - " + str(compra[0]) + ' - ' + str(compra[2])
-                    print(f'___/ buy USD + {int(nominales)} {compra[0]} {compra[2]} {ask} ',end=' | ')
+                    print(f'___/ venta USD + {int(nominales)} {compra[0]} {compra[2]} {ask} ',end=' | ')
                     if esFinde == False and noMatriz == False:
                         pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(ask),order_type=pyRofex.OrderType.LIMIT)
 
@@ -791,7 +791,7 @@ def buscoOperaciones(inicio,fin):
     hora = time.strftime("%H:%M:%S")
     if hora <= '11:01:00': soloContinua()
     if not shtData.range('T1').value: 
-        inicio,fin = 2,25
+        inicio,fin = 2,29
         shtData.range('X1').value = 'STOP'
         roll() # RULO AUTOMATICO activado por columna O
 
@@ -799,7 +799,7 @@ def buscoOperaciones(inicio,fin):
         inicio,fin = 26,60
 
     for valor in shtData.range('P'+str(inicio)+':'+'U'+str(fin)).value:
-        try:
+        '''try:
             if not valor[5] or valor[5] == 0:
                 pass  
             else: 
@@ -807,7 +807,7 @@ def buscoOperaciones(inicio,fin):
                 cantidad = cantidadAuto(valor[0]+1)
                 if cantidad != 0:
                     trailingStop('A'+str((int(valor[0]+1))),cantidad,int(valor[0]),nominalDescubierto,valor[5])
-        except: pass
+        except: pass'''
 
         if valor[1]: # # Columna Q en el excel /////////////////////////////////////////////////////////////////////////////////
             if str(valor[1]).lower() == 'r' and posicionRulo(valor[0]+1) == 'ok': buyRoll(valor[0]+1)
@@ -1291,10 +1291,10 @@ while True:
             else:
                 print(time.strftime("%H:%M:%S"), 'Mercado local cerrado')
                 shtData.range('Q1').value = 'PRC'
-                shtData.range('S1').value = 'ADR'
                 shtData.range('R1').value = 'OPC'
+                shtData.range('S1').value = 'ADR'
                 shtData.range('T1').value = 'ROLL'
-                shtData.range('W1').value = 'SCALP'
+                shtData.range('W1').value = 'D'
                 shtData.range('X1').value = 'STOP'
                 shtData.range('Z1').value = 0.5
                 pyRofex.close_websocket_connection()
