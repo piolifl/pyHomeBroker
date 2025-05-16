@@ -193,7 +193,7 @@ if esFinde == False and noMatriz == False:
 
 def getPortfolioHB(hb, comitente, tipo):
     try:
-        shtData.range('U26:U'+str(rangoHasta)).value = ''
+        shtData.range('U18:U'+str(rangoHasta)).value = ''
         payload = {'comitente': str(comitente),
         'consolida': '0',
         'proceso': '22',
@@ -218,7 +218,7 @@ def getPortfolioHB(hb, comitente, tipo):
             if i[0]['NERE'] != 'Pesos':  
                 subtotal = [ ( x['NERE'],x['CAN0'],x['CANT']) for x in i[0:] if x['CANT'] != None]
                 for x in subtotal:
-                    for valor in shtData.range('A26:P'+str(rangoHasta)).value:
+                    for valor in shtData.range('A18:P'+str(rangoHasta)).value:
                         if not valor[0]: continue
                         ticker = str(valor[0]).split()
                         if ticker[0][-1:] == 'D' or ticker[0][-1:] == 'C':  
@@ -725,7 +725,7 @@ def buyRoll(celda=int):
 
 def roll():
     celda = 2
-    for i in shtData.range('O2:O25').value:
+    for i in shtData.range('O2:O18').value:
             if str(i).upper() == 'R':
                 if celda==2 or celda==6 or celda==8 or celda==10 or celda==14 or celda==18 or celda==22:
                     buyRoll(celda)
