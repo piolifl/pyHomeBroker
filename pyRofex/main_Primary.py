@@ -1173,11 +1173,12 @@ def trailingStop(nombre=str,cantidad=int,nroCelda=int,nominalDescubierto=bool,st
 def trailingUsd(celda):
 
     prCompra = shtData.range('Z'+str(int(celda))).value
+    prCompraActual = shtData.range('AB'+str(int(celda))).value
     prVentaActual = shtData.range('AC'+str(int(celda))).value
     if not prCompra or not prVentaActual: pass
     else:
         ganancia = shtData.range('Z1').value
-
+        pesosDisponibles = shtData.range('M1').value
         if prCompra + ganancia * 2 < prVentaActual: # Rutina para vender usd 
             shtData.range('Z'+str(int(celda))).value += ganancia
             nominales = random.randint(2, 15)
@@ -1202,6 +1203,32 @@ def trailingUsd(celda):
             usdVendidos = shtData.range('V'+str(int(celda))).value
             if usdVendidos: shtData.range('V'+str(int(celda))).value -= nominales
             shtData.range('AA'+str(int(celda))).value = round(float(vendoMep),2)
+
+        
+        elif prCompra > prCompraActual and pesosDisponibles > 5000:
+            nominales = random.randint(1, 5)
+            compra = str(shtData.range('A'+str(int(celda))).value).split()
+            ask = shtData.range('D'+str(int(celda))).value
+            symbol = "MERV - XMEV - " + str(compra[0]) + ' - ' + str(compra[2])
+            print(f'___/ compra USD + {int(nominales)} {compra[0]} {compra[2]} {ask} ',end=' | ')
+            if esFinde == False and noMatriz == False:
+                pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(ask),order_type=pyRofex.OrderType.LIMIT)
+            
+            vende = str(shtData.range('M'+str(int(celda))).value).split()
+            bid = shtData.range('I'+str(int(celda))).value
+            symbol = "MERV - XMEV - " + str(vende[0]) + ' - ' + str(vende[2])
+            print(f'___/ - {int(nominales)} {vende[0]} {vende[2]} {bid}',end=' || compro mep a: ')
+            compraMep = shtData.range('AB'+str(int(celda))).value
+            print(round(float(compraMep),2))
+            if esFinde == False and noMatriz == False:
+                pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(nominales)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
+            usdComprados = shtData.range('V'+str(int(celda))).value
+            if usdComprados: shtData.range('V'+str(int(celda))).value += nominales
+            else:  shtData.range('V'+str(int(celda))).value = nominales
+            shtData.range('Z'+str(int(celda))).value = round(float(compraMep),2)
+
+            gastos = shtData.range('AB1').value 
+            shtData.range('M1').value -= (ask / 100) * (1 + gastos)
 
                 
 # OPCIONES: estrategia tipo MARIPOSA ------------------------
