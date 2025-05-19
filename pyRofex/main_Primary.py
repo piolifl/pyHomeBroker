@@ -25,9 +25,9 @@ shtData.range('T1').value = 'ROLL'
 shtData.range('X1').value = 'STOP'
 shtData.range('Y1').value = 'VETA'
 shtData.range('Z1').value = 0.5
-shtData.range('V26:V29').value = 0
-iniciaDolar = shtData.range('AA1').value
-iniciaDolar = 0 if not iniciaDolar else iniciaDolar
+
+'''iniciaDolar = shtData.range('AA1').value
+iniciaDolar = 0 if not iniciaDolar else iniciaDolar'''
 rangoDesde = '2'
 rangoHasta = '29'
 reCompra = False
@@ -194,7 +194,6 @@ if esFinde == False and noMatriz == False:
 
 def getPortfolioHB(hb, comitente, tipo):
     try:
-        shtData.range('U18:U'+str(rangoHasta)).value = ''
         payload = {'comitente': str(comitente),
         'consolida': '0',
         'proceso': '22',
@@ -207,11 +206,11 @@ def getPortfolioHB(hb, comitente, tipo):
         try: 
             shtData.range('M1').value = portfolio['Result']['Activos'][0]['Subtotal'][0]['APERTURA'][1]['ACUM']
             print('ARS:', portfolio['Result']['Activos'][0]['Subtotal'][0]['APERTURA'][1]['ACUM'], end=' || ')
-        except: shtData.range('M1').value = 0
+        except: shtData.range('M1').value = 1
         try: 
             shtData.range('O1').value = portfolio['Result']['Activos'][0]['Subtotal'][2]['APERTURA'][1]['ACUM']
             print('USD MEP:', portfolio['Result']['Activos'][0]['Subtotal'][2]['APERTURA'][1]['ACUM'], ' || ',time.strftime("%H:%M:%S") )
-        except: shtData.range('O1').value = 0
+        except: shtData.range('O1').value = 1
 
         subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
 
@@ -805,7 +804,7 @@ def buscoOperaciones(inicio,fin):
         shtData.range('X1').value = 'STOP'
         roll() # RULO AUTOMATICO activado por columna O
 
-    if not usd: inicio,fin = 18,29
+    if not usd: inicio,fin = 26,29
 
     for valor in shtData.range('P'+str(inicio)+':'+'U'+str(fin)).value:
 
@@ -1175,16 +1174,17 @@ def trailingUsd(celda):
     prCompra = shtData.range('Z'+str(int(celda))).value
     prCompraActual = shtData.range('AB'+str(int(celda))).value
     prVentaActual = shtData.range('AC'+str(int(celda))).value
-    if not prCompra or not prVentaActual: pass
+    if not prCompra or not prCompraActual or not prVentaActual: pass
     else:
+        nominales = random.randint(95, 105)
         ganancia = shtData.range('Z1').value
         pesosDisponibles = shtData.range('M1').value
+        gastos = shtData.range('AB1').value 
         if prCompra + ganancia * 2 < prVentaActual: # Rutina para vender usd 
             shtData.range('Z'+str(int(celda))).value += ganancia
-            nominales = random.randint(2, 15)
+            #nominales = random.randint(95, 105)
             stock = shtData.range('V'+str(int(celda))).value
             if stock < nominales: nominales = stock
-
             compra = str(shtData.range('M'+str(int(celda))).value).split()
             ask = shtData.range('J'+str(int(celda))).value
             symbol = "MERV - XMEV - " + str(compra[0]) + ' - ' + str(compra[2])
@@ -1192,6 +1192,9 @@ def trailingUsd(celda):
             if esFinde == False and noMatriz == False:
                 pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(ask),order_type=pyRofex.OrderType.LIMIT)
             
+            try: shtData.range('O1').value -= (ask / 100) * (1+ gastos) * nominales
+            except: pass
+
             vende = str(shtData.range('A'+str(int(celda))).value).split()
             bid = shtData.range('C'+str(int(celda))).value
             symbol = "MERV - XMEV - " + str(vende[0]) + ' - ' + str(vende[2])
@@ -1200,13 +1203,15 @@ def trailingUsd(celda):
             print(round(float(vendoMep),2))
             if esFinde == False and noMatriz == False:
                 pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(nominales)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
-            usdVendidos = shtData.range('V'+str(int(celda))).value
-            if usdVendidos: shtData.range('V'+str(int(celda))).value -= nominales
-            shtData.range('AA'+str(int(celda))).value = round(float(vendoMep),2)
+            
+            shtData.range('Z'+str(int(celda))+':AA'+str(int(celda))).value = round(float(vendoMep),2)
+            
+            try: shtData.range('M1').value += (bid / 100) * (1 - gastos) * nominales
+            except: pass
 
         
-        elif prCompra > prCompraActual and pesosDisponibles > 5000:
-            nominales = random.randint(1, 5)
+        elif prCompra > prCompraActual and pesosDisponibles > (500000 / -1):
+            #nominales = random.randint(50, 64)
             compra = str(shtData.range('A'+str(int(celda))).value).split()
             ask = shtData.range('D'+str(int(celda))).value
             symbol = "MERV - XMEV - " + str(compra[0]) + ' - ' + str(compra[2])
@@ -1214,6 +1219,9 @@ def trailingUsd(celda):
             if esFinde == False and noMatriz == False:
                 pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(ask),order_type=pyRofex.OrderType.LIMIT)
             
+            try: shtData.range('M1').value -= (ask / 100) * (1 + gastos) * nominales
+            except: pass
+
             vende = str(shtData.range('M'+str(int(celda))).value).split()
             bid = shtData.range('I'+str(int(celda))).value
             symbol = "MERV - XMEV - " + str(vende[0]) + ' - ' + str(vende[2])
@@ -1222,13 +1230,11 @@ def trailingUsd(celda):
             print(round(float(compraMep),2))
             if esFinde == False and noMatriz == False:
                 pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(nominales)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
-            usdComprados = shtData.range('V'+str(int(celda))).value
-            if usdComprados: shtData.range('V'+str(int(celda))).value += nominales
-            else:  shtData.range('V'+str(int(celda))).value = nominales
+
             shtData.range('Z'+str(int(celda))).value = round(float(compraMep),2)
 
-            gastos = shtData.range('AB1').value 
-            shtData.range('M1').value -= (ask / 100) * (1 + gastos)
+            try: shtData.range('O1').value += (bid / 100) * (1 - gastos) * nominales
+            except: pass
 
                 
 # OPCIONES: estrategia tipo MARIPOSA ------------------------
@@ -1387,7 +1393,7 @@ while True:
                     shtData.range('U1').value = hora
             except: print('Hubo un error al actualizar excel', hora)
 
-            if shtData.range('T1').value and usd and vueltaPortfolio > 20 : 
+            if usd and shtData.range('T1').value and vueltaPortfolio > 20 : 
                 vueltaPortfolio = 0
                 try: 
                     if hora >= '16:25:30': pass
@@ -1410,52 +1416,3 @@ while True:
 
 
 
-
-
-'''
-portfolio = {'Success': True, 
-    'Error': {'Codigo': 0, 'Descripcion': None}, 
-    'Result': {'Totales': 
-               {'TotalPosicion': '1082540.1624925', 
-                'Detalle': [
-                    {'DETA': 'Tenencia a Liquidar', 'IMPO': '76660', 'TIPO': '1', 'Hora': 'Pesos', 'CANT': None, 'TCAM': '1'}, 
-                    {'DETA': 'Cuenta Corriente $', 'IMPO': '443749.58', 'TIPO': '1', 'Hora': 'Pesos', 'CANT': None, 'TCAM': '1'}, 
-                    {'DETA': 'Cuenta Corriente USD MEP', 'IMPO': '562130.5824925', 'TIPO': '1', 'Hora': 'USD MEP', 'CANT': '482.13', 'TCAM': '1165.9315589'}]}, 
-                'Activos': [{'GTOS': '0', 'IMPO': '1005880.1624925', 'ESPE': 'Subtotal Cuenta Corriente', 'TIPO': '11', 'Hora': '', 
-                            'Subtotal': [
-                                {'IMPO': '443749.58', 'ESPE': '', 
-                                    'APERTURA': [
-                                        {'DETA': 'Vencido', 'IMPO': '497506.59', 'GTIA': None, 'ACUM': '497506.59'}, 
-                                        {'DETA': '24 Hs. 21/04/25', 'IMPO': '-53757.01', 'GTIA': None, 'ACUM': '443749.58'}, 
-                                        {'DETA': '48 Hs. 22/04/25', 'IMPO': None, 'GTIA': None, 'ACUM': '443749.58'}, 
-                                        {'DETA': '72 Hs. 23/04/25', 'IMPO': None, 'GTIA': None, 'ACUM': '443749.58'}, 
-                                        {'DETA': '+ de 72 Hs.', 'IMPO': None, 'GTIA': None, 'ACUM': '443749.58'}, 
-                                        {'DETA': 'Gtia.Opciones', 'IMPO': None, 'GTIA': None, 'ACUM': '443749.58'}], 
-                                'Detalle': [
-                                    {'DETA': 'Disponible', 'IMPO': '497506.59', 'CANT': None, 'PCIO': '1'}, 
-                                    {'DETA': 'A Liq', 'IMPO': '-53757.01', 'CANT': None, 'PCIO': '1'}], 
-                                    'TESP': '8', 'NERE': 'Pesos', 'GTOS': '0', 'DETA': 'Total', 'TIPO': '11', 'Hora': 'Pesos', 
-                                    'AMPL': '', 'DIVI': '1', 'TICK': 'Pesos', 'CANT': None, 'PCIO': '1', 'CAN3': '0', 'CAN2': '0', 'CAN0': '0'}, 
-                            
-                                {'IMPO': '562130.58', 'ESPE': '', 
-                                    'APERTURA': [
-                                        {'DETA': 'Vencido', 'IMPO': '415.75', 'GTIA': None, 'ACUM': '415.75'}, 
-                                        {'DETA': '24 Hs. 21/04/25', 'IMPO': '66.38', 'GTIA': None, 'ACUM': '482.13'}, 
-                                        {'DETA': '48 Hs. 22/04/25', 'IMPO': None, 'GTIA': None, 'ACUM': '482.13'}, 
-                                        {'DETA': '72 Hs. 23/04/25', 'IMPO': None, 'GTIA': None, 'ACUM': '482.13'}, 
-                                        {'DETA': '+ de 72 Hs.', 'IMPO': None, 'GTIA': None, 'ACUM': '482.13'}, 
-                                        {'DETA': 'Gtia.Opciones', 'IMPO': None, 'GTIA': None, 'ACUM': '482.13'}], 
-                                        
-                                'Detalle': [
-                                    {'DETA': 'Disponible', 'IMPO': '484736.05', 'CANT': '415.75', 'PCIO': '1165.9315589'}, 
-                                    {'DETA': 'A Liq', 'IMPO': '77394.54', 'CANT': '66.38', 'PCIO': '1165.9315589'}], 
-                                    
-                                    'TESP': '8', 'NERE': 'USD MEP', 'GTOS': '0', 'DETA': 'Total', 'TIPO': '11', 'Hora': 'USD MEP', 
-                                    'AMPL': '', 'DIVI': '1', 'TICK': 'USD MEP', 'CANT': '482.13', 'PCIO': '1165.9315589', 'CAN3': '0', 'CAN2': '0', 'CAN0': '0'}], 
-                                    'CANT': None, 'TCAM': '1', 'CAN2': '92.91850754'}, 
-                                    {'GTOS': '-317.695', 'IMPO': '76660', 'ESPE': 'Subtotal Titulos Publicos','TIPO': '1', 'Hora': '', 
-                                    'Subtotal': [{'IMPO': '76660', 'ESPE': '05921', 'TESP': '8', 'NERE': 'AL30', 'GTOS': '-317.695', 'DETA': 'A Liq', 'TIPO': '1', 
-                                                'Hora': 'ANTERIOR', 'AMPL': 'BONO REP. ARGENTINA USD STEP UP 2030', 'DIVI': '.01', 'TICK': 'AL30', 'CANT': '100', 
-                                                'PCIO': '76660', 'CAN3': '-.41271046', 'CAN2': '7.08149246', 'CAN0': '76977.695'}], 'CANT': None, 'TCAM': '1', 'CAN2': '7.0814925'}]}}
-
-'''
