@@ -75,23 +75,37 @@ else: print('FIN DE SEMANA, no se actualizan los precios locales y no se envian 
 if esFinde == False: loguinHB()
 else: hb = ''
 
-rng = shtTickers.range('A2:C2').expand() # OPCIONES
+'''rng = shtTickers.range('A2:C2').expand() # OPCIONES
 opciones = pd.DataFrame(rng.value, columns=['ticker', 'symbol', 'strike'])
 rng = shtTickers.range('E2:F2').expand() # ACCIONES
 acc = pd.DataFrame(rng.value, columns=['ticker', 'symbol'])
+
 rng = shtTickers.range('H2:I2').expand() # BONOS
 bonos = pd.DataFrame(rng.value, columns=['ticker', 'symbol'])
+
 rng = shtTickers.range('K2:L2').expand() # LETRAS
 letras = pd.DataFrame(rng.value, columns=['ticker', 'symbol'])
+
 rng = shtTickers.range('N2:O2').expand() # ONS
 ons = pd.DataFrame(rng.value, columns=['ticker', 'symbol'])
+
 rng = shtTickers.range('Q2:R2').expand() # CEDARS
-cedear = pd.DataFrame(rng.value, columns=['ticker', 'symbol'])
+cedear = pd.DataFrame(rng.value, columns=['ticker', 'symbol'])'''
+
+rng = shtTickers.range('H2:I2').expand() # BONOS
+bonos = pd.DataFrame(rng.value, columns=['ticker', 'symbol'])
+
 rng = shtTickers.range('T2:U2').expand() # CAUCHO
 caucion = pd.DataFrame(rng.value, columns=['ticker', 'symbol'])
-tickers = pd.concat([opciones, acc, bonos,cedear,ons,letras, caucion ])
+
+'''tickers = pd.concat([opciones, acc, bonos,cedear,ons,letras, caucion ])
 listLength = len(acc) + 31 + len(opciones)
-allLength = len(tickers) - len(acc)  - len(caucion) - 2
+allLength = len(tickers) - len(acc)  - len(caucion) - 2'''
+
+tickers = pd.concat([bonos, caucion ])
+listLength =  31 
+allLength = len(tickers)  - len(caucion) - 2
+
 
 if esFinde == False and noMatriz == False:
     instruments_2 = pyRofex.get_detailed_instruments()
@@ -745,6 +759,7 @@ def compraUsd(celda,ladoCompra,ladoVenta):
             else:
                 if vende[2] == '24hs'or vende[2] == 'CI':
                     nominales = cantidadAuto(celda)
+                    gastos = shtData.range('AB1').value
                     ask = shtData.range(str(ladoCompra)+str(int(celda))).value
                     symbol = "MERV - XMEV - " + str(compra[0]) + ' - ' + str(compra[2])
                     print(f'___/ compra USD + {int(nominales)} {compra[0]} {compra[2]} {ask} ',end=' | ')
@@ -759,12 +774,16 @@ def compraUsd(celda,ladoCompra,ladoVenta):
                     
                     if esFinde == False and noMatriz == False:
                         pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(nominales)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
-                    usdComprados = shtData.range('V'+str(int(celda))).value
-                    if usdComprados: shtData.range('V'+str(int(celda))).value += nominales
-                    else:  shtData.range('V'+str(int(celda))).value = nominales
+                    
+                    try: shtData.range('M1').value -= (ask / 100) * (1 + gastos) * nominales
+                    except: pass
+                    try: shtData.range('O1').value += (bid / 100) * (1 - gastos) * nominales
+                    except: pass
+
                     shtData.range('Z'+str(int(celda))).value = round(float(compraMep),2)
                 else: pass
         else: pass
+        shtData.range('Q'+str(int(celda))).value = ''
 
 def vendeUsd(celda,ladoCompra,ladoVenta):
     compra = str(shtData.range('M'+str(int(celda))).value).split()
@@ -776,6 +795,7 @@ def vendeUsd(celda,ladoCompra,ladoVenta):
             else:
                 if vende[2] == '24hs'or vende[2] == 'CI':
                     nominales = cantidadAuto(celda)
+                    gastos = shtData.range('AB1').value
                     ask = shtData.range('J'+str(int(celda))).value
                     symbol = "MERV - XMEV - " + str(compra[0]) + ' - ' + str(compra[2])
                     print(f'___/ venta USD + {int(nominales)} {compra[0]} {compra[2]} {ask} ',end=' | ')
@@ -788,8 +808,12 @@ def vendeUsd(celda,ladoCompra,ladoVenta):
                     print(round(float(vendoMep),2))
                     if esFinde == False and noMatriz == False:
                         pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(nominales)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
-                    usdVendidos = shtData.range('V'+str(int(celda))).value
-                    if usdVendidos: shtData.range('V'+str(int(celda))).value -= nominales
+                    
+                    try: shtData.range('M1').value += (bid / 100) * (1 - gastos) * nominales
+                    except: pass
+                    try: shtData.range('O1').value -= (ask / 100) * (1 + gastos) * nominales
+                    except: pass
+
                     shtData.range('AA'+str(int(celda))).value = round(float(vendoMep),2)
                 else: pass
         else: pass
@@ -804,7 +828,7 @@ def buscoOperaciones(inicio,fin):
         shtData.range('X1').value = 'STOP'
         roll() # RULO AUTOMATICO activado por columna O
 
-    if not usd: inicio,fin = 26,29
+    if not usd: inicio,fin = 18,29
 
     for valor in shtData.range('P'+str(inicio)+':'+'U'+str(fin)).value:
 
@@ -1176,13 +1200,13 @@ def trailingUsd(celda):
     prVentaActual = shtData.range('AC'+str(int(celda))).value
     if not prCompra or not prCompraActual or not prVentaActual: pass
     else:
-        nominales = random.randint(95, 105)
+        nominales = random.randint(200, 205)
         ganancia = shtData.range('Z1').value
         pesosDisponibles = shtData.range('M1').value
         gastos = shtData.range('AB1').value 
         if prCompra + ganancia * 2 < prVentaActual: # Rutina para vender usd 
             shtData.range('Z'+str(int(celda))).value += ganancia
-            #nominales = random.randint(95, 105)
+
             stock = shtData.range('V'+str(int(celda))).value
             if stock < nominales: nominales = stock
             compra = str(shtData.range('M'+str(int(celda))).value).split()
@@ -1198,7 +1222,7 @@ def trailingUsd(celda):
             vende = str(shtData.range('A'+str(int(celda))).value).split()
             bid = shtData.range('C'+str(int(celda))).value
             symbol = "MERV - XMEV - " + str(vende[0]) + ' - ' + str(vende[2])
-            print(f'___/ - {int(nominales)} {vende[0]} {vende[2]} {bid}',end=' || vendo mep a: ')
+            print(f' - {int(nominales)} {vende[0]} {vende[2]} {bid}',end=' || vendo mep a: ')
             vendoMep = shtData.range('AC'+str(int(celda))).value
             print(round(float(vendoMep),2))
             if esFinde == False and noMatriz == False:
@@ -1211,7 +1235,7 @@ def trailingUsd(celda):
 
         
         elif prCompra > prCompraActual and pesosDisponibles > (500000 / -1):
-            #nominales = random.randint(50, 64)
+
             compra = str(shtData.range('A'+str(int(celda))).value).split()
             ask = shtData.range('D'+str(int(celda))).value
             symbol = "MERV - XMEV - " + str(compra[0]) + ' - ' + str(compra[2])
@@ -1225,7 +1249,7 @@ def trailingUsd(celda):
             vende = str(shtData.range('M'+str(int(celda))).value).split()
             bid = shtData.range('I'+str(int(celda))).value
             symbol = "MERV - XMEV - " + str(vende[0]) + ' - ' + str(vende[2])
-            print(f'___/ - {int(nominales)} {vende[0]} {vende[2]} {bid}',end=' || compro mep a: ')
+            print(f' - {int(nominales)} {vende[0]} {vende[2]} {bid}',end=' || compro mep a: ')
             compraMep = shtData.range('AB'+str(int(celda))).value
             print(round(float(compraMep),2))
             if esFinde == False and noMatriz == False:
