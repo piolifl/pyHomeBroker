@@ -513,9 +513,12 @@ def preparaRulo(monedaInicial):
 
 def traerADR():
     #valorAdr = yf.download(['GGAL'],period='1d',interval='1d',auto_adjust=False)['Close'].values
-    valorAdr = yf.download(['GGAL','YPF'],period='1d',interval='1d',auto_adjust=False)['Close'].values
+    valorAdr = yf.download(['GGAL'],period='1d',interval='1d',auto_adjust=False)['Close'].values
+    max = yf.download(['GGAL'],period='1d',interval='1d',auto_adjust=False)['High'].values
+    min = yf.download(['GGAL'],period='1d',interval='1d',auto_adjust=False)['Low'].values
     shtData.range('Z61').value = valorAdr[0][0]
-    shtData.range('Z63').value = valorAdr[0][1]
+    shtData.range('AB61').value = max[0][0]
+    shtData.range('AB62').value = min[0][0]
     shtData.range('Y62').value = time.strftime("%H:%M:%S")
     
 def ruloAutomatico(celda): # Rulo automatico para HOME BROKER
@@ -856,9 +859,11 @@ def buscoOperaciones(inicio,fin,usd,scalpOpc):
             else:
                 if str(valor[1]).lower() == 'r' and posicionRulo(valor[0]+1) == 'ok': buyRoll(valor[0]+1)
                 elif str(valor[1]).lower() == 'rr' and posicionRulo(valor[0]+1) == 'ok': buyRollPlus(valor[0]+1)
+                elif str(valor[1]).lower() == 'c': compraUsd(valor[0]+1,'D','C')
+                elif str(valor[1]).lower() == 'v': vendeUsd(valor[0]+1,'D','C')
                 elif str(valor[1]).lower() == 'p': getPortfolioHB(hb,'47352',1)
                 elif str(valor[1]).lower() == 'm': baseEjercible(valor[0])
-                #elif str(valor[1]).lower() == 'c': cerrarMariposa(valor[0])
+                elif str(valor[1]).lower() == 'cm': cerrarMariposa(valor[0])
                 elif str(valor[1]).lower() == 'sm': verificaMariposa(valor[0])
                 elif str(valor[1]).lower() == 't': hacerTasa(valor[0],'C','D')
                 elif valor[1] == '+': 
@@ -1056,8 +1061,8 @@ def scalpingOpciones(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,s
     costo = shtData.range('W'+str(int(celda+1))).value
     
     digitos = len(str(int(bid)))
-    if digitos > 1: ganancia *= 2
-    else: ganancia /= 2
+    if digitos > 2: ganancia *= 2
+    elif digitos < 1: ganancia /= 2
 
     if costo != None and nominalDescubierto == False:
         if bid > abs(costo) + ganancia * 10:                         
@@ -1100,9 +1105,9 @@ def scalpingOpciones(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,s
             
 
     elif costo != None: # OPCION VENDIDA EN DESCUBIERTO
-        if ask < abs(costo) - ganancia * 10: 
+        if ask < abs(costo) - ganancia * 2 : 
             #shtData.range('W'+str(int(celda+1))).value = ask
-            bid -= ganancia * 10
+            bid -= ganancia * 4
             print(f'___ SCALPING BUY opciones vendidas ___ + {cantidad} {nombre[0]} {bid} ', end= '| ')
             if esFinde == False and noMatriz == False:
                 pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
