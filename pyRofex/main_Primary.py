@@ -240,6 +240,7 @@ def getPortfolioHB(hb, comitente, tipo):
                                 shtData.range('U'+str(int(valor[15]+1))).value = int(x[2])
                         else:
                             if x[0] == ticker[0]: 
+                                
                                 shtData.range('U'+str(int(valor[15]+1))).value = int(x[2])
                                 hayW = shtData.range('W'+str(int(valor[15]+1))).value
                                 if not hayW: shtData.range('W'+str(int(valor[15]+1))).value = valor[5]
@@ -514,11 +515,11 @@ def preparaRulo(monedaInicial):
 def traerADR():
     #valorAdr = yf.download(['GGAL'],period='1d',interval='1d',auto_adjust=False)['Close'].values
     valorAdr = yf.download(['GGAL'],period='1d',interval='1d',auto_adjust=False)['Close'].values
-    max = yf.download(['GGAL'],period='1d',interval='1d',auto_adjust=False)['High'].values
-    min = yf.download(['GGAL'],period='1d',interval='1d',auto_adjust=False)['Low'].values
     shtData.range('Z61').value = valorAdr[0][0]
+    '''max = yf.download(['GGAL'],period='1d',interval='1d',auto_adjust=False)['High'].values
+    min = yf.download(['GGAL'],period='1d',interval='1d',auto_adjust=False)['Low'].values
     shtData.range('AB61').value = max[0][0]
-    shtData.range('AB62').value = min[0][0]
+    shtData.range('AB62').value = min[0][0]'''
     shtData.range('Y62').value = time.strftime("%H:%M:%S")
     
 def ruloAutomatico(celda): # Rulo automatico para HOME BROKER
