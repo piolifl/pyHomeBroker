@@ -10,17 +10,22 @@ import yfinance as yf
 
 env = environ.Env()
 environ.Env.read_env()
-wb = xw.Book('..\\epgb_pyHB.xlsb')
-shtTest = wb.sheets('HomeBroker')
+wb = xw.Book('..\\epgb.xlsb')
+shtData = wb.sheets('HOME')
 shtTickers = wb.sheets('Tickers')
 
-shtTest.range('Q1').value = 'BONOS'
-shtTest.range('S1').value = 'OPCIONES'
-shtTest.range('W1').value = 'TRAILING'
-shtTest.range('X1').value = 'STOP'
-shtTest.range('Z1').value = 0.001
-rangoDesde = '2'
-rangoHasta = '64'
+shtData.range('A1').value = 'symbol'
+shtData.range('Q1').value = 'PRC'
+shtData.range('R1').value = 'ADR'
+shtData.range('S1').value = 'D'
+shtData.range('T1').value = 'ROLL'
+shtData.range('W1').value = 'STOP'
+shtData.range('X1').value = 'SCP'
+shtData.range('Y1').value = os.environ.get('name')
+shtData.range('Z1').value = 0.5
+
+rangoDesde = '28'
+rangoHasta = '60'
 
 hoyEs = time.strftime("%A")
 
@@ -163,9 +168,8 @@ def diaLaboral():
     if hoyEs == 'Saturday' or hoyEs == 'Sunday':
         return 'Fin de semana'
 
-def getPortfolio(hb, comitente):
+def getPortfolio(hb, comitente, tipo):
     try:
-        shtTest.range('U'+str(rangoDesde)+':'+'U'+str(265)).value = ''
         payload = {'comitente': str(comitente),
         'consolida': '0',
         'proceso': '22',
@@ -184,33 +188,54 @@ def getPortfolio(hb, comitente):
         else: 
             portfolio = requests.post("https://clientes.bcch.org.ar/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
 
-        try: print('Total:', portfolio['Result']['Activos'][0]['Subtotal'][0]['IMPO'], end='  ')
-        except: pass
-        try: print('Disponible:',portfolio['Result']['Activos'][0]['Subtotal'][0]['Detalle'][0]['IMPO'], end='  ')
-        except: pass
-
-        for i in portfolio['Result']['Activos'][0]['Subtotal'][0]['APERTURA']:
-            if i['IMPO'] != None: print(i['DETA'],':',i['IMPO'], end='  ' )
-        print(' ||')
+        shtData.range('U26:V'+str(rangoHasta)).value = ''
+        try: 
+            shtData.range('M1').value = portfolio['Result']['Activos'][0]['Subtotal'][0]['APERTURA'][1]['ACUM']
+            print('ARS:', portfolio['Result']['Activos'][0]['Subtotal'][0]['APERTURA'][1]['ACUM'], end=' || ')
+        except: shtData.range('M1').value = 0
+        try: 
+            shtData.range('O1').value = portfolio['Result']['Activos'][0]['Subtotal'][2]['APERTURA'][1]['ACUM']
+            print('USD MEP:', portfolio['Result']['Activos'][0]['Subtotal'][2]['APERTURA'][1]['ACUM'], ' || ',time.strftime("%H:%M:%S") )
+        except: shtData.range('O1').value = 0
 
         subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
+
         for i in subtotal[0:]:
             if i[0]['NERE'] != 'Pesos':  
                 subtotal = [ ( x['NERE'],x['CAN0'],x['CANT']) for x in i[0:] if x['CANT'] != None]
                 for x in subtotal:
-                    for valor in shtTest.range('A'+str(rangoDesde)+':'+'P'+str(265)).value:
+                    for valor in shtData.range('A26:P'+str(rangoHasta)).value:
                         if not valor[0]: continue
                         ticker = str(valor[0]).split()
-                        if x[0] == ticker[0]: 
-                            shtTest.range('U'+str(int(valor[15]+1))).value = x[2]
-                            if not shtTest.range('V'+str(int(valor[15]+1))).value:
-                                if len(ticker) < 2: 
-                                    shtTest.range('X'+str(int(valor[15]+1))).value = x[1]
-                                else:
-                                    try: shtTest.range('X'+str(int(valor[15]+1))).value = x[1] /100
-                                    except: shtTest.range('X'+str(int(valor[15]+1))).value = x[1]
-    except: pass
+                        if ticker[0][-1:] == 'D' or ticker[0][-1:] == 'C':  
+                            if x[0] == ticker[0][:-1]: 
+                                shtData.range('U'+str(int(valor[15]+1))).value = int(x[2])
+                        else:
+                            if x[0] == ticker[0]: 
+                                
+                                shtData.range('U'+str(int(valor[15]+1))).value = int(x[2])
+                                hayW = shtData.range('W'+str(int(valor[15]+1))).value
 
+                                if tipo == 1:
+
+                                    if len(ticker) < 2: 
+                                        if not hayW: shtData.range('W'+str(int(valor[15]+1))).value = valor[5]
+                                        shtData.range('X'+str(int(valor[15]+1))).value = float(x[1])
+                                    
+                                    else:
+                                        if not hayW: 
+                                            if ticker[0] == 'KO': shtData.range('W'+str(int(valor[15]+1))).value = valor[5]
+                                            else: shtData.range('W'+str(int(valor[15]+1))).value = valor[5] / 100
+                                        if ticker[0] == 'KO': shtData.range('X'+str(int(valor[15]+1))).value = float(x[1])
+                                        else: shtData.range('X'+str(int(valor[15]+1))).value = float(x[1]) / 100
+                                else:
+                                    if len(ticker) < 2: 
+                                        if not hayW: shtData.range('W'+str(int(valor[15]+1))).value = valor[5]
+                                    else:
+                                        if not hayW: 
+                                            if ticker[0] == 'KO': shtData.range('W'+str(int(valor[15]+1))).value = valor[5]
+                                            else: shtData.range('W'+str(int(valor[15]+1))).value = valor[5] / 100
+    except: pass
 #--------------------------------------------------------------------------------------------------------------------------------
 if diaLaboral():
     print('Es FIN DE SEMANA, sin logueo y no se actualizan los precios en la planilla.')
@@ -221,7 +246,7 @@ else:
     getTodos()
     print(time.strftime("%H:%M:%S"),f"Logueo correcto en: {os.environ.get('name')} cuenta: {int(os.environ.get('account_id'))}")
 
-shtTest.range('Y1').value = os.environ.get('name')
+shtData.range('Y1').value = os.environ.get('name')
 
 #--------------------------------------------------------------------------------------------------------------------------------
 
@@ -261,131 +286,233 @@ def namesMep(nombre,plazo):
         else: return nombre[:1]+nombre[3:5]+'D'+plazo
     else: return nombre[:4]+'D'+plazo
 
-def cargoXplazo(dicc):
+def cargoXplazo(dicc,moneda):
     mejorMep = dicc['mepCI'][0]
     mejorMep24 = dicc['mep24'][0]
-    mepArs = namesMep(dicc['arsCImep'][0],' - spot')
+    mejorCcl = dicc['cclCI'][0]
+    mejorCcl24 = dicc['ccl24'][0]
+    mepArs = namesMep(dicc['arsCImep'][0],' - CI')
     mepArs24 = namesMep(dicc['ars24mep'][0],' - 24hs')
-    mepCcl = namesMep(dicc['cclCI'][0],' - spot')
+    mepCcl = namesMep(dicc['cclCI'][0],' - CI')
     mepCcl24 = namesMep(dicc['ccl24'][0],' - 24hs')
 
-    if mejorMep == 'AL30D - spot': shtTest.range('A2:A5').value = ''
-    else: 
-        shtTest.range('A2').value = mejorMep
-        shtTest.range('A3').value = 'AL30D - spot'
-        shtTest.range('A4').value = 'AL30 - spot'
-        shtTest.range('A5').value = namesArs(dicc['mepCI'][0],' - spot')
+    if str(moneda).upper() == 'PD':
+        shtData.range('A2').value = namesArs(dicc['mepCI'][0],' - CI')
+        shtData.range('A3').value = mejorMep
+        shtData.range('A4').value = 'AL30D - CI'
+        shtData.range('A5').value = 'AL30 - CI'
+        shtData.range('A6').value = namesArs(dicc['mep24'][0],' - 24hs')
+        shtData.range('A7').value = mejorMep24
+        shtData.range('A8').value = 'AL30D - 24hs'
+        shtData.range('A9').value = 'AL30 - 24hs'
+        shtData.range('A10').value = namesArs(dicc['mepCI'][0],' - CI')
+        shtData.range('A11').value = mejorMep
+        shtData.range('A12').value = mepArs
+        shtData.range('A13').value = dicc['arsCImep'][0]
+        shtData.range('A14').value = namesArs(dicc['mep24'][0],' - 24hs')
+        shtData.range('A15').value = mejorMep24
+        shtData.range('A16').value = mepArs24
+        shtData.range('A17').value = dicc['ars24mep'][0]
+        # ---------------------------------------------------
+        '''shtData.range('A26').value = namesArs(dicc['mep24'][0],' - 24hs')
+        shtData.range('A27').value = mejorMep24
+        shtData.range('A28').value = 'AL30 - 24hs'
+        shtData.range('A29').value = 'AL30D - 24hs'
+        '''
+        
+    elif str(moneda).upper() == 'PC':
+        shtData.range('A2').value = namesArs(dicc['cclCI'][0],' - CI')
+        shtData.range('A3').value = mejorCcl
+        shtData.range('A4').value = 'AL30C - CI'
+        shtData.range('A5').value = 'AL30 - CI'
+        shtData.range('A6').value = namesArs(dicc['ccl24'][0],' - 24hs')
+        shtData.range('A7').value = mejorCcl24
+        shtData.range('A8').value = 'AL30C - 24hs'
+        shtData.range('A9').value = 'AL30 - 24hs'
+        shtData.range('A10').value = namesArs(dicc['cclCI'][0],' - CI')
+        shtData.range('A11').value = mejorCcl
+        shtData.range('A12').value = namesCcl(dicc['arsCIccl'][0],' - CI')
+        shtData.range('A13').value = dicc['arsCIccl'][0]
+        shtData.range('A14').value = namesArs(dicc['ccl24'][0],' - 24hs')
+        shtData.range('A15').value = mejorCcl24
+        shtData.range('A16').value = namesCcl(dicc['ars24ccl'][0],' - 24hs')
+        shtData.range('A17').value = dicc['ars24ccl'][0]
+        # ---------------------------------------------------
+        '''shtData.range('A26').value = namesArs(dicc['ccl24'][0],' - 24hs')
+        shtData.range('A27').value = mejorCcl24
+        shtData.range('A28').value = 'AL30C - 24hs'
+        shtData.range('A29').value = 'AL30 - 24hs'
+        '''
+    if str(moneda).upper() == 'DP':
+        shtData.range('A2').value = mejorMep
+        shtData.range('A3').value = namesArs(dicc['mepCI'][0],' - CI')
+        shtData.range('A4').value = 'AL30 - CI'
+        shtData.range('A5').value = 'AL30D - CI'
+        shtData.range('A6').value = mejorMep24
+        shtData.range('A7').value = namesArs(dicc['mep24'][0],' - 24hs')
+        shtData.range('A8').value = 'AL30 - 24hs'
+        shtData.range('A9').value = 'AL30D - 24hs'
+        shtData.range('A10').value = mejorMep
+        shtData.range('A11').value = namesArs(dicc['mepCI'][0],' - CI')
+        shtData.range('A12').value = dicc['arsCImep'][0]
+        shtData.range('A13').value = namesMep(dicc['arsCImep'][0],' - CI')
+        shtData.range('A14').value = mejorMep24
+        shtData.range('A15').value = namesArs(dicc['mep24'][0],' - 24hs')
+        shtData.range('A16').value = dicc['ars24mep'][0]
+        shtData.range('A17').value = namesMep(dicc['ars24mep'][0],' - 24hs')
+        # -------------------------------------------------------
+        '''shtData.range('A26').value = mejorMep24
+        shtData.range('A27').value = namesArs(dicc['mep24'][0],' - 24hs')
+        shtData.range('A28').value = 'AL30D - 24hs'
+        shtData.range('A29').value = 'AL30 - 24hs'
+        '''
 
-    if mejorMep24 == 'AL30D - 24hs': shtTest.range('A6:A9').value = ''
-    else: 
-        shtTest.range('A6').value = mejorMep24
-        shtTest.range('A7').value = 'AL30D - 24hs'
-        shtTest.range('A8').value = 'AL30 - 24hs'
-        shtTest.range('A9').value = namesArs(dicc['mep24'][0],' - 24hs')
+    elif str(moneda).upper() == 'DC':
+        shtData.range('A2').value = mejorMep
+        shtData.range('A3').value = namesCcl(dicc['mepCI'][0],' - CI')
+        shtData.range('A4').value = 'AL30C - CI'
+        shtData.range('A5').value = 'AL30D - CI'
+        shtData.range('A6').value = mejorMep24
+        shtData.range('A7').value = namesCcl(dicc['mep24'][0],' - 24hs')
+        shtData.range('A8').value = 'AL30C - 24hs'
+        shtData.range('A9').value = 'AL30D - 24hs'
+        shtData.range('A10').value = mejorMep
+        shtData.range('A11').value = namesCcl(dicc['mepCI'][0],' - CI')
+        shtData.range('A12').value = mejorCcl
+        shtData.range('A13').value = namesMep(dicc['cclCI'][0],' - CI')
+        shtData.range('A14').value = mejorMep24
+        shtData.range('A15').value = namesCcl(dicc['mep24'][0],' - 24hs')
+        shtData.range('A16').value = mejorCcl24
+        shtData.range('A17').value = namesMep(dicc['ccl24'][0],' - 24hs')
     
-    if mejorMep == mepArs: shtTest.range('A10:A13').value = ''
-    else:
-        shtTest.range('A10').value = mejorMep
-        shtTest.range('A11').value = mepArs
-        shtTest.range('A12').value = dicc['arsCImep'][0]
-        shtTest.range('A13').value = namesArs(dicc['mepCI'][0],' - spot')
+    if str(moneda).upper() == 'CP':
+        shtData.range('A2').value = mejorCcl
+        shtData.range('A3').value = namesArs(dicc['cclCI'][0],' - CI')
+        shtData.range('A4').value = 'AL30 - CI'
+        shtData.range('A5').value = 'AL30C - CI'
+        shtData.range('A6').value = mejorCcl24
+        shtData.range('A7').value = namesArs(dicc['ccl24'][0],' - 24hs')
+        shtData.range('A8').value = 'AL30 - 24hs'
+        shtData.range('A9').value = 'AL30C - 24hs'
+        # --------------------------------------------------
+        '''shtData.range('A26').value = mejorCcl24
+        shtData.range('A27').value = namesArs(dicc['ccl24'][0],' - 24hs')
+        shtData.range('A28').value = 'AL30 - 24hs'
+        shtData.range('A29').value = 'AL30C - 24hs'
+        '''
+    elif str(moneda).upper() == 'CD':
+        shtData.range('A2').value = mejorCcl
+        shtData.range('A3').value = namesMep(dicc['cclCI'][0],' - CI')
+        shtData.range('A4').value = 'AL30D - CI'
+        shtData.range('A5').value = 'AL30C - CI'
+        shtData.range('A6').value = mejorCcl24
+        shtData.range('A7').value = namesMep(dicc['ccl24'][0],' - 24hs')
+        shtData.range('A8').value = 'AL30D - 24hs'
+        shtData.range('A9').value = 'AL30C - 24hs'
+ 
 
-    if mejorMep24 == mepArs24: shtTest.range('A14:A17').value = ''
-    else:
-        shtTest.range('A14').value = mejorMep24
-        shtTest.range('A15').value = mepArs24
-        shtTest.range('A16').value = dicc['ars24mep'][0]
-        shtTest.range('A17').value = namesArs(dicc['mep24'][0],' - 24hs')
+    '''shtData.range('A10').value = dicc['arsCImep'][0]
+    shtData.range('A11').value = mepArs
+    shtData.range('A12').value = mejorMep
+    shtData.range('A13').value = namesArs(dicc['mepCI'][0],' - CI')
+    shtData.range('A14').value = dicc['ars24mep'][0]
+    shtData.range('A15').value = mepArs24
+    shtData.range('A16').value = mejorMep24
+    shtData.range('A17').value = namesArs(dicc['mep24'][0],' - 24hs')
+    shtData.range('A18').value = dicc['cclCI'][0]
+    shtData.range('A19').value = mepCcl
+    shtData.range('A20').value = mejorMep
+    shtData.range('A21').value = namesCcl(dicc['mepCI'][0],' - CI')
+    shtData.range('A22').value = dicc['ccl24'][0]
+    shtData.range('A23').value = mepCcl24
+    shtData.range('A24').value = mejorMep24
+    shtData.range('A25').value = namesCcl(dicc['mep24'][0],' - 24hs')
 
-    if mejorMep == mepCcl:  shtTest.range('A18:A21').value = ''
-    else:
-        shtTest.range('A18').value = mejorMep
-        shtTest.range('A19').value = mepCcl
-        shtTest.range('A20').value = dicc['cclCI'][0]
-        shtTest.range('A21').value = namesCcl(dicc['mepCI'][0],' - spot')
+    {'cclCI': ['AL30C - CI', 1156.071964017991], 'ccl24': ['AL30C - 24hs', 0.9878100531348846], 
+         'mepCI': ['AL41D - CI', 1.001461810048996], 'mep24': ['GD38D - 24hs', 1.0023826834418272], 
+         'arsCIccl': ['AL30 - CI', 1156.071964017991], 'ars24ccl': ['GD30 - 24hs', 1157.8330893118593], 
+         'arsCImep': ['AE38 - CI', 1143.4628975265018], 'ars24mep': ['AL35 - 24hs', 1145.8394160583941]}
+    
+    '''
+    shtData.range('A1').value = 'symbol'
 
-    if mejorMep24 == mepCcl24: shtTest.range('A22:A25').value = ''
-    else:
-        shtTest.range('A22').value = mejorMep24
-        shtTest.range('A23').value = mepCcl24
-        shtTest.range('A24').value = dicc['ccl24'][0]
-        shtTest.range('A25').value = namesCcl(dicc['mep24'][0],' - 24hs')
-
-    shtTest.range('A1').value = 'symbol'
-
-def ilRulo():
-    celda,pesos,dolar = listLength+2,1000,0.01
+def preparaRulo(monedaInicial):
+    celda,pesos,dolar = listLength,1000,0.01
     tikers = {'cclCI':['',dolar],'ccl24':['',dolar],'mepCI':['',dolar],'mep24':['',dolar],'arsCIccl':['',pesos],'ars24ccl':['',pesos],'arsCImep':['',pesos],'ars24mep':['',pesos]}
-    
-    for valor in shtTest.range('A'+str(celda)+':A'+str(allLength)).value:
+    for valor in shtData.range('A'+str(listLength)+':A'+str(allLength)).value:
         if not valor: continue
         name = str(valor).split()
-        
-        if str(name[2]).lower() == 'spot':
-
+        if str(name[2]).lower() == 'ci':
             if str(name[0][-1:]).upper()=='C':
-
-                arsC = shtTest.range('AA'+str(celda)).value
+                arsC = shtData.range('AA'+str(celda)).value
                 if not arsC: arsC = 1000
-                if arsC > tikers['arsCIccl'][1]: tikers['arsCIccl'] = [namesArs(name[0],' - spot'),arsC]
-
-                ccl = shtTest.range('Z'+str(celda)).value
+                if arsC > tikers['arsCIccl'][1]: tikers['arsCIccl'] = [namesArs(name[0],' - CI'),arsC]
+                ccl = shtData.range('Z'+str(celda)).value
                 if not ccl: ccl = 0.01
                 if ccl > tikers['cclCI'][1]: tikers['cclCI'] = [valor,ccl]
-
             if str(name[0][-1:]).upper()=='D': 
-
-                arsM = shtTest.range('AA'+str(celda)).value
+                arsM = shtData.range('AA'+str(celda)).value
                 if not arsM: arsM = 1000
-                if arsM > tikers['arsCImep'][1]: tikers['arsCImep'] = [namesArs(name[0],' - spot'),arsM]
-
-                mep = shtTest.range('Z'+str(celda)).value
+                if arsM > tikers['arsCImep'][1]: tikers['arsCImep'] = [namesArs(name[0],' - CI'),arsM]
+                mep = shtData.range('Z'+str(celda)).value
                 if not mep: mep = 0.01
                 if mep > tikers['mepCI'][1]: tikers['mepCI'] = [valor,mep]
 
-
         if str(name[2]) == '24hs':
             if str(name[0][-1:]).upper()=='C':
-                arsC = shtTest.range('AA'+str(celda)).value
+                arsC = shtData.range('AA'+str(celda)).value
                 if not arsC: arsC = 1000
                 if arsC > tikers['ars24ccl'][1]: tikers['ars24ccl'] = [namesArs(name[0],' - 24hs'),arsC]
-                ccl = shtTest.range('Z'+str(celda)).value
+                ccl = shtData.range('Z'+str(celda)).value
                 if not ccl: ccl = 0.01
                 if ccl > tikers['ccl24'][1]: tikers['ccl24'] = [valor,ccl]
-
             if str(name[0][-1:]).upper()=='D': 
-                arsM = shtTest.range('AA'+str(celda)).value
+                arsM = shtData.range('AA'+str(celda)).value
                 if not arsM: arsM = 1000
                 if arsM > tikers['ars24mep'][1]: tikers['ars24mep'] = [namesArs(name[0],' - 24hs'),arsM]
-                mep = shtTest.range('Z'+str(celda)).value
+                mep = shtData.range('Z'+str(celda)).value
                 if not mep: mep = 0.01
                 if mep > tikers['mep24'][1]: tikers['mep24'] = [valor,mep]
-        celda +=1
-    cargoXplazo(tikers)
+        celda +=1 
+    cargoXplazo(tikers,monedaInicial)
+
+def traerADR():
+    #valorAdr = yf.download(['GGAL'],period='1d',interval='1d',auto_adjust=False)['Close'].values
+    valorAdr = yf.download(['GGAL'],period='1d',interval='1d',auto_adjust=False)['Close'].values
+    shtData.range('Z61').value = valorAdr[0][0]
+    '''max = yf.download(['GGAL'],period='1d',interval='1d',auto_adjust=False)['High'].values
+    min = yf.download(['GGAL'],period='1d',interval='1d',auto_adjust=False)['Low'].values
+    shtData.range('AB61').value = max[0][0]
+    shtData.range('AB62').value = min[0][0]'''
+    shtData.range('Y62').value = time.strftime("%H:%M:%S")
+
+
+
+
 
 def cancelaCompra(celda):
-    orderC = shtTest.range('AB'+str(int(celda+1))).value
+    orderC = shtData.range('AB'+str(int(celda+1))).value
     if not orderC or orderC == None or orderC == 'None' or orderC == '': orderC = 0
     if esFinde == False: 
         try: 
             hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderC))
             print(f"/// Cancelada Compra : {int(orderC)} ",end='\t')
         except: pass
-    try: shtTest.range('V'+str(int(celda+1))).value -= shtTest.range('AC'+str(int(celda+1))).value
+    try: shtData.range('V'+str(int(celda+1))).value -= shtData.range('AC'+str(int(celda+1))).value
     except: pass
-    shtTest.range('AB'+str(int(celda+1))+':'+'AD'+str(int(celda+1))).value = ''
+    shtData.range('AB'+str(int(celda+1))+':'+'AD'+str(int(celda+1))).value = ''
         
 def cancelarVenta(celda):
-    orderV = shtTest.range('AE'+str(int(celda+1))).value
+    orderV = shtData.range('AE'+str(int(celda+1))).value
     if not orderV or orderV == None or orderV == 'None' or orderV == '': orderV = 0
     if esFinde == False: 
         try:
             hb.orders.cancel_order(int(os.environ.get('account_id')),int(orderV))
             print(f"/// Cancelada Venta  : {int(orderV)} " ,end='\t')
         except: pass
-    try: shtTest.range('V'+str(int(celda+1))).value += shtTest.range('AF'+str(int(celda+1))).value
+    try: shtData.range('V'+str(int(celda+1))).value += shtData.range('AF'+str(int(celda+1))).value
     except: pass
-    shtTest.range('AE'+str(int(celda+1))+':'+'AG'+str(int(celda+1))).value = ''
+    shtData.range('AE'+str(int(celda+1))+':'+'AG'+str(int(celda+1))).value = ''
 
 def cancelarTodo(desde,hasta):
     if esFinde == False:
@@ -393,10 +520,10 @@ def cancelarTodo(desde,hasta):
             hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
             print("/// Todas las ordenes activas canceladas ")
         except: pass
-    shtTest.range('AB'+str(desde)+':'+'AH'+str(hasta)).value = ''
+    shtData.range('AB'+str(desde)+':'+'AH'+str(hasta)).value = ''
 
 def cantidadAuto(nroCelda):
-    cantidad = shtTest.range('Y'+str(int(nroCelda))).value
+    cantidad = shtData.range('Y'+str(int(nroCelda))).value
     if not cantidad or cantidad == None or cantidad == 'None': 
         cantidad = 0
     return abs(int(cantidad))
@@ -404,182 +531,166 @@ def cantidadAuto(nroCelda):
 def soloContinua():
     pass
 
-vuelta = 0
-def traerADR():
-    galiciaADR= yf.download('GGAL',period='1d',interval='1d')['Close'].values
-    return galiciaADR[0]
-
 def stokDisponible(nroCelda):
-    stok = shtTest.range('U'+str(int(nroCelda))).value
+    stok = shtData.range('U'+str(int(nroCelda))).value
     if not stok or stok == None or stok == 'None': 
         stok = 0
     return abs(int(stok))
 
-def ruloAutomatico(celda):
-    shtTest.range('Q'+str(int(celda+1))).value = ""
-    if celda+1 == 2 or celda+1 == 6 or celda+1 == 8 or celda+1 == 14 or celda+1 == 18 or celda+1 == 22:
-        stockVenta = shtTest.range('U'+str(int(celda+1))).value
-        if stockVenta != None:
-            shtTest.range('S'+str(int(celda+1))).value = "-"
-            shtTest.range('R'+str(int(celda+2))).value = "+"
-            shtTest.range('S'+str(int(celda+3))).value = "-"
-            shtTest.range('R'+str(int(celda+4))).value = "+"
-            if esFinde == False: getPortfolio(hb, os.environ.get('account_id'))
-        else: print('No hay stock disponible para inciar RULO')
 
 ###############################################################  ENVIAR ORDENES ################################################    
 def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
     global orderC, orderV
     orderC, orderV = hoyEs,hoyEs
-    symbol = str(shtTest.range(str(symbol)).value).split()
-    precio = shtTest.range(str(price)).value
+    symbol = str(shtData.range(str(symbol)).value).split()
+    precio = shtData.range(str(price)).value
     if tipo.lower() == 'buy': 
         try: 
             if len(symbol) < 2:
                 if esFinde == False: orderC = hb.orders.send_buy_order(symbol[0],'24hs', float(precio), abs(int(size)))
-                shtTest.range('AD'+str(int(celda+1))).value = float(precio)
-                shtTest.range('X'+str(int(celda+1))).value = precio
+                shtData.range('AD'+str(int(celda+1))).value = float(precio)
+                shtData.range('X'+str(int(celda+1))).value = precio
                 print(f'        ______/ BUY  opcion + {int(size)} {symbol[0]} // precio: {precio} // {orderC}') 
             else:
                 if esFinde == False: orderC = hb.orders.send_buy_order(symbol[0],symbol[2], float(precio), abs(int(size)))
-                shtTest.range('AD'+str(int(celda+1))).value = float(precio/100)
-                shtTest.range('X'+str(int(celda+1))).value = precio / 100
+                shtData.range('AD'+str(int(celda+1))).value = float(precio/100)
+                shtData.range('X'+str(int(celda+1))).value = precio / 100
                 print(f'        ______/ BUY + {int(size)} {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // {orderC}')
         except: 
-            shtTest.range('Q'+str(int(celda+1))+':'+'R'+str(int(celda+1))).value = ''
+            shtData.range('Q'+str(int(celda+1))+':'+'R'+str(int(celda+1))).value = ''
             print(f'        ______/ ERROR en COMPRA. {symbol[0]} // precio: {precio} // + {int(size)}')
 
-        shtTest.range('Q'+str(int(celda+1))+':'+'R'+str(int(celda+1))).value = ''
-        try: shtTest.range('V'+str(int(celda+1))).value += abs(int(size))
-        except: shtTest.range('V'+str(int(celda+1))).value = abs(int(size))
-        shtTest.range('AB'+str(int(celda+1))).value = orderC
-        shtTest.range('AC'+str(int(celda+1))).value = abs(int(size))
+        shtData.range('Q'+str(int(celda+1))+':'+'R'+str(int(celda+1))).value = ''
+        try: shtData.range('V'+str(int(celda+1))).value += abs(int(size))
+        except: shtData.range('V'+str(int(celda+1))).value = abs(int(size))
+        shtData.range('AB'+str(int(celda+1))).value = orderC
+        shtData.range('AC'+str(int(celda+1))).value = abs(int(size))
     
     else: # VENTA
         try:
             if len(symbol) < 2:
                 if esFinde == False: orderV = hb.orders.send_sell_order(symbol[0],'24hs', float(precio), abs(int(size)))
-                shtTest.range('AG'+str(int(celda+1))).value = float(precio)
-                shtTest.range('X'+str(int(celda+1))).value = precio
+                shtData.range('AG'+str(int(celda+1))).value = float(precio)
+                shtData.range('X'+str(int(celda+1))).value = precio
                 print(f'______/ SELL opcion - {int(size)} {symbol[0]} // precio: {precio} // {orderV}')
             else:
                 if esFinde == False: orderV = hb.orders.send_sell_order(symbol[0],symbol[2], float(precio), abs(int(size)))
-                shtTest.range('AG'+str(int(celda+1))).value = float(precio/100)
-                shtTest.range('X'+str(int(celda+1))).value = precio /100
+                shtData.range('AG'+str(int(celda+1))).value = float(precio/100)
+                shtData.range('X'+str(int(celda+1))).value = precio /100
                 print(f'______/ SELL - {int(size)} {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // {orderV}')
         except:
-            shtTest.range('S'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
+            shtData.range('S'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
             print(f'______/ ERROR en VENTA. {symbol[0]} // precio: {precio} // {int(size)}')
 
-        shtTest.range('S'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
-        try: shtTest.range('V'+str(int(celda+1))).value -= abs(int(size))
-        except: shtTest.range('V'+str(int(celda+1))).value = int(size) / -1
-        shtTest.range('AE'+str(int(celda+1))).value = orderV
-        shtTest.range('AF'+str(int(celda+1))).value = abs(int(size))
+        shtData.range('S'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
+        try: shtData.range('V'+str(int(celda+1))).value -= abs(int(size))
+        except: shtData.range('V'+str(int(celda+1))).value = int(size) / -1
+        shtData.range('AE'+str(int(celda+1))).value = orderV
+        shtData.range('AF'+str(int(celda+1))).value = abs(int(size))
 ############################################################### TRAILING STOP #################################################
 def trailingStop(nombre=str,cantidad=int,nroCelda=int,vendido=str):
     
     try:
-        costo = shtTest.range('X'+str(int(nroCelda+1))).value 
+        costo = shtData.range('X'+str(int(nroCelda+1))).value 
         if not costo or costo == None or costo == 'None': soloContinua()
-        nombre = str(shtTest.range(str(nombre)).value).split()
+        nombre = str(shtData.range(str(nombre)).value).split()
         if str(nombre[0]).upper() == 'GGAL' or str(nombre[0]).upper() == 'GGALD' or len(nombre) < 2: 
-            bid = shtTest.range('C'+str(int(nroCelda+1))).value
-            ask = shtTest.range('D'+str(int(nroCelda+1))).value
-            last = shtTest.range('F'+str(int(nroCelda+1))).value
+            bid = shtData.range('C'+str(int(nroCelda+1))).value
+            ask = shtData.range('D'+str(int(nroCelda+1))).value
+            last = shtData.range('F'+str(int(nroCelda+1))).value
         else : 
-            bid = shtTest.range('C'+str(int(nroCelda+1))).value / 100
-            ask = shtTest.range('D'+str(int(nroCelda+1))).value / 100
-            last = shtTest.range('F'+str(int(nroCelda+1))).value / 100
+            bid = shtData.range('C'+str(int(nroCelda+1))).value / 100
+            ask = shtData.range('D'+str(int(nroCelda+1))).value / 100
+            last = shtData.range('F'+str(int(nroCelda+1))).value / 100
         if not last or last == None or last == 'None': soloContinua()
 
-        ganancia = shtTest.range('Z1').value
+        ganancia = shtData.range('Z1').value
         if not ganancia: ganancia = 0.001
 
         if len(nombre) < 2: # Ingresa si son OPCIONES ///////////////////////////////////////////////////////////////////////////
             if vendido == 'no':
                 if bid > abs(costo) * (1 + (ganancia*75)):
-                    shtTest.range('X'+str(int(nroCelda+1))).value = bid
+                    shtData.range('X'+str(int(nroCelda+1))).value = bid
                     print(f'TRAILING {nombre[0]} siguiente precio {bid * (1+(ganancia*75))}', time.strftime("%H:%M:%S"))
-                    if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'BUYTRAIL': pass
-                    else: shtTest.range('W'+str(int(nroCelda+1))).value = 'BUYTRAIL'
+                    if str(shtData.range('W'+str(int(nroCelda+1))).value) == 'BUYTRAIL': pass
+                    else: shtData.range('W'+str(int(nroCelda+1))).value = 'BUYTRAIL'
                     
-                if not shtTest.range('X1').value:
+                if not shtData.range('X1').value:
                     if last < abs(costo) * (1 - (ganancia*75)): 
-                        if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP':
+                        if str(shtData.range('W'+str(int(nroCelda+1))).value) == 'STOP':
                             if bid > last * (1-(ganancia*45)):
-                                if shtTest.range('Y'+str(int(nroCelda+1))).value : 
-                                    try: shtTest.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
+                                if shtData.range('Y'+str(int(nroCelda+1))).value : 
+                                    try: shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
                                     except: pass
                                     enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
                         else:
-                            if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP': pass
+                            if str(shtData.range('W'+str(int(nroCelda+1))).value) == 'STOP': pass
                             else: 
                                 print(f'STOP {nombre[0]} x {cantidad} precio {bid} target salida {costo * (1-(ganancia*75))}', time.strftime("%H:%M:%S"))
-                                shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'
+                                shtData.range('W'+str(int(nroCelda+1))).value = 'STOP'
             else:
                 if ask < abs(costo) * (1 - (ganancia*75)):
-                    shtTest.range('X'+str(int(nroCelda+1))).value = ask
+                    shtData.range('X'+str(int(nroCelda+1))).value = ask
                     print(f'TRAILING {nombre[0]} siguiente precio {costo * (1-(ganancia*75))}', time.strftime("%H:%M:%S"))
-                    if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'SELLTRAIL': pass
-                    else: shtTest.range('W'+str(int(nroCelda+1))).value = 'SELLTRAIL'
+                    if str(shtData.range('W'+str(int(nroCelda+1))).value) == 'SELLTRAIL': pass
+                    else: shtData.range('W'+str(int(nroCelda+1))).value = 'SELLTRAIL'
                     
-                if not shtTest.range('X1').value:  
+                if not shtData.range('X1').value:  
                     if last > abs(costo) * (1 + (ganancia*75)): 
-                        if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP': 
+                        if str(shtData.range('W'+str(int(nroCelda+1))).value) == 'STOP': 
                             
                             if ask < last * (1-(ganancia*15)):
-                                if shtTest.range('Y'+str(int(nroCelda+1))).value : 
-                                    try: shtTest.range('U'+str(int(nroCelda+1))).value += abs(cantidad)
+                                if shtData.range('Y'+str(int(nroCelda+1))).value : 
+                                    try: shtData.range('U'+str(int(nroCelda+1))).value += abs(cantidad)
                                     except: pass
                                     enviarOrden('buy','A'+str((int(nroCelda)+1)),'D'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
                         else:
-                            if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP': pass
+                            if str(shtData.range('W'+str(int(nroCelda+1))).value) == 'STOP': pass
                             else: 
                                 print(f'STOP {nombre[0]} target salida {costo * (1-(ganancia*75))}', time.strftime("%H:%M:%S"))
-                                shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'
+                                shtData.range('W'+str(int(nroCelda+1))).value = 'STOP'
 
 
         else: # Ingresa si son BONOS / LETRAS / ON / CEDEARS ////////////////////////////////////////////////////////////////////
             if time.strftime("%H:%M:%S") > '16:24:00' and str(nombre[2]).lower() == 'CI': 
                 if time.strftime("%H:%M:%S") > '17:01:00': soloContinua()
                 else: 
-                    shtTest.range('W'+str(int(nroCelda+1))).value = "CLOSED"
+                    shtData.range('W'+str(int(nroCelda+1))).value = "CLOSED"
                     soloContinua()
             if time.strftime("%H:%M:%S") > '16:56:00' and str(nombre[2]).lower() == '24hs': 
                 if time.strftime("%H:%M:%S") > '17:01:00': soloContinua()
                 else: 
-                    shtTest.range('W'+str(int(nroCelda+1))).value = "CLOSED"
+                    shtData.range('W'+str(int(nroCelda+1))).value = "CLOSED"
                     soloContinua()
             else:
                 if bid > abs(costo) * (1 + ganancia):     
-                    shtTest.range('X'+str(int(nroCelda+1))).value = bid   
+                    shtData.range('X'+str(int(nroCelda+1))).value = bid   
                     print(f'TRAILING {nombre[0]} precio objetivo {bid * (1+(ganancia))}', time.strftime("%H:%M:%S"))     
-                    if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'BUYTRAIL': pass
-                    else: shtTest.range('W'+str(int(nroCelda+1))).value = 'BUYTRAIL'
+                    if str(shtData.range('W'+str(int(nroCelda+1))).value) == 'BUYTRAIL': pass
+                    else: shtData.range('W'+str(int(nroCelda+1))).value = 'BUYTRAIL'
                 
-                if not shtTest.range('X1').value:
+                if not shtData.range('X1').value:
                     if last < abs(costo) * (1 - ganancia*3):
-                        if str(shtTest.range('W'+str(int(nroCelda+1))).value)=='STOP' and (bid)>(last)*(1-ganancia*1.5):
-                            if shtTest.range('Y'+str(int(nroCelda+1))).value : 
+                        if str(shtData.range('W'+str(int(nroCelda+1))).value)=='STOP' and (bid)>(last)*(1-ganancia*1.5):
+                            if shtData.range('Y'+str(int(nroCelda+1))).value : 
                                 tengoStok = stokDisponible(nroCelda+1)
                                 if tengoStok < 1: soloContinua()
                                 elif cantidad > tengoStok: cantidad = tengoStok
                                 print(f'{time.strftime("%H:%M:%S")} STOP venta    ',end=' || ')
-                                shtTest.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
-                                shtTest.range('W'+str(int(nroCelda+1))).value = ''
+                                shtData.range('U'+str(int(nroCelda+1))).value -= abs(cantidad)
+                                shtData.range('W'+str(int(nroCelda+1))).value = ''
                                 enviarOrden('sell','A'+str((int(nroCelda)+1)),'C'+str((int(nroCelda)+1)),abs(cantidad),nroCelda)
                         else: 
                             print(f'STOP {nombre[0]} target salida {costo * (1-ganancia*5)}', time.strftime("%H:%M:%S"))
-                            if str(shtTest.range('W'+str(int(nroCelda+1))).value) == 'STOP': soloContinua()
+                            if str(shtData.range('W'+str(int(nroCelda+1))).value) == 'STOP': soloContinua()
                             else: 
-                                shtTest.range('W'+str(int(nroCelda+1))).value = 'STOP'
+                                shtData.range('W'+str(int(nroCelda+1))).value = 'STOP'
     except: soloContinua()
 ############################################################## BUSCA OPERACIONES ###############################################
 def buscoOperaciones(inicio,fin):
-    for valor in shtTest.range('P'+str(inicio)+':'+'U'+str(fin)).value:
+    for valor in shtData.range('P'+str(inicio)+':'+'U'+str(fin)).value:
         try:
-            if not shtTest.range('W1').value: # Permite TRAILING  ///////////////////////////////////////////////////////////////
+            if not shtData.range('W1').value: # Permite TRAILING  ///////////////////////////////////////////////////////////////
                 if not valor[5]:  pass
                 else: 
                     if valor[5] < 0: vendido = 'si'
@@ -590,17 +701,16 @@ def buscoOperaciones(inicio,fin):
         if valor[1]: # # Columna Q en el excel /////////////////////////////////////////////////////////////////////////////////
             if str(valor[1]).lower() == 'c': cancelaCompra(valor[0])
             elif str(valor[1]).lower() == 'x': cancelarTodo(inicio,fin)
-            elif str(valor[1]).lower() == 'r': ruloAutomatico(valor[0])
             elif valor[1] == '+': 
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
             elif str(valor[1]).upper() == 'P': 
                 if esFinde == False: getPortfolio(hb, os.environ.get('account_id'))
             else: 
                 try: 
-                    if shtTest.range('AB'+str(int(valor[0]+1))).value: cancelaCompra(valor[0]) # CANCELA oreden compra anterior
+                    if shtData.range('AB'+str(int(valor[0]+1))).value: cancelaCompra(valor[0]) # CANCELA oreden compra anterior
                     enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0]) # Compra Bid
-                except: shtTest.range('Q'+str(int(valor[0]+1))).value = ''
-            shtTest.range('Q'+str(int(valor[0]+1))).value = ''
+                except: shtData.range('Q'+str(int(valor[0]+1))).value = ''
+            shtData.range('Q'+str(int(valor[0]+1))).value = ''
 
         if valor[2]: #  Columna R en el excel //////////////////////////////////////////////////////////////////////////////////
             if str(valor[2]).lower() == 'c': cancelaCompra(valor[0])
@@ -611,10 +721,10 @@ def buscoOperaciones(inicio,fin):
                 if esFinde == False: getPortfolio(hb, os.environ.get('account_id'))
             else: 
                 try: 
-                    if shtTest.range('AB'+str(int(valor[0]+1))).value: cancelaCompra(valor[0])
+                    if shtData.range('AB'+str(int(valor[0]+1))).value: cancelaCompra(valor[0])
                     enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[2],valor[0]) # Compra Ask
-                except: shtTest.range('R'+str(int(valor[0]+1))).value = ''
-            shtTest.range('R'+str(int(valor[0]+1))).value = ''
+                except: shtData.range('R'+str(int(valor[0]+1))).value = ''
+            shtData.range('R'+str(int(valor[0]+1))).value = ''
 
         if valor[3]: # Columna S en el excel ///////////////////////////////////////////////////////////////////////////////////
             if str(valor[3]).lower() == 'v': cancelarVenta(valor[0])
@@ -625,10 +735,10 @@ def buscoOperaciones(inicio,fin):
                 if esFinde == False: getPortfolio(hb, os.environ.get('account_id'))
             else: 
                 try: 
-                    if shtTest.range('AE'+str(int(valor[0]+1))).value: cancelarVenta(valor[0])
+                    if shtData.range('AE'+str(int(valor[0]+1))).value: cancelarVenta(valor[0])
                     enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[3],valor[0]) # Vendo Bid
-                except: shtTest.range('S'+str(int(valor[0]+1))).value = ''
-            shtTest.range('S'+str(int(valor[0]+1))).value = ''
+                except: shtData.range('S'+str(int(valor[0]+1))).value = ''
+            shtData.range('S'+str(int(valor[0]+1))).value = ''
 
         if valor[4]: # Columna T en el excel //////////////////////////////////////////////////////////////////////////////////
             if str(valor[4]).lower() == 'v': cancelarVenta(valor[0])
@@ -639,12 +749,15 @@ def buscoOperaciones(inicio,fin):
                 if esFinde == False: getPortfolio(hb, os.environ.get('account_id'))
             else: 
                 try: 
-                    if shtTest.range('AE'+str(int(valor[0]+1))).value: cancelarVenta(valor[0]) # CANCELA oreden venta anterior
+                    if shtData.range('AE'+str(int(valor[0]+1))).value: cancelarVenta(valor[0]) # CANCELA oreden venta anterior
                     enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[4],valor[0]) # Vendo Ask
-                except: shtTest.range('T'+str(int(valor[0]+1))).value = ''
-            shtTest.range('T'+str(int(valor[0]+1))).value = ''
+                except: shtData.range('T'+str(int(valor[0]+1))).value = ''
+            shtData.range('T'+str(int(valor[0]+1))).value = ''
 ############################################################ CARGA BUCLE EN EXCEL ##############################################
-broker = str(shtTest.range('Y1').value).upper()
+broker = str(shtData.range('Y1').value).upper()
+
+vuelta = 0
+vueltaPortfolio = 0
 
 while True:
 
@@ -652,33 +765,36 @@ while True:
         if time.strftime("%H:%M:%S") > '17:05:00': pass
         else: break
     
+    try:
+        preparar =  shtData.range('A1').value
+        if preparar != 'symbol': 
+            shtData.range('T1').value = 'ROLL'
+            preparaRulo(preparar)
+    except:
+        print('error al preparar los Rulos ')
+        shtData.range('A1').value = 'symbol'
+
+
     if broker == 'BCCH': 
         buscoOperaciones(rangoDesde,rangoHasta)
-    
     
     time.sleep(2)
 
     try: 
-        if not shtTest.range('Q1').value and esFinde == False:
-            shtTest.range('A'+str(listLength)).options(index=True,header=False).value = everything
-            try: shtTest.range('AJ2').options(index=True, header=False).value = cauciones
+        if not shtData.range('Q1').value and esFinde == False:
+            shtData.range('A31').options(index=True,header=False).value=options
+            shtData.range('A'+str(listLength+1)).options(index=True,header=False).value = everything
+            try: shtData.range('AJ2').options(index=True, header=False).value = cauciones
             except: print("______ ERROR al cargar cauciones en Excel ______ ",time.strftime("%H:%M:%S")) 
     except: print("______ ERROR al cargar Bonos/Letras en Excel ______ ",time.strftime("%H:%M:%S")) 
-
+ 
     try:
-        if not shtTest.range('S1').value and esFinde == False: 
-            shtTest.range('A30').options(index=True,header=False).value=options  
-            try:
-                if vuelta > 10: 
-                    valorAdr = traerADR()
-                    shtTest.range('Z61').value = valorAdr
-                    vuelta = 0
-                else: vuelta += 1
-            except: print('ERROR, al cargar el ADR desde yahoo finance')
-
-    except: print("______ ERROR al cargar OPCIONES en Excel ______ ",time.strftime("%H:%M:%S")) 
-        
-    if str(shtTest.range('A1').value) != 'symbol': ilRulo()
+        if vuelta > 10: 
+            valorAdr = traerADR()
+            shtData.range('Z61').value = valorAdr
+            vuelta = 0
+        else: vuelta += 1
+    except: print('ERROR, al cargar el ADR desde yahoo finance')
     
 try: 
     hb.orders.cancel_all_orders(int(os.environ.get('account_id')))
@@ -687,10 +803,14 @@ except: pass
 
 print(time.strftime("%H:%M:%S"), 'Mercado cerrado. ')
 
-shtTest.range('Q1').value = 'BONOS'
-shtTest.range('S1').value = 'OPCIONES'
-shtTest.range('W1').value = 'TRAILING'
-shtTest.range('X1').value = 'STOP'
-shtTest.range('Y1').value = 'BROKER'
+shtData.range('A1').value = 'symbol'
+shtData.range('Q1').value = 'PRC'
+shtData.range('R1').value = 'ADR'
+shtData.range('S1').value = 'D'
+shtData.range('T1').value = 'ROLL'
+shtData.range('W1').value = 'STOP'
+shtData.range('X1').value = 'SCP'
+shtData.range('Y1').value = os.environ.get('name')
+shtData.range('Z1').value = 0.5
 
 #[ ]><   \n
