@@ -21,6 +21,7 @@ shtData.range('Q1').value = 'PRC'
 shtData.range('R1').value = 'ADR'
 shtData.range('S1').value = 'D'
 shtData.range('T1').value = 'ROLL'
+shtData.range('V1').value = 'BCCH'
 shtData.range('W1').value = 'STOP'
 shtData.range('X1').value = 'SCP'
 shtData.range('Y1').value = 'VETA'
@@ -51,6 +52,21 @@ def loguinHB():
         print("*** online en HB VETA *** ", time.strftime("%H:%M:%S"))
     except: 
         print(" *  NO se pudo loguear en VETA HOME BROKER  *", time.strftime("%H:%M:%S"))
+
+def loguinBCCH():
+    from pyhomebroker import HomeBroker  
+    global hb
+    try:
+        hb = HomeBroker(int(os.environ.get('broker2474')))
+        hb.auth.login(dni=str(os.environ.get('dni2474')), 
+        user=str(os.environ.get('user2474')),  
+        password=str(os.environ.get('password2474')),
+        raise_exception=True)
+        shtData.range('V1').value = 'BCCH'
+        print("*** online en HB BCCH *** ", time.strftime("%H:%M:%S"))
+    except: 
+        print(" *  NO se pudo loguear en BCCH HOME BROKER  *", time.strftime("%H:%M:%S"))
+
 diaLaboral()
 
 
@@ -63,14 +79,16 @@ if esFinde == False:
             password=str(os.environ.get('password')), 
             account=str(os.environ.get('account')), 
             environment=pyRofex.Environment.LIVE)
-
-        print("*** online en MATRIZ OMS VETA *** ", end=' || ')
+        shtData.range('U1').value = 'VETA'
+        print("*** online en MATRIZ OMS VETA *** ", end=' ')
     except: 
         noMatriz = True
-        print("No fue posible el logueo con MATRIZ OMS, sigue loguin en HB ... ", end=' || ')
+        print("No fue posible el logueo con MATRIZ OMS, sigue loguin en HB ... ")
 else: print('FIN DE SEMANA, no se actualizan los precios locales y no se envian ordenes al broker.')
 
-if esFinde == False: loguinHB()
+if esFinde == False: 
+    #loguinBCCH()
+    loguinHB()
 else: hb = ''
 
 rng = shtTickers.range('A2:C2').expand() # OPCIONES
@@ -205,9 +223,7 @@ if esFinde == False and noMatriz == False:
     #pyRofex.order_report_subscription()
 
 def getPortfolioHB(hb, comitente, tipo):
-
     try:
-
         payload = {'comitente': str(comitente),
         'consolida': '0',
         'proceso': '22',
@@ -216,16 +232,26 @@ def getPortfolioHB(hb, comitente, tipo):
         'tipo': None,
         'especie': None,
         'comitenteMana': None}
-        portfolio = requests.post("https://cuentas.vetacapital.com.ar/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
-        shtData.range('U26:V'+str(rangoHasta)).value = ''
-        try: 
-            shtData.range('M1').value = portfolio['Result']['Activos'][0]['Subtotal'][0]['APERTURA'][1]['ACUM']
-            print('ARS:', portfolio['Result']['Activos'][0]['Subtotal'][0]['APERTURA'][1]['ACUM'], end=' || ')
-        except: shtData.range('M1').value = 0
-        try: 
-            shtData.range('O1').value = portfolio['Result']['Activos'][0]['Subtotal'][2]['APERTURA'][1]['ACUM']
-            print('USD MEP:', portfolio['Result']['Activos'][0]['Subtotal'][2]['APERTURA'][1]['ACUM'], ' || ',time.strftime("%H:%M:%S") )
-        except: shtData.range('O1').value = 0
+
+        if tipo == 3:
+            portfolio = requests.post("https://clientes.bcch.org.ar/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
+            shtData.range('V26:V'+str(rangoHasta)).value = ''
+            try: 
+                shtData.range('O1').value = portfolio['Result']['Activos'][0]['Subtotal'][0]['APERTURA'][1]['ACUM']
+                print('ARS:', portfolio['Result']['Activos'][0]['Subtotal'][0]['APERTURA'][1]['ACUM'], end=' || ')
+            except: shtData.range('M1').value = 0
+        else:
+            portfolio = requests.post("https://cuentas.vetacapital.com.ar/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
+            shtData.range('U26:U'+str(rangoHasta)).value = ''
+            try: 
+                shtData.range('M1').value = portfolio['Result']['Activos'][0]['Subtotal'][0]['APERTURA'][1]['ACUM']
+                print('ARS:', portfolio['Result']['Activos'][0]['Subtotal'][0]['APERTURA'][1]['ACUM'], end=' || ')
+            except: shtData.range('M1').value = 0
+            
+            try: 
+                shtData.range('O1').value = portfolio['Result']['Activos'][0]['Subtotal'][2]['APERTURA'][1]['ACUM']
+                print('USD MEP:', portfolio['Result']['Activos'][0]['Subtotal'][2]['APERTURA'][1]['ACUM'], ' || ',time.strftime("%H:%M:%S") )
+            except: shtData.range('O1').value = 0
 
         subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
 
@@ -238,14 +264,18 @@ def getPortfolioHB(hb, comitente, tipo):
                         ticker = str(valor[0]).split()
                         if ticker[0][-1:] == 'D' or ticker[0][-1:] == 'C':  
                             if x[0] == ticker[0][:-1]: 
-                                shtData.range('U'+str(int(valor[15]+1))).value = int(x[2])
+                                
+                                if tipo == 3: shtData.range('V'+str(int(valor[15]+1))).value = int(x[2])
+                                else: shtData.range('U'+str(int(valor[15]+1))).value = int(x[2])
                         else:
                             if x[0] == ticker[0]: 
                                 
-                                shtData.range('U'+str(int(valor[15]+1))).value = int(x[2])
+                                if tipo == 3: shtData.range('V'+str(int(valor[15]+1))).value = int(x[2])
+                                else: shtData.range('U'+str(int(valor[15]+1))).value = int(x[2])
+
                                 hayW = shtData.range('W'+str(int(valor[15]+1))).value
 
-                                if tipo == 1:
+                                if tipo == 1 or tipo == 3:
 
                                     if len(ticker) < 2: 
                                         if not hayW: shtData.range('W'+str(int(valor[15]+1))).value = valor[5]
@@ -257,6 +287,8 @@ def getPortfolioHB(hb, comitente, tipo):
                                             else: shtData.range('W'+str(int(valor[15]+1))).value = valor[5] / 100
                                         if ticker[0] == 'KO': shtData.range('X'+str(int(valor[15]+1))).value = float(x[1])
                                         else: shtData.range('X'+str(int(valor[15]+1))).value = float(x[1]) / 100
+
+
                                 else:
                                     if len(ticker) < 2: 
                                         if not hayW: shtData.range('W'+str(int(valor[15]+1))).value = valor[5]
@@ -267,37 +299,85 @@ def getPortfolioHB(hb, comitente, tipo):
     except: pass
 
 def cancelaCompraHB(celda):
-    orderC = shtData.range('AC'+str(int(celda+1))).value
-    if not orderC or orderC == None or orderC == 'None' or orderC == '': orderC = 0
+    orderC = shtData.range('AF'+str(int(celda+1))).value
+    if orderC == None: orderC = 0
 
     if esFinde == False: 
         try: 
-            hb.orders.cancel_order('47352',int(orderC))
+            hb.orders.cancel_order(int(os.environ.get('account_id2474')),int(orderC))
             print(f"/// Cancelada Compra : {int(orderC)} ",end='\t')
         except: 
             print(f'Error al cancelar COMPRA {orderC} con HB')
-    try: shtData.range('V'+str(int(celda+1))).value -= shtData.range('AB'+str(int(celda+1))).value
+    try: shtData.range('V'+str(int(celda+1))).value -= shtData.range('AE'+str(int(celda+1))).value
     except: pass
-    shtData.range('AB'+str(int(celda+1))+':'+'AC'+str(int(celda+1))).value = ''
+    shtData.range('AE'+str(int(celda+1))+':'+'AF'+str(int(celda+1))).value = ''
         
 def cancelarVentaHB(celda):
-    orderV = shtData.range('AE'+str(int(celda+1))).value
-    if not orderV or orderV == None or orderV == 'None' or orderV == '': orderV = 0
+    orderV = shtData.range('AH'+str(int(celda+1))).value
+    if orderV == None: orderV = 0
     if esFinde == False: 
         try:
-            hb.orders.cancel_order('47352',int(orderV))
+            hb.orders.cancel_order(int(os.environ.get('account_id2474')),int(orderV))
             print(f"/// Cancelada Venta  : {int(orderV)} " ,end='\t')
         except: 
             print(f'Error al cancelar VENTA {orderV} con HB')
-    try: shtData.range('V'+str(int(celda+1))).value += shtData.range('AD'+str(int(celda+1))).value
+    try: shtData.range('V'+str(int(celda+1))).value += shtData.range('AG'+str(int(celda+1))).value
     except: pass
-    shtData.range('AD'+str(int(celda+1))+':'+'AE'+str(int(celda+1))).value = ''
+    shtData.range('AG'+str(int(celda+1))+':'+'AH'+str(int(celda+1))).value = ''
+
+def cancelarTodo(desde,hasta):
+    if esFinde == False:
+        try:  
+            hb.orders.cancel_all_orders(int(os.environ.get('account_id2474')))
+            print("/// Todas las ordenes activas canceladas ")
+        except: pass
+    shtData.range('AE'+str(desde)+':'+'AH'+str(hasta)).value = ''
+
+def enviarOrdenHB(tipo=str,symbol=str, price=float, size=int, celda=int):
+    global orderC, orderV
+    orderC, orderV = 'S/D','S/D'
+    symbol = str(shtData.range(str(symbol)).value).split()
+    precio = shtData.range(str(price)).value
+    if tipo.lower() == 'buy': 
+        try: 
+            if len(symbol) < 2:
+                if esFinde == False: orderC = hb.orders.send_buy_order(symbol[0],'24hs', float(precio), abs(int(size)))
+                print(f'        ______/ BUY HB  opcion + {int(size)} {symbol[0]} // precio: {precio} // {orderC}') 
+            else:
+                if esFinde == False: orderC = hb.orders.send_buy_order(symbol[0],symbol[2], float(precio), abs(int(size)))
+                print(f'        ______/ BUY HB + {int(size)} {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // {orderC}')
+        except: 
+            shtData.range('Q'+str(int(celda+1))+':'+'R'+str(int(celda+1))).value = ''
+            print(f'        ______/ ERROR en COMPRA HB. {symbol[0]} // precio: {precio} // + {int(size)}')
+
+        try: shtData.range('V'+str(int(celda+1))).value += abs(int(size))
+        except: shtData.range('V'+str(int(celda+1))).value = abs(int(size))
+        shtData.range('AE'+str(int(celda+1))).value = abs(int(size))
+        shtData.range('AF'+str(int(celda+1))).value = orderC
+    
+    else: # VENTA
+        try:
+            if len(symbol) < 2:
+                if esFinde == False: orderV = hb.orders.send_sell_order(symbol[0],'24hs', float(precio), abs(int(size)))
+                print(f'______/ SELL opcion - {int(size)} {symbol[0]} // precio: {precio} // {orderV}')
+            else:
+                if esFinde == False: orderV = hb.orders.send_sell_order(symbol[0],symbol[2], float(precio), abs(int(size)))
+                print(f'______/ SELL - {int(size)} {symbol[0]} {symbol[2]} // precio: {round(precio/100,4)} // {orderV}')
+        except:
+            shtData.range('S'+str(int(celda+1))+':'+'T'+str(int(celda+1))).value = ''
+            print(f'______/ ERROR en VENTA. {symbol[0]} // precio: {precio} // {int(size)}')
+
+        try: shtData.range('V'+str(int(celda+1))).value -= abs(int(size))
+        except: shtData.range('V'+str(int(celda+1))).value = int(size) / -1
+        shtData.range('AG'+str(int(celda+1))).value = abs(int(size))
+        shtData.range('AH'+str(int(celda+1))).value = orderV
+        
+
 
 def soloContinua():
     global cantidad
     cantidad = 0
     pass
-
 
 def namesArs(nombre,plazo): 
     if nombre[:2] == 'BA': return 'BA37D'+plazo
@@ -839,9 +919,9 @@ def vendeUsd(celda,ladoCompra,ladoVenta):
 
 def buscoOperaciones(inicio,fin,stop,scalp):
     hora = time.strftime("%H:%M:%S")
-
-    if hora <= '11:01:00': soloContinua()
-
+    #bk1 = shtData.range('U1').value
+    bk2 = shtData.range('V1').value
+ 
     if not shtData.range('T1').value: 
         inicio,fin = 2,29
         shtData.range('W1').value = 'STOP'
@@ -850,7 +930,7 @@ def buscoOperaciones(inicio,fin,stop,scalp):
 
     for valor in shtData.range('P'+str(inicio)+':'+'U'+str(fin)).value:
 
-        if not valor[5] or valor[5] == None or valor[5] == 0: pass  
+        if not valor[5] or valor[5] == None or valor[5] == 0 or hora <= '11:01:00': pass  
         else:
             if stop == None or stop == 'None':
                 cantidad = cantidadAuto(valor[0]+1)
@@ -881,7 +961,19 @@ def buscoOperaciones(inicio,fin,stop,scalp):
                 scalping(valor[0],'C','BUY', valor[5], cantidad)
             else: 
                 try: enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0]) # Compra Bid
-                except: shtData.range('Q'+str(int(valor[0]+1))).value = ''
+                except: pass
+            if bk2 == None:
+                if str(valor[1]).lower() == 'cc': cancelaCompraHB(valor[0])
+                elif str(valor[1]).lower() == 'xx': cancelarTodo(inicio,fin)
+                elif valor[1] == '+': 
+                    enviarOrdenHB('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
+                elif str(valor[1]).upper() == 'P': 
+                    if esFinde == False: getPortfolioHB(hb, os.environ.get('account_id2474'),3)
+                else: 
+                    try: 
+                        if shtData.range('AF'+str(int(valor[0]+1))).value: cancelaCompraHB(valor[0]) # CANCELA oreden compra anterior
+                        enviarOrdenHB('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[1],valor[0]) # Compra Bid
+                    except: pass
             shtData.range('Q'+str(int(valor[0]+1))).value = ''
 
         if valor[2]: #  Columna R en el excel //////////////////////////////////////////////////////////////////////////////////:
@@ -896,7 +988,20 @@ def buscoOperaciones(inicio,fin,stop,scalp):
                 scalping(valor[0],'D','BUY', valor[5], cantidad)
             else: 
                 try: enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[2],valor[0]) # Compra Ask
-                except: shtData.range('R'+str(int(valor[0]+1))).value = ''
+                except: pass
+            if bk2 == 2:
+                if str(valor[2]).lower() == 'cc': cancelaCompraHB(valor[0])
+                elif str(valor[2]).lower() == 'xx': cancelarTodo(inicio,fin)
+                elif valor[2] == '+': 
+                    enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
+                elif str(valor[2]).upper() == 'P': 
+                    if esFinde == False: getPortfolioHB(hb, os.environ.get('account_id2474'), 3)
+                else: 
+                    try: 
+                        if shtData.range('AB'+str(int(valor[0]+1))).value: cancelaCompraHB(valor[0])
+                        enviarOrdenHB('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[2],valor[0]) # Compra Ask
+                    except: pass
+
             shtData.range('R'+str(int(valor[0]+1))).value = ''
         
         if valor[3]: # Columna S en el excel ///////////////////////////////////////////////////////////////////////////////////
@@ -910,7 +1015,20 @@ def buscoOperaciones(inicio,fin,stop,scalp):
                 scalping(valor[0],'C','SELL', valor[5], cantidad)
             else: 
                 try: enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[3],valor[0]) # Vendo Bid
-                except: shtData.range('S'+str(int(valor[0]+1))).value = ''
+                except: pass
+            if bk2 == None:
+                if str(valor[3]).lower() == 'vv': cancelarVentaHB(valor[0])
+                elif str(valor[3]).lower() == 'xx': cancelarTodo(inicio,fin)
+                elif valor[3] == '-': 
+                    enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
+                elif str(valor[3]).upper() == 'P': 
+                    if esFinde == False: getPortfolioHB(hb, os.environ.get('account_id2474'), 3)
+                else: 
+                    try: 
+                        if shtData.range('AE'+str(int(valor[0]+1))).value: cancelarVentaHB(valor[0])
+                        enviarOrdenHB('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),valor[3],valor[0]) # Vendo Bid
+                    except: pass
+
             shtData.range('S'+str(int(valor[0]+1))).value = ''
 
         if valor[4]: # Columna T en el excel //////////////////////////////////////////////////////////////////////////////////
@@ -924,7 +1042,19 @@ def buscoOperaciones(inicio,fin,stop,scalp):
                 scalping(valor[0],'D','SELL', valor[5], cantidad)
             else: 
                 try: enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[4],valor[0]) # Vendo Ask
-                except: shtData.range('T'+str(int(valor[0]+1))).value = ''
+                except: pass
+            if bk2 == None:
+                if str(valor[4]).lower() == 'vv': cancelarVentaHB(valor[0])
+                elif str(valor[4]).lower() == 'xx': cancelarTodo(inicio,fin)
+                elif valor[4] == '-': 
+                    enviarOrdenHB('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
+                elif str(valor[4]).upper() == 'P': 
+                    if esFinde == False: getPortfolioHB(hb, os.environ.get('account_id2474'),3)
+                else: 
+                    try: 
+                        if shtData.range('AH'+str(int(valor[0]+1))).value: cancelarVentaHB(valor[0]) # CANCELA oreden venta anterior
+                        enviarOrdenHB('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),valor[4],valor[0]) # Vendo Ask
+                    except: pass
             shtData.range('T'+str(int(valor[0]+1))).value = ''
         
 def enviarOrden(tipo=str,symbol=str, price=float, size=int, celda=int):
@@ -1070,8 +1200,10 @@ def scalpingOpciones(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,s
             if digitosB == 1 or digitosA == 1: 
                 if bid < 1 or ask < 1: ganancia /= 2
             if digitosB == 2 or digitosA == 2: ganancia *= 2
-            if digitosB == 3 or digitosA == 3: ganancia *= 10
-            if digitosB > 3 or digitosA > 3: ganancia *= 20
+            if digitosB == 3 or digitosA == 3: 
+                if bid < 200 or ask < 200: ganancia *= 10
+                else: ganancia *= 30
+            if digitosB > 3 or digitosA > 3: ganancia *= 60
         except: costo = None
         
     else: 
@@ -1405,13 +1537,14 @@ while True:
             try:
                 if esFinde == False and noMatriz == False: 
                     shtData.range('A30').options(index=False, headers=False).value = df_datos  
-                    shtData.range('U1').value = hora
+                    shtData.range('Z63').value = hora
             except: print('Hubo un error al actualizar excel', hora)
 
-            if shtData.range('T1').value and vueltaPortfolio > 20 : 
+            if scalp and vueltaPortfolio > 20 : 
                 vueltaPortfolio = 0
                 try: 
-                    getPortfolioHB(hb,'47352',2) 
+                    getPortfolioHB(hb, os.environ.get('account_id'), 2) 
+                    #getPortfolioHB(hb, os.environ.get('account_id2474'), 3)
                 except: 
                     print('Hubo un error al traer datos del portafolio')
             else: vueltaPortfolio += 1

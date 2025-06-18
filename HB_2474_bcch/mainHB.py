@@ -704,7 +704,7 @@ def buscoOperaciones(inicio,fin):
             elif valor[1] == '+': 
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
             elif str(valor[1]).upper() == 'P': 
-                if esFinde == False: getPortfolio(hb, os.environ.get('account_id'))
+                if esFinde == False: getPortfolio(hb, os.environ.get('account_id'),1)
             else: 
                 try: 
                     if shtData.range('AB'+str(int(valor[0]+1))).value: cancelaCompra(valor[0]) # CANCELA oreden compra anterior
@@ -718,7 +718,7 @@ def buscoOperaciones(inicio,fin):
             elif valor[2] == '+': 
                 enviarOrden('buy','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
             elif str(valor[2]).upper() == 'P': 
-                if esFinde == False: getPortfolio(hb, os.environ.get('account_id'))
+                if esFinde == False: getPortfolio(hb, os.environ.get('account_id'),1)
             else: 
                 try: 
                     if shtData.range('AB'+str(int(valor[0]+1))).value: cancelaCompra(valor[0])
@@ -732,7 +732,7 @@ def buscoOperaciones(inicio,fin):
             elif valor[3] == '-': 
                 enviarOrden('sell','A'+str((int(valor[0])+1)),'C'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
             elif str(valor[3]).upper() == 'P': 
-                if esFinde == False: getPortfolio(hb, os.environ.get('account_id'))
+                if esFinde == False: getPortfolio(hb, os.environ.get('account_id'),1)
             else: 
                 try: 
                     if shtData.range('AE'+str(int(valor[0]+1))).value: cancelarVenta(valor[0])
@@ -746,7 +746,7 @@ def buscoOperaciones(inicio,fin):
             elif valor[4] == '-': 
                 enviarOrden('sell','A'+str((int(valor[0])+1)),'D'+str((int(valor[0])+1)),cantidadAuto(valor[0]+1),valor[0])
             elif str(valor[4]).upper() == 'P': 
-                if esFinde == False: getPortfolio(hb, os.environ.get('account_id'))
+                if esFinde == False: getPortfolio(hb, os.environ.get('account_id'),1)
             else: 
                 try: 
                     if shtData.range('AE'+str(int(valor[0]+1))).value: cancelarVenta(valor[0]) # CANCELA oreden venta anterior
