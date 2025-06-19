@@ -1222,7 +1222,7 @@ def scalpingOpciones(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,s
                     shtData.range('U'+str(int(celda+1))+':X'+str(int(celda+1))).value = ''
                 else:
                     shtData.range('U'+str(int(celda+1))).value -= cantidad
-                    shtData.range('W'+str(int(celda+1))).value = last
+                    shtData.range('W'+str(int(celda+1))).value = bid
             except: pass
             bid -= ganancia
             bid = round(bid, 2)
@@ -1240,9 +1240,9 @@ def scalpingOpciones(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,s
                     shtData.range('U'+str(int(celda+1))+':X'+str(int(celda+1))).value = ''
                 else:
                     shtData.range('U'+str(int(celda+1))).value -= cantidad
-                    shtData.range('W'+str(int(celda+1))).value = last
+                    shtData.range('W'+str(int(celda+1))).value = bid
             except: pass
-            bid -= ganancia
+            bid -= ganancia / 2
             bid = round(bid, 2)
             print(f'____/ BUY el STOP /___  + {cantidad} {nombre[0]} {bid}','|| ' ,  hora)
             if esFinde == False and noMatriz == False:
@@ -1260,7 +1260,7 @@ def scalpingOpciones(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,s
                     shtData.range('U'+str(int(celda+1))+':X'+str(int(celda+1))).value = ''
                 else:
                     shtData.range('U'+str(int(celda+1))).value += cantidad
-                    shtData.range('W'+str(int(celda+1))).value = last
+                    shtData.range('W'+str(int(celda+1))).value = ask
             except: pass
             ask += ganancia
             ask = round(ask, 2)
@@ -1277,9 +1277,9 @@ def scalpingOpciones(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,s
                     shtData.range('U'+str(int(celda+1))+':X'+str(int(celda+1))).value = ''
                 else:
                     shtData.range('U'+str(int(celda+1))).value += cantidad
-                    shtData.range('W'+str(int(celda+1))).value = last
+                    shtData.range('W'+str(int(celda+1))).value = ask
             except: pass
-            ask += ganancia
+            ask += ganancia / 2
             ask = round(ask, 2)
             print(f'____ SELL el STOP ___  + {cantidad} {nombre[0]} {ask}','|| ' ,  hora)
             if esFinde == False and noMatriz == False:
