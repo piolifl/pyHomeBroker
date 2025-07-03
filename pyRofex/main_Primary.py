@@ -274,7 +274,7 @@ def getPortfolioHB(hb, comitente, tipo):
             
             try: 
                 shtData.range('O1').value = portfolio['Result']['Activos'][0]['Subtotal'][2]['APERTURA'][1]['ACUM']
-                print('   MEP:', portfolio['Result']['Activos'][0]['Subtotal'][2]['APERTURA'][1]['ACUM'], end=' || ' )
+                print('   MEP:', portfolio['Result']['Activos'][0]['Subtotal'][2]['APERTURA'][1]['ACUM'])
             except: shtData.range('O1').value = 0
 
         subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
@@ -1620,8 +1620,7 @@ while True:
             vueltaPortfolio = 0
             if not auto: 
                 obtenerSaldoMatriz(str(os.environ.get('account')))
-                print('BCCH: S/D no conectado || ')
-            getPortfolioHB(hbVETA, str(os.environ.get('account_id')), 2) 
+                getPortfolioHB(hbVETA, str(os.environ.get('account_id')), 2) 
 
             #if not bcch: getPortfolioHB(hb, str(os.environ.get('account_id2474')), 3)
             #else: print('BCCH: s/d')
