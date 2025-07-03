@@ -267,15 +267,13 @@ def getPortfolioHB(hb, comitente, tipo):
             shtData.range('U26:U'+str(rangoHasta)).value = ''
             try: 
                 print(time.strftime("%H:%M:%S"), '|| VETA ARS:', portfolio['Result']['Activos'][0]['Subtotal'][0]['APERTURA'][1]['ACUM'], end=' ')
+                print(' MEP: ', portfolio['Result']['Activos'][0]['Subtotal'][2]['APERTURA'][1]['ACUM'])
                 if tipo == 1:
                     shtData.range('M1').value = portfolio['Result']['Activos'][0]['Subtotal'][0]['APERTURA'][1]['ACUM']
-
-            except: shtData.range('M1').value = 0
-            
-            try: 
-                shtData.range('O1').value = portfolio['Result']['Activos'][0]['Subtotal'][2]['APERTURA'][1]['ACUM']
-                print('   MEP:', portfolio['Result']['Activos'][0]['Subtotal'][2]['APERTURA'][1]['ACUM'])
-            except: shtData.range('O1').value = 0
+                    shtData.range('O1').value = portfolio['Result']['Activos'][0]['Subtotal'][2]['APERTURA'][1]['ACUM']
+            except: 
+                shtData.range('M1').value = 1
+                shtData.range('O1').value = 1
 
         subtotal = [ i['Subtotal'] for i in portfolio["Result"]["Activos"][0:] ]
 
@@ -1031,7 +1029,7 @@ def buscoOperaciones(inicio,fin,auto):
             if str(valor[2]).lower() == 'r' and posicionRulo(valor[0]+1) == 'ok': buyRoll(valor[0]+1)
             elif str(valor[2]).lower() == 'd': compraUsd(valor[0]+1,'D')
             elif str(valor[2]).lower() == 't': hacerTasa(valor[0],'D','D')
-            elif str(valor[2]).upper() == 'P':  getPortfolioHB(hbVETA, os.environ.get('account_id'),3)
+            elif str(valor[2]).upper() == 'P':  getPortfolioHB(hbVETA, os.environ.get('account_id'),1)
             elif valor[2] == '+': 
                 cantidad = cantidadAuto(valor[0]+1)
                 operacionRapida(valor[0],'D','BUY', valor[5], cantidad)
@@ -1058,7 +1056,7 @@ def buscoOperaciones(inicio,fin,auto):
         if valor[3]: # Columna S en el excel ///////////////////////////////////////////////////////////////////////////////////
             if str(valor[3]).lower() == 'r' and posicionRulo(valor[0]+1) == 'ok': buyRoll(valor[0]+1)
             elif str(valor[3]).lower() == 'd': vendeUsd(valor[0]+1,'H')
-            elif str(valor[3]).upper() == 'P':  getPortfolioHB(hbVETA, os.environ.get('account_id'),3)
+            elif str(valor[3]).upper() == 'P':  getPortfolioHB(hbVETA, os.environ.get('account_id'),1)
             elif valor[3] == '-': 
                 cantidad = cantidadAuto(valor[0]+1)
                 operacionRapida(valor[0],'C','SELL', valor[5], cantidad)
@@ -1085,7 +1083,7 @@ def buscoOperaciones(inicio,fin,auto):
         if valor[4]: # Columna T en el excel //////////////////////////////////////////////////////////////////////////////////
             if str(valor[4]).lower() == 'r' and posicionRulo(valor[0]+1) == 'ok': buyRoll(valor[0]+1)
             elif str(valor[4]).lower() == 'd': vendeUsd(valor[0]+1,'I')
-            elif str(valor[4]).upper() == 'P':  getPortfolioHB(hbVETA, os.environ.get('account_id'),3)
+            elif str(valor[4]).upper() == 'P':  getPortfolioHB(hbVETA, os.environ.get('account_id'),1)
             elif valor[4] == '-': 
                 cantidad = cantidadAuto(valor[0]+1)
                 operacionRapida(valor[0],'D','SELL', valor[5], cantidad)
@@ -1236,12 +1234,14 @@ def bullOpciones(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,stock
 def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=bool):
     nombre = str(shtData.range(str(nombre)).value).split()
     ganancia = shtData.range('Z1').value
+    gastos = shtData.range('AB1').value
     permiteScalping = shtData.range('X1').value
     disponible = stockU(celda+1)
     bid = shtData.range('C'+str(int(celda+1))).value
     ask = shtData.range('D'+str(int(celda+1))).value
     last = shtData.range('F'+str(int(celda+1))).value
     costo = shtData.range('W'+str(int(celda+1))).value
+
 
     if len(nombre) < 2:
         symbol = "MERV - XMEV - " + str(nombre[0]) + ' - 24hs'
@@ -1342,12 +1342,12 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
             dolar = 'NO'
             symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])
             if nombre[0][-1:] == 'D' or nombre[0][-1:] == 'C':
-                ganancia /= 10
+                ganancia /= 300
                 dolar = 'SI'
-            try:
+            '''try:
                 digitosB = len(str(int(bid)))
                 if digitosB <= 3: ganancia /= 3
-            except: costo = None
+            except: costo = None'''
 
             if not auto: 
                 if bid / 100 >= abs(costo) + ganancia / 3:
@@ -1359,7 +1359,8 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
                             compraAuto(letra[0]+1)
 
             if bid / 100 >= abs(costo) + ganancia:   
-                if permiteScalping: shtData.range('W'+str(int(celda+1))).value = bid / 100
+                if permiteScalping: 
+                    shtData.range('W'+str(int(celda+1))).value = (bid / 100) * (1 + gastos)
                 else:
                     print(f'____ SCALPING vendo posicion comprada - {cantidad}  {nombre[0]}  {bid} ', end= ' | ')
                     cantidad /= 4
@@ -1375,7 +1376,7 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
                             shtData.range('U'+str(int(celda+1))+':X'+str(int(celda+1))).value = ''
                         else:
                             shtData.range('U'+str(int(celda+1))).value -= cantidad
-                            shtData.range('W'+str(int(celda+1))).value = bid / 100
+                            shtData.range('W'+str(int(celda+1))).value = (bid / 100) * (1 + gastos)
                     except: pass
                     if auto:
                         if dolar == 'SI':
@@ -1402,7 +1403,7 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
                         shtData.range('U'+str(int(celda+1))+':X'+str(int(celda+1))).value = ''
                     else:
                         shtData.range('U'+str(int(celda+1))).value -= cantidad
-                        shtData.range('W'+str(int(celda+1))).value = bid / 100
+                        shtData.range('W'+str(int(celda+1))).value = (bid / 100) * (1 + gastos)
                 except: pass
                 shtData.range('W'+str(int(celda+1))).value = last / 100
                 if auto:
