@@ -954,7 +954,7 @@ def compraAuto(celda):
     precio = shtData.range('C'+str(int(celda))).value
     symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' +str(nombre[2])
     nominales = shtData.range('Y'+str(int(celda))).value
-    nominales = 100 if nominales == None else int(nominales / 10)
+    nominales = 100 if nominales == None else int(nominales / 4)
 
     dinero = shtData.range('M1').value
 
@@ -965,7 +965,7 @@ def compraAuto(celda):
         print(f'*** ___ COMPRA automatica ___ + {nominales} {nombre[0]} {nombre[2]} // precio: {precio}')
         if esFinde == False and noMatriz == False: 
             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
-            #shtData.range('Y1').value -= valorArs
+            shtData.range('M1').value -= valorArs
     else:
         nominales = dinero / int(precio / 100)
         if nominales > 0:
@@ -973,15 +973,21 @@ def compraAuto(celda):
             print(f'*** ___ COMPRA automatica ___ + {nominales} {nombre[0]} {nombre[2]} // precio: {precio}')
             if esFinde == False and noMatriz == False: 
                 pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)   
-                #shtData.range('Y1').value -= valorArs
+                shtData.range('M1').value -= valorArs
 
     
 def buscoOperaciones(inicio,fin,auto):
     hora = time.strftime("%H:%M:%S")
     operaOpciones = shtData.range('Y1').value
     if operaOpciones: inicio,fin = 18,29
+    else: 
+        inicio,fin = 26,60
+        shtData.range('W1').value = 'AUTO'
     if not shtData.range('T1').value: 
         inicio,fin = 2,17
+        shtData.range('W1').value = 'AUTO'
+        shtData.range('X1').value = 'SCP'
+        shtData.range('Y1').value = 'OPTION'
         roll() # RULO AUTOMATICO activado por columna O
 
     for valor in shtData.range('P'+str(inicio)+':'+'U'+str(fin)).value:
@@ -1335,7 +1341,7 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
 
     else: # OPERACIONES CON BONOS
         cierreHora = False
-        #auto = shtData.range('W1').value
+        auto = shtData.range('W1').value
         if hora > '16:24:00' and str(nombre[2]).lower() == 'CI': cierreHora = True
         if hora > '16:56:00' and str(nombre[2]).lower() == '24hs': cierreHora = True
         if cierreHora == False and costo != None:
@@ -1350,7 +1356,9 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
             except: costo = None'''
 
             if not auto: 
-                if bid / 100 >= abs(costo) + ganancia / 3:
+                #shtData.range('X1').value = 'SCP'
+                shtData.range('Y1').value = 'OPTION'
+                if bid / 100 > abs(costo):
                     for letra in shtData.range('P28:U29').value:
                         ticker = shtData.range('A'+str(int(letra[0]+1))).value
                         if ticker == None: continue
@@ -1359,13 +1367,13 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
                             compraAuto(letra[0]+1)
 
             if bid / 100 >= abs(costo) + ganancia:   
-                if permiteScalping: 
-                    shtData.range('W'+str(int(celda+1))).value = (bid / 100) * (1 + gastos)
+                if permiteScalping : 
+                    shtData.range('W'+str(int(celda+1))).value = (bid / 100)
                 else:
-                    print(f'____ SCALPING vendo posicion comprada - {cantidad}  {nombre[0]}  {bid} ', end= ' | ')
-                    cantidad /= 4
-                    bid += ganancia
+                    cantidad /= 2
+                    bid += ganancia / 3
                     bid = round(bid, -1)
+                    print(f'____ SCALPING vendo posicion comprada - {cantidad}  {nombre[0]}  {bid} ', end= ' | ')
                     if esFinde == False and noMatriz == False:
                         pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
                     try: 
@@ -1376,7 +1384,7 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
                             shtData.range('U'+str(int(celda+1))+':X'+str(int(celda+1))).value = ''
                         else:
                             shtData.range('U'+str(int(celda+1))).value -= cantidad
-                            shtData.range('W'+str(int(celda+1))).value = (bid / 100) * (1 + gastos)
+                            shtData.range('W'+str(int(celda+1))).value = (bid / 100)
                     except: pass
                     if auto:
                         if dolar == 'SI':
@@ -1391,6 +1399,7 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
                     else: print(' ______ ')
             # ENTRA EN STOP
             if last/100 <= abs(costo) - ganancia * 1.2 and bid/100 >= last/100:
+                if disponible < cantidad: cantidad = disponible
                 print(f'//// ____ STOP vendo posicion comprada - {cantidad} {nombre[0]} {nombre[2]} {int(bid)} ',end=' ') 
                 if esFinde == False and noMatriz == False:
                     pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
@@ -1403,7 +1412,7 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
                         shtData.range('U'+str(int(celda+1))+':X'+str(int(celda+1))).value = ''
                     else:
                         shtData.range('U'+str(int(celda+1))).value -= cantidad
-                        shtData.range('W'+str(int(celda+1))).value = (bid / 100) * (1 + gastos)
+                        shtData.range('W'+str(int(celda+1))).value = (bid / 100)
                 except: pass
                 shtData.range('W'+str(int(celda+1))).value = last / 100
                 if auto:
@@ -1619,9 +1628,9 @@ while True:
 
         if vueltaPortfolio > 30: 
             vueltaPortfolio = 0
-            if not auto: 
-                obtenerSaldoMatriz(str(os.environ.get('account')))
-                getPortfolioHB(hbVETA, str(os.environ.get('account_id')), 2) 
+            if not auto: obtenerSaldoMatriz(str(os.environ.get('account')))
+            getPortfolioHB(hbVETA, str(os.environ.get('account_id')), 2) 
+           
 
             #if not bcch: getPortfolioHB(hb, str(os.environ.get('account_id2474')), 3)
             #else: print('BCCH: s/d')
