@@ -233,7 +233,7 @@ def obtenerSaldoMatriz(cuenta=None):
     try:
         resumenCuenta = pyRofex.get_account_report(account=cuenta)
         resumenCuenta = resumenCuenta["accountData"]['detailedAccountReports']['1']['currencyBalance']['detailedCurrencyBalance']['ARS']['available']
-        resumenCuenta /= 2
+        resumenCuenta /= 4
         shtData.range('M1').value = int(resumenCuenta)
         # print('Disponible Matriz para Gtias: ',resumenCuenta["accountData"]['availableToCollateral'],end=' | ')
     except: print('Error obterner disponible Gtias ')
@@ -251,14 +251,14 @@ def getPortfolioHB(hb, comitente, tipo):
 
         if tipo == 3:
             portfolio = requests.post("https://clientes.bcch.org.ar/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
-            shtData.range('V26:V'+str(rangoHasta)).value = ''
+            shtData.range('V29:V'+str(rangoHasta)).value = ''
             try: 
                 shtData.range('O1').value = portfolio['Result']['Activos'][0]['Subtotal'][0]['APERTURA'][1]['ACUM']
                 print('BCCH ARS:', portfolio['Result']['Activos'][0]['Subtotal'][0]['APERTURA'][1]['ACUM'])
             except: shtData.range('M1').value = 0
         else:
             portfolio = requests.post("https://cuentas.vetacapital.com.ar/Consultas/GetConsulta", cookies=hb.auth.cookies, json=payload).json()
-            shtData.range('U26:U'+str(rangoHasta)).value = ''
+            shtData.range('U29:U'+str(rangoHasta)).value = ''
             try: 
                 print(time.strftime("%H:%M:%S"), '|| VETA ARS:', portfolio['Result']['Activos'][0]['Subtotal'][0]['APERTURA'][1]['ACUM'], end=' ')
                 print(' MEP: ', portfolio['Result']['Activos'][0]['Subtotal'][2]['APERTURA'][1]['ACUM'])
@@ -275,7 +275,7 @@ def getPortfolioHB(hb, comitente, tipo):
             if i[0]['NERE'] != 'Pesos':  
                 subtotal = [ ( x['NERE'],x['CAN0'],x['CANT']) for x in i[0:] if x['CANT'] != None]
                 for x in subtotal:
-                    for valor in shtData.range('A28:P'+str(rangoHasta)).value:
+                    for valor in shtData.range('A29:P'+str(rangoHasta)).value:
                         if not valor[0]: continue
                         ticker = str(valor[0]).split()
                         if ticker[0][-1:] == 'D' or ticker[0][-1:] == 'C':  
@@ -920,7 +920,7 @@ def vendeUsd(celda,ladoCompra):
 
 def compraAuto(celda):
     nombre = str(shtData.range('A'+str(int(celda))).value).split()
-    precio = shtData.range('C'+str(int(celda))).value
+    precio = shtData.range('C'+str(int(celda))).value - 10
     symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' +str(nombre[2])
     nominales = shtData.range('Y'+str(int(celda))).value
     nominales = 100 if nominales == None else int(nominales / 4)
@@ -943,6 +943,9 @@ def compraAuto(celda):
             if esFinde == False and noMatriz == False: 
                 pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)   
                 shtData.range('M1').value -= valorArs
+        else: 
+            shtData.range('W1').value = 'AUTO'
+            shtData.range('X1').value = ''
 
     
 def buscoOperaciones(inicio,fin):
@@ -1326,7 +1329,7 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
             except: costo = None
 
             if not auto: 
-                if bid / 100 > abs(costo):
+                if bid / 100 > abs(costo) + ganancia / 4 or (bid / 100)  < abs(costo) - ganancia / 3:
                     shtData.range('W29').value = bid / 100
                     compraAuto('29')
 
@@ -1342,10 +1345,11 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
                         pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
                     try: 
                         arsVenta = bid/ 100 * cantidad
-                        shtData.range('W1').value += int(arsVenta)
+                        shtData.range('M1').value += int(arsVenta)
 
-                        if disponible - abs(cantidad) == 0:
+                        if disponible - abs(cantidad) < 1:
                             shtData.range('U'+str(int(celda+1))+':X'+str(int(celda+1))).value = ''
+                            shtData.range('W1').value = ''
                         else:
                             shtData.range('U'+str(int(celda+1))).value -= cantidad
                             shtData.range('W'+str(int(celda+1))).value = (bid / 100)
@@ -1363,7 +1367,7 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
                     else: print(' ______ ')
             
             # ENTRA EN STOP
-            if last/100 <= abs(costo) - ganancia * 1.2 and bid/100 >= last/100:
+            if last/100 <= abs(costo) - ganancia and bid/100 >= last/100:
                 if disponible < cantidad: cantidad = disponible
                 print(f'//// ____ STOP vendo posicion comprada - {cantidad} {nombre[0]} {nombre[2]} {int(bid)} ',end=' ') 
                 if esFinde == False and noMatriz == False:
@@ -1371,10 +1375,11 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
                 try:
 
                     arsVenta = bid/ 100 * cantidad
-                    shtData.range('W1').value += int(arsVenta)
+                    shtData.range('M1').value += int(arsVenta)
 
-                    if disponible - abs(cantidad) == 0:
+                    if disponible - abs(cantidad) < 1:
                         shtData.range('U'+str(int(celda+1))+':X'+str(int(celda+1))).value = ''
+                        shtData.range('W1').value = ''
                     else:
                         shtData.range('U'+str(int(celda+1))).value -= cantidad
                         shtData.range('W'+str(int(celda+1))).value = (bid / 100)
