@@ -27,10 +27,10 @@ shtData.range('U1').value = 'veta'
 shtData.range('V1').value = 'bcch'
 shtData.range('W1').value = 'AUTO'
 shtData.range('X1').value = 'SCP'
-shtData.range('Y1').value = 'OPTION'
+
 shtData.range('Z1').value = 0.5
 
-rangoDesde = '28'
+rangoDesde = '18'
 rangoHasta = '60'
 reCompra = False
 esFinde = False
@@ -934,7 +934,10 @@ def compraAuto(celda):
         print(f'*** ___ COMPRA automatica ___ + {nominales} {nombre[0]} {nombre[2]} // precio: {precio}')
         if esFinde == False and noMatriz == False: 
             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
-            shtData.range('M1').value -= valorArs
+            try:
+                shtData.range('M1').value -= valorArs
+                shtData.range('U'+str(int(celda))).value += nominales
+            except: pass
     else:
         nominales = dinero / int(precio / 100)
         if nominales > 0:
@@ -942,7 +945,10 @@ def compraAuto(celda):
             print(f'*** ___ COMPRA automatica ___ + {nominales} {nombre[0]} {nombre[2]} // precio: {precio}')
             if esFinde == False and noMatriz == False: 
                 pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)   
-                shtData.range('M1').value -= valorArs
+                try:
+                    shtData.range('M1').value -= valorArs
+                    shtData.range('U'+str(int(celda))).value += nominales
+                except: pass
         else: 
             shtData.range('W1').value = 'AUTO'
             shtData.range('X1').value = ''
@@ -950,18 +956,13 @@ def compraAuto(celda):
     
 def buscoOperaciones(inicio,fin):
     hora = time.strftime("%H:%M:%S")
-    operaOpciones = shtData.range('Y1').value
     auto = shtData.range('W1').value
 
-    if operaOpciones: inicio,fin = 18,29
-    else: 
-        inicio,fin = 26,60
-        shtData.range('W1').value = 'AUTO'
     if not shtData.range('T1').value: 
         inicio,fin = 2,17
         shtData.range('W1').value = 'AUTO'
         shtData.range('X1').value = 'SCP'
-        shtData.range('Y1').value = 'OPTION'
+
         roll() # RULO AUTOMATICO activado por columna O
 
     for valor in shtData.range('P'+str(inicio)+':'+'U'+str(fin)).value:
@@ -1314,6 +1315,8 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
     else: # OPERACIONES CON BONOS
         cierreHora = False
         auto = shtData.range('W1').value
+        arsVenta = bid / 100 * cantidad
+
         if hora > '16:24:00' and str(nombre[2]).lower() == 'CI': cierreHora = True
         if hora > '16:56:00' and str(nombre[2]).lower() == '24hs': cierreHora = True
         if cierreHora == False and costo != None:
@@ -1333,7 +1336,7 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
                     shtData.range('W29').value = bid / 100
                     compraAuto('29')
 
-            if bid / 100 >= abs(costo) + ganancia:   
+            elif bid / 100 >= abs(costo) + ganancia:   
                 if hacerScalping : 
                     shtData.range('W'+str(int(celda+1))).value = (bid / 100)
                 else:
@@ -1344,12 +1347,9 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
                     if esFinde == False and noMatriz == False:
                         pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
                     try: 
-                        arsVenta = bid/ 100 * cantidad
                         shtData.range('M1').value += int(arsVenta)
-
                         if disponible - abs(cantidad) < 1:
                             shtData.range('U'+str(int(celda+1))+':X'+str(int(celda+1))).value = ''
-                            shtData.range('W1').value = ''
                         else:
                             shtData.range('U'+str(int(celda+1))).value -= cantidad
                             shtData.range('W'+str(int(celda+1))).value = (bid / 100)
@@ -1373,13 +1373,12 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
                 if esFinde == False and noMatriz == False:
                     pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
                 try:
-
                     arsVenta = bid/ 100 * cantidad
                     shtData.range('M1').value += int(arsVenta)
-
                     if disponible - abs(cantidad) < 1:
                         shtData.range('U'+str(int(celda+1))+':X'+str(int(celda+1))).value = ''
                         shtData.range('W1').value = ''
+                        shtData.range('X1').value = 'SCP'
                     else:
                         shtData.range('U'+str(int(celda+1))).value -= cantidad
                         shtData.range('W'+str(int(celda+1))).value = (bid / 100)
@@ -1580,7 +1579,7 @@ while True:
                 shtData.range('V1').value = 'bcch'
                 shtData.range('W1').value = 'AUTO'
                 shtData.range('X1').value = 'SCP'
-                shtData.range('Y1').value = 'OPTION'
+
                 shtData.range('Z1').value = 0.5
                 pyRofex.close_websocket_connection()
                 hb.online.disconnect()
