@@ -918,38 +918,44 @@ def vendeUsd(celda,ladoCompra):
         else: pass
         shtData.range('Q'+str(int(celda))).value = ''
 
-def compraAuto(celda):
+def compraAuto(celda,esDolar):
     nombre = str(shtData.range('A'+str(int(celda))).value).split()
-    precio = shtData.range('C'+str(int(celda))).value - 10
+    if esDolar == False: precio = shtData.range('C'+str(int(celda))).value - 10
+    else: precio = shtData.range('C'+str(int(celda))).value + 0.01
     symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' +str(nombre[2])
     nominales = shtData.range('Y'+str(int(celda))).value
     nominales = 100 if nominales == None else int(nominales / 4)
 
-    dinero = shtData.range('M1').value
+    if esDolar == False: dinero = shtData.range('M1').value
+    else: dinero = shtData.range('O1').value
 
     dinero = 0 if dinero == None else dinero
-    valorArs = precio /100 * nominales
+    costo = precio /100 * nominales
 
-    if valorArs <= dinero and dinero >= 1000 :
+    if costo <= dinero:
         print(f'*** ___ COMPRA automatica ___ + {nominales} {nombre[0]} {nombre[2]} // precio: {precio}')
         if esFinde == False and noMatriz == False: 
             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)
             try:
-                shtData.range('M1').value -= valorArs
+                if esDolar == False: shtData.range('M1').value -= costo
+                else:  shtData.range('O1').value -= costo
+
                 shtData.range('U'+str(int(celda))).value += nominales
             except: pass
     else:
         nominales = dinero / int(precio / 100)
         if nominales > 0:
-            valorArs = precio /100 * nominales
+            costo = precio /100 * nominales
             print(f'*** ___ COMPRA automatica ___ + {nominales} {nombre[0]} {nombre[2]} // precio: {precio}')
             if esFinde == False and noMatriz == False: 
                 pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(nominales)), price=float(precio),order_type=pyRofex.OrderType.LIMIT)   
                 try:
-                    shtData.range('M1').value -= valorArs
+                    if esDolar == False: shtData.range('M1').value -= costo
+                    else:  shtData.range('O1').value -= costo
                     shtData.range('U'+str(int(celda))).value += nominales
                 except: pass
         else: 
+            shtData.range('Z1').value = 0.5
             shtData.range('W1').value = 'AUTO'
             shtData.range('X1').value = ''
 
@@ -1320,11 +1326,11 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
         if hora > '16:24:00' and str(nombre[2]).lower() == 'CI': cierreHora = True
         if hora > '16:56:00' and str(nombre[2]).lower() == '24hs': cierreHora = True
         if cierreHora == False and costo != None:
-            dolar = 'NO'
+            dolar = False
             symbol = "MERV - XMEV - " + str(nombre[0]) + ' - ' + str(nombre[2])
             if nombre[0][-1:] == 'D' or nombre[0][-1:] == 'C':
                 ganancia /= 300
-                dolar = 'SI'
+                dolar = True
             try:
                 digitosB = len(str(int(bid)))
                 if digitosB == 3: 
@@ -1334,7 +1340,7 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
             if not auto: 
                 if bid / 100 > abs(costo) + ganancia / 4 or (bid / 100)  < abs(costo) - ganancia / 3:
                     shtData.range('W29').value = bid / 100
-                    compraAuto('29')
+                    compraAuto('29',dolar)
 
             elif bid / 100 >= abs(costo) + ganancia:   
                 if hacerScalping : 
