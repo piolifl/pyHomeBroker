@@ -988,6 +988,7 @@ def buscoOperaciones(inicio,fin):
             elif str(valor[1]).lower() == 'cm': cerrarMariposa(valor[0])
             elif str(valor[1]).lower() == 'sm': verificaMariposa(valor[0])
             elif str(valor[1]).lower() == 't': compraTasa(valor[0]+1,'C')
+            elif str(valor[1]).lower() == 'x': cancelarOrdenOMS()
             elif valor[1] == '+': 
                 cantidad = cantidadAuto(valor[0]+1)
                 operacionRapida(valor[0],'C','BUY',valor[5], cantidad)
@@ -1321,7 +1322,7 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
 
     else: # OPERACIONES CON BONOS
         cierreHora = False
-        auto = shtData.range('W1').value
+        
         arsVenta = bid / 100 * cantidad
 
         if hora > '16:24:00' and str(nombre[2]).lower() == 'CI': cierreHora = True
@@ -1341,10 +1342,8 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
             if not auto: 
                 if bid / 100 > abs(costoX) + ganancia / 2: 
                     shtData.range('X29').value = bid / 100
-                    compraAuto('29',dolar)
-
                     cantidad /= 2
-                    ask += ganancia
+                    ask += ganancia * 100
                     ask = round(ask, -1)
                     print(f'_______ SCALPING rapido por subida. SELL posicion comprada - {cantidad}  {nombre[0]}  {ask} ')
                     if esFinde == False and noMatriz == False:
@@ -1354,7 +1353,7 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
                         shtData.range('U29').value -= cantidad
                     except: pass
 
-                elif bid / 100 < abs(costo) - ganancia / 4:
+                elif bid / 100 > abs(costo) + ganancia / 2 or bid / 100 < abs(costo) - ganancia / 4: 
                     shtData.range('W29').value = bid / 100
                     compraAuto('29',dolar)
 
@@ -1363,7 +1362,7 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
                     shtData.range('W'+str(int(celda+1))).value = (bid / 100)
                 else:
                     cantidad /= 2
-                    bid += ganancia / 3
+                    bid += ganancia * 20
                     bid = round(bid, -1)
                     print(f'____ SCALPING vendo posicion comprada - {cantidad}  {nombre[0]}  {bid} ', end= ' | ')
                     if esFinde == False and noMatriz == False:
