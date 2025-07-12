@@ -988,7 +988,6 @@ def buscoOperaciones(inicio,fin):
             elif str(valor[1]).lower() == 'cm': cerrarMariposa(valor[0])
             elif str(valor[1]).lower() == 'sm': verificaMariposa(valor[0])
             elif str(valor[1]).lower() == 't': compraTasa(valor[0]+1,'C')
-            elif str(valor[1]).lower() == 'x': cancelarOrdenOMS()
             elif valor[1] == '+': 
                 cantidad = cantidadAuto(valor[0]+1)
                 operacionRapida(valor[0],'C','BUY',valor[5], cantidad)
@@ -1340,7 +1339,7 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
             except: costo = None
 
             if not auto: 
-                if bid / 100 > abs(costoX) + ganancia / 2: 
+                if bid / 100 > abs(costoX) + ganancia / 3: 
                     shtData.range('X29').value = bid / 100
                     cantidad /= 2
                     ask += ganancia * 100
