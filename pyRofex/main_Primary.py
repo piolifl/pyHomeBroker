@@ -22,7 +22,7 @@ shtData.range('A1').value = 'symbol'
 shtData.range('Q1').value = 'PRC'
 shtData.range('R1').value = 'ADR'
 shtData.range('S1').value = 'D'
-shtData.range('T1').value = 'ROLL'
+#shtData.range('T1').value = 'ROLL'
 shtData.range('U1').value = 'veta'
 shtData.range('V1').value = 'bcch'
 shtData.range('W1').value = 'AUTO'
@@ -30,7 +30,7 @@ shtData.range('X1').value = 'SCP'
 shtData.range('Y31:Y65').value = ''
 shtData.range('Z1').value = 0.5
 
-rangoDesde = '18'
+rangoDesde = '10'
 rangoHasta = '34'
 reCompra = False
 esFinde = False
@@ -968,26 +968,19 @@ def rollNuevo():
         usdARS[inicio] = valor
         inicio += 1
     inicio = 18
-    shtData.range('A2').value = shtData.range('A'+str(min(arsUSD,key=arsUSD.get))).value
-    shtData.range('A3').value = shtData.range('M'+str(min(arsUSD,key=arsUSD.get))).value
-    shtData.range('A4').value = shtData.range('M'+str(max(usdARS,key=usdARS.get))).value
-    shtData.range('A5').value = shtData.range('A'+str(max(usdARS,key=usdARS.get))).value
+    shtData.range('A10').value = shtData.range('A'+str(min(arsUSD,key=arsUSD.get))).value
+    shtData.range('A11').value = shtData.range('M'+str(min(arsUSD,key=arsUSD.get))).value
+    shtData.range('A12').value = shtData.range('M'+str(max(usdARS,key=usdARS.get))).value
+    shtData.range('A13').value = shtData.range('A'+str(max(usdARS,key=usdARS.get))).value
     
-    shtData.range('A6').value = shtData.range('M'+str(min(arsUSD,key=arsUSD.get))).value
-    shtData.range('A7').value = shtData.range('A'+str(min(arsUSD,key=arsUSD.get))).value
-    shtData.range('A8').value = shtData.range('A'+str(max(usdARS,key=usdARS.get))).value
-    shtData.range('A9').value = shtData.range('M'+str(max(usdARS,key=usdARS.get))).value
+    shtData.range('A14').value = shtData.range('M'+str(max(usdARS,key=usdARS.get))).value
+    shtData.range('A15').value = shtData.range('A'+str(max(usdARS,key=usdARS.get))).value
+    shtData.range('A16').value = shtData.range('A'+str(min(arsUSD,key=arsUSD.get))).value
+    shtData.range('A17').value = shtData.range('M'+str(min(arsUSD,key=arsUSD.get))).value
 
 def buscoOperaciones(inicio,fin):
     hora = time.strftime("%H:%M:%S")
     auto = shtData.range('W1').value
-
-    if not shtData.range('T1').value: 
-        inicio,fin = 2,17
-        shtData.range('W1').value = 'AUTO'
-        shtData.range('X1').value = 'SCP'
-
-        #roll() # RULO AUTOMATICO activado por columna O
 
     for valor in shtData.range('P'+str(inicio)+':'+'U'+str(fin)).value:
 
@@ -1236,7 +1229,10 @@ def bullOpciones(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,stock
                             pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(ask),order_type=pyRofex.OrderType.LIMIT)
     except: pass
 
+
+
 def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=bool):
+
     nombre = str(shtData.range(str(nombre)).value).split()
     ganancia = shtData.range('Z1').value
     hacerScalping = shtData.range('X1').value
@@ -1244,6 +1240,8 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
     bid = shtData.range('C'+str(int(celda+1))).value
     ask = shtData.range('D'+str(int(celda+1))).value
     last = shtData.range('F'+str(int(celda+1))).value
+    costoStop = shtData.range('V'+str(int(celda+1))).value
+    costoStop = bid if costoStop == None else costoStop
     costo = shtData.range('W'+str(int(celda+1))).value
     costoX = shtData.range('X'+str(int(celda+1))).value
     costoX = costo if costoX == None else costoX
@@ -1359,7 +1357,7 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
             except: costo = None
 
             # ENTRA EN STOP
-            if last/100 <= abs(costo) - ganancia * 1.2 and bid/100 >= last/100:
+            if last/100 <= abs(costoStop) - ganancia * 1.2 and bid/100 >= last/100:
                 cantidad = disponible / 2
                 print(f'//// ____ STOP vendo posicion comprada - {int(cantidad)} {nombre[0]} {nombre[2]} {int(bid)} ',end=' ') 
                 if esFinde == False and noMatriz == False:
@@ -1371,29 +1369,27 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
                         shtData.range('U'+str(int(celda+1))+':X'+str(int(celda+1))).value = ''
                     else:
                         shtData.range('U'+str(int(celda+1))).value -= cantidad
-                        shtData.range('W'+str(int(celda+1))).value = (bid / 100)
+                        shtData.range('V'+str(int(celda+1))).value = (bid / 100)
                 except: pass
-                shtData.range('W'+str(int(celda+1))).value = last / 100
-                if auto:
-                    if dolar == 'SI':
-                        bid -= ganancia * 200
-                        bid = round(bid, 2)
-                    else: 
-                        bid -= ganancia * 340
-                        bid = round(bid, -1)
-                    print(f'____ Recompro posicion vendida + {cantidad} {nombre[0]} {nombre[2]} {int(bid)}', hora)
-                    if esFinde == False and noMatriz == False:
-                        pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
-                else: print(' ______ ')
+                shtData.range('V'+str(int(celda+1))).value = last / 100
+
+                if dolar == 'SI':
+                    bid -= ganancia * 200
+                    bid = round(bid, 2)
+                else: 
+                    bid -= ganancia * 340
+                    bid = round(bid, -1)
+                print(f'____ Recompro posicion vendida + {cantidad} {nombre[0]} {nombre[2]} {int(bid)}', hora)
+                if esFinde == False and noMatriz == False:
+                    pyRofex.send_order(ticker=symbol, side=pyRofex.Side.BUY, size=abs(int(cantidad)), price=float(bid),order_type=pyRofex.OrderType.LIMIT)
             
             if not auto and disponibleARS > 0: 
                 if bid / 100 > abs(costoX) + ganancia / 3 and cantidad > 10: 
                     shtData.range('X'+str(int(celda+1))).value = bid / 100
-                    cantidad /= 2
                     if disponible < cantidad: cantidad = disponible - 1
                     ask += ganancia * 50
                     ask = round(ask, -1)
-                    print(f'_______ SCALPING rapido por subida. SELL posicion comprada - {cantidad}  {nombre[0]}  {ask} ')
+                    print(f'____ SCALPING rapido por subida. SELL posicion comprada - {cantidad}  {nombre[0]}  {ask} ')
                     if esFinde == False and noMatriz == False:
                         pyRofex.send_order(ticker=symbol, side=pyRofex.Side.SELL, size=abs(int(cantidad)), price=float(ask),order_type=pyRofex.OrderType.LIMIT)
                     try: 
@@ -1402,16 +1398,24 @@ def scalpingStop(nombre=str,cantidad=int,celda=int,nominalDescubierto=bool,auto=
                     except: pass
 
                 elif bid / 100 > abs(costo) + ganancia / 2: 
+                    shtData.range('V'+str(int(celda+1))).value = bid / 100
                     shtData.range('W'+str(int(celda+1))).value = bid / 100
-                    shtData.range('Y'+str(int(celda+1))).value += cantidad / 10 
+                    modificaNominalesOperados = shtData.range('Y'+str(int(celda+1))).value + abs(cantidad) / 10
+                    if modificaNominalesOperados > 999: pass
+                    else: shtData.range('Y'+str(int(celda+1))).value += abs(cantidad) / 10
                     compraAuto(celda+1,dolar,'up')
+
                 elif bid / 100 < abs(costo) - ganancia / 4: 
-                    shtData.range('X'+str(int(celda+1))).value = ask / 100
-                    shtData.range('Y'+str(int(celda+1))).value -= cantidad / 10
+                    shtData.range('W'+str(int(celda+1))).value = bid / 100
+                    modificaNominalesOperados = shtData.range('Y'+str(int(celda+1))).value - abs(cantidad) / 10
+                    if modificaNominalesOperados < 10: pass
+                    else: shtData.range('Y'+str(int(celda+1))).value -= abs(cantidad) / 10
                     compraAuto(celda+1,dolar,'down')
+
 
             elif bid / 100 >= abs(costo) + ganancia:   
                 if hacerScalping : 
+                    shtData.range('V'+str(int(celda+1))).value = bid / 100
                     shtData.range('W'+str(int(celda+1))).value = (bid / 100)
                 else:
                     cantidad /= 2
@@ -1602,16 +1606,17 @@ while True:
     
     try:
         preparar =  shtData.range('A1').value
-        if preparar != 'symbol': 
-            shtData.range('T1').value = 'ROLL'
+        if not preparar: 
+            shtData.range('A1').value = 'symbol'
             rollNuevo()
             #preparaRulo(preparar)
-    except:
+    except: 
         print('error al preparar los Rulos ')
         shtData.range('A1').value = 'symbol'
 
-    buscoOperaciones(rangoDesde,rangoHasta)
 
+    buscoOperaciones(rangoDesde,rangoHasta)
+    
     if hora >= '17:00:30': 
         if noMatriz == False or esFinde == False:
             if hora >= '17:01:30': pass
@@ -1620,7 +1625,7 @@ while True:
                 shtData.range('Q1').value = 'PRC'
                 shtData.range('R1').value = 'ADR'
                 shtData.range('S1').value = 'D'
-                shtData.range('T1').value = 'ROLL'
+                #shtData.range('T1').value = 'ROLL'
                 shtData.range('U1').value = 'veta'
                 shtData.range('V1').value = 'bcch'
                 shtData.range('W1').value = 'AUTO'
